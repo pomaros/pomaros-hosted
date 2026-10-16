@@ -35,4 +35,8 @@ LLVM compiler-rt 20.1.0 builtins are linked into the AROS runtime components.
 See Licenses/LLVM-COMPILER-RT-NOTICE.md and the verbatim
 Licenses/LLVM-COMPILER-RT-LICENSE.txt for their source and licence terms.
 
+The standard C library includes generated Unicode character data. See
+Licenses/Unicode-NOTICE.md and Licenses/Unicode-LICENSE.txt; matching cached
+UnicodeData.txt and SpecialCasing.txt accompany the source materials.
+
 Apple system frameworks are loaded from macOS and are not redistributed.
