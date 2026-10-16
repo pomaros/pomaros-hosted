@@ -266,6 +266,7 @@ fsw_roots_value() {
 
 write_startup_sequence() {
     local startup="$AROS/S/Startup-Sequence"
+    mkdir -p "$AROS/S" || return 1
     local payload="" startup_mode
 
     # Stage the PIPE: mount description (L:pipe-handler is a build artifact; the

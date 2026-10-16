@@ -41,25 +41,16 @@ line to run first.
 <details><summary>What that automates (the manual recipe)</summary>
 
 ```sh
-# 1. Stable locations (NOT a session scratchpad, NOT /tmp) + reuse the toolchain
-BUILD=~/Source/aros-project/Build/pomaros-hosted ; XT=~/Source/aros-project/aros-crosstools
-ln -sf "$XT/bin/llvm-objcopy" "$XT/bin/objcopy"        # macOS lacks objcopy; stable shim
-export PATH="$XT/bin:/opt/homebrew/bin:$PATH"
+# Stable output and an existing toolchain; these wrappers never build LLVM.
+export AROS_BUILD="$HOME/Source/aros-project/Build/pomaros-hosted"
+export AROS_CROSSTOOLS="$HOME/Source/aros-project/aros-crosstools"
+POMAROS_CONFIGURE_ONLY=1 graft/build-darwin-aarch64.sh
 
-# 2. Configure ONCE — REUSE the toolchain (skip the ~1-2h LLVM build), no X11
-cd "$BUILD"    # (rm -rf "$BUILD" first only for a truly clean reconfigure)
-../../aros-core-pomaros/configure \
-    --target=darwin-aarch64 --with-toolchain=llvm \
-    --with-aros-toolchain=yes --with-aros-toolchain-install="$XT" \
-    --without-x --with-resolution=1366x768x8
-#   -> must print "checking whether to build crosstools... no"
-#   -> must print "checking for default resolution of WBScreen... 1366 x 768 x 8"
+# Full boot, desktop, and bridge modules through one dependency graph per stage.
+graft/rebuild-aros.sh
 
-# 3. Build the BOOT MODULE SET + desktop via explicit metatargets (NOT a bare `make`)
-make kernel-exec kernel-kernel kernel-dos kernel-dosboot kernel-utility \
-     kernel-intuition kernel-graphics kernel-layers ... \
-     workbench-libs-muimaster ... kernel-hidd-cocoa kernel-bootstrap-hosted \
-     workbench-c workbench-system-wanderer workbench-classes-zune ...
+# An explicit subset uses the same normal dependency handling.
+TARGETS="kernel-dos kernel-intuition" graft/rebuild-aros.sh
 ```
 </details>
 
@@ -345,10 +336,12 @@ command so its real object is archived on the next build.
 
 The hosted audio stage selects CoreAudio explicitly. Shared SDK headers for PCI
 and Apple hardware do not imply that those physical drivers are available in a
-hosted process. Only this stage sets `ac_cv_header_asm_io_h=no` and
+hosted process. Only the hosted audio graphs set `ac_cv_header_asm_io_h=no` and
 `ac_cv_header_aros_apple_audio_h=no`; native and VM builds retain their own driver
 selection. This configuration runs before the main graph because AHIRecord can
-pull AHI in as a dependency. It uses the selected LLVM compiler, archiver, and
+pull AHI in as a dependency. The final install graph carries the same cache
+settings in case its prerequisites trigger another configure. It uses the
+selected LLVM compiler, archiver, and
 ranlib, discards only stale AHI objects when that profile changes, and verifies
 the generated driver choices and CoreAudio Makefile before compiling AHI.
 

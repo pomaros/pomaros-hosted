@@ -11,7 +11,9 @@ modules, desktop preferences, icons, and themes. Launches pass custom host
 configuration paths through to the GUI process. The development app also starts
 in its recorded AROS build directory when opened from Finder. The hosted JIT
 reserves x18 in generated code as well as compiled code; a real execution test
-checks the emitted instructions against an independent 68k interpreter.
+checks the emitted instructions against an independent 68k interpreter. Fresh
+output trees create the startup-script directory before deployment, and the
+CoreAudio driver selection survives AHI’s final configuration pass.
 
 
 ## 2026-09-18 - One metadata file per folder, shared with other tools

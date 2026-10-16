@@ -128,7 +128,7 @@ build_workbench_system_base() {
 # mode file and AddAudioModes), then the AHISmoke test client.
 # See docs/features/coreaudio-audio/README.md.
 AUDIO_TARGETS="AHI-coreaudio-bridge-darwin workbench-devs-AHI-quick
-workbench-c-ahismoke"
+workbench-c-ahismoke workbench-c-testlib"
 
 # Final assembly: link the hosted kickstart core (the `boot/darwin/kernel` file
 # AROSBootstrap loads first — darwin hosted uses the unix bootstrap flavor), then
@@ -185,9 +185,17 @@ fi
 
 if [ -n "$FULL_SET" ] && [ "$fail" -eq 0 ]; then
     build_workbench_system_base
-    if ! "$ROOT/graft/build-targets" --build "$AROS_BUILD" --log "$LOGDIR/hosted-audio-assemble.log" \
+    if ! ac_cv_header_asm_io_h=no ac_cv_header_aros_apple_audio_h=no \
+        "$ROOT/graft/build-targets" --build "$AROS_BUILD" --log "$LOGDIR/hosted-audio-assemble.log" \
+        --make-var "AR_PLAIN=$AROS_CROSSTOOLS/bin/llvm-ar" \
+        --make-var "RANLIB=$AROS_CROSSTOOLS/bin/llvm-ranlib" \
         $AUDIO_TARGETS $ASSEMBLE_TARGETS; then
         fail=$((fail+1)); failed="$failed audio-assembly"
+    fi
+    if ! grep -Eq '^HAVE_COREAUDIO[[:space:]]*=[[:space:]]*1' "$ahi_dir/Drivers/Makefile" ||
+       ! grep -Eq '^HAVE_ASMIO[[:space:]]*=[[:space:]]*$' "$ahi_dir/Drivers/Makefile" ||
+       ! grep -Eq '^HAVE_APPLE_AUDIO_H[[:space:]]*=[[:space:]]*$' "$ahi_dir/Drivers/Makefile"; then
+        fail=$((fail+1)); failed="$failed final-audio-profile"
     fi
 fi
 
