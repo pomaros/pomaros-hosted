@@ -17,7 +17,9 @@ CoreAudio driver selection survives AHI’s final configuration pass. Hosted
 builds now compile a separate x18-reserving compiler runtime, include the POSIX
 library and keyboard maps, and can capture their own native window for diagnostics
 on macOS 14.4 or newer. Desktop startup restores saved AROS preferences from
-ENVARC into ENV before launching preferences and Wanderer.
+ENVARC into ENV before launching preferences and Wanderer. The desktop now
+closes its startup console and opens a live system monitor using the shared
+clock renderer, actual AROS uptime and memory, and explicit hosted sensor limits.
 
 
 ## 2026-09-18 - One metadata file per folder, shared with other tools

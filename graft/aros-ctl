@@ -386,9 +386,6 @@ write_startup_sequence() {
                 if [ -n "$payload" ]; then
                     printf 'Execute "S:.aros-ctl-startup"\n'
                 fi
-                # Do not terminate the boot CLI here. Wanderer and the host
-                # control session own the lifetime; explicit `aros-ctl stop`,
-                # `kill`, or a guest power request is what ends the instance.
             } > "$startup"
             ;;
         minimal|test)
@@ -456,6 +453,16 @@ write_startup_sequence() {
 
     [ -n "${AROS_CTL_STARTUP_EXTRA:-}" ] && printf '%s\n' "$AROS_CTL_STARTUP_EXTRA" \
         >> "$startup"
+    if [ "${AROS_CTL_STARTUP_FILE_MODE:-payload}" != replace ] &&
+       { [ "$startup_mode" = desktop ] || [ "$startup_mode" = wanderer ]; }; then
+        printf '%s\n' \
+            'If EXISTS "SYS:Tools/SystemMonitor"' \
+            '    Run <NIL: >NIL: QUIET SYS:Tools/SystemMonitor' \
+            'EndIf' \
+            'If EXISTS "WANDERER:Wanderer"' \
+            '    EndCLI' \
+            'EndIf' >> "$startup"
+    fi
     return 0
 }
 

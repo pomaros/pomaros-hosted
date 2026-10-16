@@ -224,6 +224,9 @@ write_startup_sequence() {
                     'If EXISTS "WANDERER:Wanderer"' \
                     '    Run <NIL: >NIL: QUIET WANDERER:Wanderer' \
                     '    Wait 2' \
+                    '    If EXISTS "SYS:Tools/SystemMonitor"' \
+                    '        Run <NIL: >NIL: QUIET SYS:Tools/SystemMonitor' \
+                    '    EndIf' \
                     '    EndCLI' \
                     'EndIf'
             } > "$startup"

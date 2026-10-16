@@ -77,7 +77,11 @@ If no config or hostvolume key is present, launchers default to
 
 PomAROS host/guest exchanges use `.pomaros-media`, `.pomaros-volumes`, and
 `.pomaros-keymap`. New GUI preference profiles start windowed. Desktop startup restores
-`ENVARC:` into the fresh `ENV:` RAM directory before IPrefs and Wanderer.
+`ENVARC:` into the fresh `ENV:` RAM directory before IPrefs and Wanderer, then
+closes the startup console to expose the desktop. `Tools/SystemMonitor` opens
+the shared clock renderer with real AROS time, uptime, and memory values;
+physical Apple sensors are marked unavailable in hosted mode. Its optional
+`--diagnostic` argument writes one measurement sample per second to stdout.
 For bounded qualification, `POMAROS_FORCE_WINDOWED=1` also rejects fullscreen
 requests while preserving the normal user-controlled fullscreen option.
 

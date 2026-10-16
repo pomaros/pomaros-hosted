@@ -98,7 +98,7 @@ iconset-Gorilla-wbench-icons workbench-images"
 #   - SysExplorer used to trap at launch (the 64-bit taglist bug class,
 #     bare-int tag values spilled to stack vararg slots -- see build README
 #     3b); fixed 2026-07-16 in the NList sources (upstream 471cb63f).
-APP_TARGETS="workbench-tools workbench-tools-ahirecord workbench-tools-hdtoolbox
+APP_TARGETS="workbench-tools workbench-tools-systemmonitor workbench-tools-ahirecord workbench-tools-hdtoolbox
 workbench-tools-installaros workbench-tools-sysexplorer-app
 workbench-utilities-help workbench-utilities-installer
 workbench-devs-diskimage-gui workbench-prefs-boot

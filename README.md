@@ -14,7 +14,7 @@ Apple Virtualization.framework, Apple Silicon native, and Raspberry Pi targets
 share the AROS source architecture; hosted keeps its Darwin adaptation and
 reserves Apple's `x18` register. Their platform binaries are distinct.
 
-![PomAROS Hosted running in a native Mac window, with its AROS console and host status bar.](docs/images/pomaros-hosted.png)
+![PomAROS Hosted running in a native Mac window, with its Wanderer desktop and live system monitor.](docs/images/pomaros-hosted.png)
 
 ## Migration status
 
@@ -22,8 +22,10 @@ This repository has been renamed to PomAROS Hosted. No PomAROS release has been
 published yet; earlier version and signing notes describe the inherited product.
 The rebuilt development app has passed windowed startup, host file exchange,
 CoreAudio playback, network and 68k library initialization, and clean shutdown.
-The screenshot shows its console view. Full desktop interaction and the bundled
-third-party applications still need separate release qualification.
+The screenshot shows the real Wanderer desktop and the shared monitor renderer,
+with live AROS clock, uptime, and memory measurements. Apple hardware sensors
+are explicitly unavailable in hosted mode. Broader desktop interaction and the
+bundled third-party applications still need separate release qualification.
 Build from source with [GETTING-STARTED.md](GETTING-STARTED.md). The product
 repository is [pomaros/pomaros-hosted](https://github.com/pomaros/pomaros-hosted).
 
