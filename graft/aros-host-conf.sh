@@ -52,16 +52,6 @@ aros_host_conf_load() {
 
 aros_host_conf_load
 
-aros_host_profile_migrate() {
-    _share="$(printf '%s\n' "${AROS_HOST_VOLUME:-}" | sed -n 's/^MacRW:\([^;]*\).*$/\1/p' | head -1)"
-    [ -n "$_share" ] || _share="${AROS_SHARE:-$HOME/AROS/Shared}"
-    # Retain earlier additional-folder offers without replacing a new profile.
-    if [ -f "$_share/.macaros-volumes" ] && [ ! -e "$_share/.pomaros-volumes" ]; then
-        cp -p -n "$_share/.macaros-volumes" "$_share/.pomaros-volumes" 2>/dev/null || true
-    fi
-}
-aros_host_profile_migrate
-
 # A partial AROS build can replace AROSBootstrap.conf with an empty or incomplete
 # file.  The launchers used to append their optional resident modules to that
 # file, producing a plausible-looking configuration with no kernel, DOS, or

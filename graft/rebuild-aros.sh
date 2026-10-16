@@ -76,7 +76,7 @@ BRIDGE_TARGETS="workbench-libs-uuid workbench-libs-bsdsocket hostlibs-emu68k
 workbench-devs-hostdisk kernel-fs-exfat"
 
 DESKTOP_TARGETS="workbench-c workbench-libs-icon workbench-libs-kms
-workbench-libs-lowlevel workbench-libs-diskfont workbench-libs-reaction
+workbench-libs-lowlevel workbench-libs-diskfont workbench-libs-muiscreen workbench-libs-reaction
 workbench-libs-workbench workbench-libs-version workbench-libs-mathffp
 workbench-libs-mathieeesingbas workbench-libs-mathieeedoubbas
 workbench-libs-mathieeedoubtrans workbench-system-wanderer
@@ -138,7 +138,7 @@ ASSEMBLE_TARGETS="kernel-link-unix boot"
 
 FULL_SET=""
 [ -z "${TARGETS:-}" ] && FULL_SET=1
-TARGETS="${TARGETS:-$BOOT_TARGETS $BRIDGE_TARGETS $DESKTOP_TARGETS $APP_TARGETS $AUDIO_TARGETS $ASSEMBLE_TARGETS}"
+TARGETS="${TARGETS:-$BOOT_TARGETS $BRIDGE_TARGETS $DESKTOP_TARGETS $APP_TARGETS}"
 
 cd "$AROS_BUILD"
 ok=0; fail=0; failed=""
@@ -150,7 +150,35 @@ else
     fail=1; failed="explicit module graph"
 fi
 
-[ -n "$FULL_SET" ] && [ "$fail" -eq 0 ] && build_workbench_system_base
+if [ -n "$FULL_SET" ] && [ "$fail" -eq 0 ]; then
+    build_workbench_system_base
+    # Header presence in the shared SDK is not hardware availability hosted.
+    # Keep physical PCI/Apple audio drivers out of this CoreAudio profile.
+    ahi_dir="$AROS_BUILD/bin/darwin-aarch64/gen/workbench/devs/AHI"
+    audio_profile="hosted-coreaudio-v1:$(git -C "$AROS_SRC" rev-parse HEAD):$AROS_CROSSTOOLS"
+    if [ "$(cat "$ahi_dir/.pomaros-profile" 2>/dev/null || true)" != "$audio_profile" ]; then
+        rm -f "$ahi_dir/.configured" "$ahi_dir/.installed"
+    fi
+    if ac_cv_header_asm_io_h=no ac_cv_header_aros_apple_audio_h=no \
+        "$ROOT/graft/build-targets" --build "$AROS_BUILD" --log "$LOGDIR/hosted-audio-configure.log" \
+        AHI-coreaudio-bridge-darwin workbench-devs-AHI-subsystem-configure; then
+        if [ -f "$ahi_dir/Drivers/CoreAudio/Makefile" ] && \
+            grep -Eq '^HAVE_COREAUDIO[[:space:]]*=[[:space:]]*1' "$ahi_dir/Drivers/Makefile" && \
+            grep -Eq '^HAVE_ASMIO[[:space:]]*=[[:space:]]*$' "$ahi_dir/Drivers/Makefile" && \
+            grep -Eq '^HAVE_APPLE_AUDIO_H[[:space:]]*=[[:space:]]*$' "$ahi_dir/Drivers/Makefile"; then
+            printf '%s\n' "$audio_profile" > "$ahi_dir/.pomaros-profile"
+            if ! ac_cv_header_asm_io_h=no ac_cv_header_aros_apple_audio_h=no \
+                "$ROOT/graft/build-targets" --build "$AROS_BUILD" --log "$LOGDIR/hosted-audio-assemble.log" \
+                $AUDIO_TARGETS $ASSEMBLE_TARGETS; then
+                fail=$((fail+1)); failed="$failed audio-assembly"
+            fi
+        else
+            fail=$((fail+1)); failed="$failed audio-profile"
+        fi
+    else
+        fail=$((fail+1)); failed="$failed audio-configure"
+    fi
+fi
 
 # AROS.boot signature: dos's __dos_IsBootable needs :AROS.boot at the boot
 # volume root holding the CPU string, else every boot mis-reports "can't open

@@ -20,14 +20,20 @@ a.build = a.build.resolve()
 log = a.log or a.build / 'pomaros-targets.log'
 log.parent.mkdir(parents=True, exist_ok=True)
 if log.exists():
-    log.rename(log.with_name(log.stem + '-' + str(time.time_ns()) + log.suffix))
+    archive_stem = log.stem + '-' + str(time.time_ns())
+    log.rename(log.with_name(archive_stem + log.suffix))
+    previous_manifest = log.with_suffix('.targets.json')
+    if previous_manifest.exists():
+        previous_manifest.rename(log.with_name(archive_stem + '.targets.json'))
 batch = a.build / 'pomaros-targets.mk'
 batch.write_text('.PHONY: pomaros-targets\npomaros-targets: $(CONFIGUREFILES)\n'
                  '\t@+$(MAKE) $(MKARGS) crosstools-toolchain\n'
                  '\t@+$(MAKE) $(MKARGS) crosstools-toolchain features\n'
                  '\t@+$(CALL) $(MMAKE) $(MMAKE_OPTIONS) ' +
                  ' '.join('AROS.' + target for target in a.targets) + '\n')
-(a.build / 'pomaros-targets.json').write_text(json.dumps(a.targets, indent=2) + '\n')
+target_manifest = json.dumps(a.targets, indent=2) + '\n'
+(a.build / 'pomaros-targets.json').write_text(target_manifest)
+log.with_suffix('.targets.json').write_text(target_manifest)
 command = ['make', '-C', str(a.build), '-j' + os.environ.get('AROS_BUILD_JOBS', '4'),
            '-f', 'Makefile', '-f', str(batch), 'pomaros-targets']
 print('Building ' + str(len(a.targets)) + ' explicit metatargets; log=' + str(log), flush=True)

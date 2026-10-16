@@ -4,8 +4,7 @@
 
 The hosted Mac product is now PomAROS Hosted, with renamed app, release tools,
 menus, diagnostics, and issue links. Host bridges and existing user configuration
-paths are retained; missing GUI preferences and extra-folder offers are imported
-without replacing newer settings. Build tools use a separate stable hosted output directory,
+paths are retained. New GUI preference profiles start windowed. Build tools use a separate stable hosted output directory,
 preserve existing builds, select the LLVM archive tools, and reject a hosted
 configuration that allocates x18. Fresh rebuilds include the guest bridge
 modules, desktop preferences, icons, and themes. Launches pass custom host

@@ -21,7 +21,6 @@
  * Independent work — no third-party implementation source was read or consulted;
  * any resemblance is coincidental.
  */
-#include "profile_migration.h"
 #import <AppKit/AppKit.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -643,28 +642,12 @@ static void apply_all(CMContext *cx, BOOL host_only) {
     }
 }
 
-static void migrate_profile_defaults(void) {
-    NSString *domain = NSBundle.mainBundle.bundleIdentifier ?: NSProcessInfo.processInfo.processName;
-    if (![domain isEqual:@"org.pomaros.hosted"] && ![domain isEqual:@"PomAROS"]) return;
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSMutableDictionary *current = [[defaults persistentDomainForName:domain] mutableCopy] ?: [NSMutableDictionary dictionary];
-    if ([current[@"pomaros.profileImported"] boolValue]) return;
-    NSMutableSet *keys = [NSMutableSet set];
-    for (int i = 0; i < gCount; i++)
-        if (gSettings[i].store == CMStoreDefaults) [keys addObject:@(gSettings[i].storeKey)];
-    for (NSString *legacy in @[@"org.aros.hosted", @"Macaros"])
-        cm_profile_merge_defaults(current, [defaults persistentDomainForName:legacy], keys);
-    current[@"pomaros.profileImported"] = @YES;
-    [defaults setPersistentDomain:current forName:domain];
-}
-
 static int load_schema_once(void) {
     if (gCount > 0) return gCount;
     set_conf_path(resolve_conf_path());
     const char *sp = resolve_schema_path();
     int n = sp ? load_schema(sp) : -1;
     if (n <= 0) { NSLog(@"[shell] settings schema not loaded: %s", gErr); return 0; }
-    migrate_profile_defaults();
     gSchemaPath = @(sp);          /* recorded for the window footer */
     snapshot_boot_settings();
     return n;
