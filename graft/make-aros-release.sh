@@ -599,7 +599,7 @@ mkdir -p "$APP/Contents/Resources/Documentation"
 cp "$RELEASE_README" "$APP/Contents/Resources/Documentation/README.md"
 cp "$ROOT/RELEASE-NOTES.md" "$APP/Contents/Resources/Documentation/RELEASE-NOTES.md"
 cp "$ROOT/LICENSE" "$APP/Contents/Resources/Documentation/LICENSE"
-cp "$ROOT/THIRD-PARTY-NOTICES.md" "$APP/Contents/Resources/Documentation/THIRD-PARTY-NOTICES.md"
+cp "$PRODUCT_NOTICES" "$APP/Contents/Resources/Documentation/THIRD-PARTY-NOTICES.md"
 /usr/bin/ditto "$NOTICES" "$APP/Contents/Resources/Documentation/Licenses"
 printf 'AROS\nPomAROS host bridges\nEmu68 MPL sources\n' > "$APP/Contents/Resources/Documentation/COMPONENTS.txt"
 if [ "$RELEASE_PROFILE" = complete ]; then
