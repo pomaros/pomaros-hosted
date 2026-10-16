@@ -4,6 +4,7 @@ PomAROS packages [AROS](https://aros.org), the open-source AmigaOS-compatible
 operating system, as a native Apple Silicon Mac application. AROS runs as an
 arm64 process, presents the Wanderer desktop in a Cocoa/Metal window, and uses
 macOS for display, sound, networking, clipboard, and access to shared files.
+New profiles start in a window; fullscreen remains an explicit user choice.
 
 ![The PomAROS Wanderer desktop on Apple Silicon](docs/aros-apple-silicon-pomaros.png)
 

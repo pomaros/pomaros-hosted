@@ -2458,5 +2458,10 @@ pomaros-hosted:
 	./graft/make-aros-app.sh
 
 pomaros-hosted-check:
-	$(MAKE) hosted-abi cocoametal-abi pasteboard-abi coreaudio-abi bsdsock-abi cocoametal-shell cocoametal-prefs hosted-hostvolume hosted-jit68k-hardened
+	POMAROS_FORCE_WINDOWED=1 $(MAKE) cocoametal-profile hosted-abi cocoametal-abi pasteboard-abi coreaudio-abi bsdsock-abi cocoametal-shell cocoametal-prefs hosted-hostvolume hosted-jit68k-hardened
 	./graft/make-aros-app.sh --check
+
+.PHONY: cocoametal-profile
+cocoametal-profile: | build
+	clang -fobjc-arc -arch arm64 -O2 -Wall -Wextra hosted/cocoametal/profile_test.m -o build/cocoametal-profile -framework Foundation
+	build/cocoametal-profile

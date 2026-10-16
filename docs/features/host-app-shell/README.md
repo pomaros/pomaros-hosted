@@ -128,3 +128,6 @@ layout, so choosing a layout in the window did nothing.)
 - [spec.md](spec.md) — implementation spec
 - Surfaces it umbrellas: [display](../cocoa-metal-display/README.md) ·
   [clipboard](../clipboard-bridge/README.md) · [host volume](../host-volume/README.md)
+
+The PomAROS rename preserves existing configuration and imports missing GUI
+preferences once; see [profile migration](../deployment/README.md#host-config).

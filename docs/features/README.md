@@ -99,7 +99,7 @@ one-look summary. Verified against the code, not just the docs.)
 | 68k-marshalling | The big-endian-on-LE library-call marshalling boundary for the JIT | [README](68k-marshalling/README.md) |
 | 68k-transparent-exec | Launch classic 68k programs transparently: execution-boundary dispatch, AUTO/JIT/FULL routing, crash-as-fuel | [README](68k-transparent-exec/README.md) |
 | cocoa-metal-display | Live macOS Metal window as the AROS display | [README](cocoa-metal-display/README.md) |
-| host-app-shell | Make the window a first-class Mac app (menu/About/icon/Settings) | [README](host-app-shell/README.md) |
+| host-app-shell | Mac app menus, About, Settings, and preservation of migrated preferences | [README](host-app-shell/README.md) |
 | clipboard-bridge | Two-way macOS NSPasteboard ↔ AROS `clipboard.device` | [README](clipboard-bridge/README.md) |
 | host-volume | A real macOS folder mounted as an AROS volume | [README](host-volume/README.md) |
 | dos64-packets | `DosPacket64` layout + send/reply plumbing for the `8001`–`8004` actions; prerequisite for files > 4 GB | [README](dos64-packets/README.md) |

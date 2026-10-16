@@ -1,6 +1,6 @@
 # Reviewed shared AROS source, common to all PomAROS products.
 CORE_URL=https://github.com/jonx/aros-apple-core.git
 CORE_BRANCH=pomaros-common
-CORE_REVISION=303b6ade2011abb6b9eb930bc1938dbe271ba6db
+CORE_REVISION=b027ee4ecdba914d6e5ee21901acbc83df5fe81b
 CORE_TARGET=darwin-aarch64
 CORE_X18_POLICY=reserved

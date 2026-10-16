@@ -760,6 +760,8 @@ int cm_set_option(CMContext *cx, int key, long value) {
         cx->scaleMode = (CMScaleMode)value;
         return 0;
     case CM_OPT_FULLSCREEN:
+        if (value && getenv("POMAROS_FORCE_WINDOWED") &&
+            strcmp(getenv("POMAROS_FORCE_WINDOWED"), "0")) return 2;
         cx->fullscreen = value ? 1 : 0;
         /* REAL native AppKit fullscreen (§9): record the flag (above, so
          * cm_get_option/the panel reflect it and it persists), then REQUEST the

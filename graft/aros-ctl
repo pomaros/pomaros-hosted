@@ -692,6 +692,7 @@ run)
     # on for every harness run and could produce hundreds of megabytes of log.
     run_env=(
         "AROS_DARWIN_THREADED=1"
+        "CFFIXED_USER_HOME=${CFFIXED_USER_HOME:-$HOME}"
         "AROS_CM_CONTROL=$FIFO"
         "DYLD_FALLBACK_LIBRARY_PATH=$HOST_LIB_DIR"
         "AROS_HOST_VOLUME=$AROS_HOST_VOLUME"
@@ -700,6 +701,7 @@ run)
         "AROS_REPORT_DIR=$AROS_REPORT_DIR"
     )
     for name in \
+        POMAROS_FORCE_WINDOWED \
         AROS_CM_WATCHDOG_SECS \
         EMU68K_LIBS_PATH EMU68K_COMMAND_PATH \
         EMU68K_BRIDGE_TRACE EMU68K_BRIDGE_TRACE_LEVEL \

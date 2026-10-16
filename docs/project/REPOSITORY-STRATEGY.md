@@ -1,6 +1,6 @@
 # PomAROS repository boundary
 
-The dedicated [jonx/PomAROS](https://github.com/pomaros/pomaros-hosted) repository is now
+The dedicated [pomaros/pomaros-hosted](https://github.com/pomaros/pomaros-hosted) repository is now
 the product and release-integration home. It owns the hosted bridges, graft and
 deployment scripts, unattended harness, product documentation, compatibility
 policy, packaging, signing workflow, and release notes.

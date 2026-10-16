@@ -8,7 +8,7 @@
 # The four rules that save you days (all baked in below):
 #   1. build in a STABLE dir (not a session scratchpad that gets GC'd mid-build)
 #   2. REUSE the cross-toolchain — never rebuild the ~1-2h LLVM from scratch
-#   3. never a bare `make` (it tries to rebuild LLVM and breaks on darwin modules)
+#   3. select explicit modules, never a bare `make`
 #   4. build module METATARGETS, not the `kernel`/`workbench-libs` aggregates
 #
 # Usage:
@@ -25,6 +25,8 @@ LLVM="${LLVM:-/opt/homebrew/opt/llvm/bin}"
 SHIM="${SHIM:-$BUILD/host-tools}"
 AROS_SRC="$(cd "$AROS_SRC" && pwd)"
 AROS_SRC="$AROS_SRC" "$ROOT/graft/check-core"
+: "${SOURCE_DATE_EPOCH:=$(git -C "$AROS_SRC" show -s --format=%ct HEAD)}"
+export SOURCE_DATE_EPOCH
 mkdir -p "$BUILD"
 BUILD="$(cd "$BUILD" && pwd)"
 
@@ -39,9 +41,18 @@ ln -sf "$LLVM/llvm-objcopy" "$SHIM/objcopy"
 AROS_BUILD_VENV="${AROS_BUILD_VENV:-$ROOT/../build-venv}"
 export PATH="$SHIM:$XT/bin:$AROS_BUILD_VENV/bin:/opt/homebrew/opt/make/libexec/gnubin:/opt/homebrew/bin:$PATH"
 cd "$BUILD"
-if [ ! -f Makefile ]; then
+CONFIGURE_ID="$(git -C "$AROS_SRC" rev-parse HEAD):$SOURCE_DATE_EPOCH:$XT"
+if [ ! -f Makefile ] || [ "$(cat .pomaros-configure-core 2>/dev/null || true)" != "$CONFIGURE_ID" ]; then
     "$AROS_SRC/configure" --target=darwin-aarch64 --with-toolchain=llvm \
         --without-x --with-aros-toolchain=yes --with-aros-toolchain-install="$XT"
+    printf '%s\n' "$CONFIGURE_ID" > .pomaros-configure-core
+    {
+        printf 'CORE_REVISION=%s\n' "$(git -C "$AROS_SRC" rev-parse HEAD)"
+        printf 'SOURCE_DATE_EPOCH=%s\n' "$SOURCE_DATE_EPOCH"
+        printf 'command='; printf '%q ' "$AROS_SRC/configure" --target=darwin-aarch64 \
+            --with-toolchain=llvm --without-x --with-aros-toolchain=yes \
+            --with-aros-toolchain-install="$XT"; printf '\n'
+    } > pomaros-configure.txt
 fi
 if ! grep -Eq -- '^[^#]*-ffixed-x18' config/make.cfg; then
     echo "Hosted build requires -ffixed-x18 in config/make.cfg; refusing mixed ABI" >&2
@@ -49,8 +60,8 @@ if ! grep -Eq -- '^[^#]*-ffixed-x18' config/make.cfg; then
 fi
 
 # --- 3) Build the boot module set (rules 3 + 4) ------------------------------
-# Explicit metatargets, ONE PER `make` CALL (a mid-run mmake rebuild otherwise
-# staleness the metatarget DB -> "Nothing known about project kernel-kernel").
+# Explicit metatargets share one MetaMake graph. This deduplicates prerequisites
+# without independent top-level make goals racing a metadata regeneration.
 # This set boots to a CLI. The full Wanderer desktop needs more userland — see
 # docs/features/build/README.md section 3b.
 # CAREFUL: mmake exits 0 on an UNKNOWN target ("Nothing known about target X"
@@ -68,10 +79,7 @@ TARGETS=(
     compiler-stdc compiler-stdcio workbench-devs-clipboard
     workbench-libs-cgfx
 )
-for t in "${TARGETS[@]}"; do
-    echo "### make $t"
-    make "$t"
-done
+"$ROOT/graft/build-targets" --build "$BUILD" "${TARGETS[@]}"
 
 echo
 echo "### done. Boot it from the repo:"

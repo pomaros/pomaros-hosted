@@ -13,10 +13,10 @@
 #   graft/rebuild-aros.sh                 # build the whole boot+desktop set
 #   TARGETS="kernel-dos kernel-intuition" graft/rebuild-aros.sh   # subset
 #
-# Each metatarget is built in its own `make` call (one per call avoids the mmake
-# stale-DB "Nothing known about project X" failure). Failures are logged and the
-# run continues; a summary prints at the end. NEVER a bare `make` (that fetches
-# and builds LLVM from source).
+# Explicit metatargets share one MetaMake dependency graph, avoiding independent
+# top-level make goals and repeated global prerequisite walks. The complete
+# graph and its log are retained; an unknown target or failed build is fatal.
+# NEVER run a bare `make` (that fetches and builds LLVM from source).
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -24,6 +24,8 @@ AROS_SRC="${AROS_SRC:-$ROOT/../aros-core-pomaros}"
 AROS_BUILD="${AROS_BUILD:-${BUILD:-$ROOT/../Build/pomaros-hosted}}"
 AROS_CROSSTOOLS="${AROS_CROSSTOOLS:-${XT:-$ROOT/../aros-crosstools}}"
 AROS_SRC="$AROS_SRC" "$ROOT/graft/check-core" || exit $?
+: "${SOURCE_DATE_EPOCH:=$(git -C "$AROS_SRC" show -s --format=%ct HEAD)}"
+export SOURCE_DATE_EPOCH
 LOGDIR="${LOGDIR:-$AROS_BUILD/rebuild-logs}"
 mkdir -p "$LOGDIR"
 
@@ -100,7 +102,7 @@ external-openurl-cmd external-openurl-prefs kernel-usb-trident"
 # aggregate -- so invoke their directory's generated mmakefile directly.
 build_workbench_system_base() {
     printf '[rebuild] %-40s ' "workbench-system (base files)"
-    if make --no-print-directory -C "$AROS_BUILD/workbench/system" \
+    if make -j"${AROS_BUILD_JOBS:-4}" --no-print-directory -C "$AROS_BUILD/workbench/system" \
         TOP="$AROS_BUILD" SRCDIR="$AROS_SRC" CURDIR=workbench/system \
         TARGET=workbench-system AROS_TARGET_ARCH=darwin AROS_TARGET_CPU=aarch64 \
         AROS_HOST_ARCH=darwin AROS_HOST_CPU=aarch64 \
@@ -134,24 +136,15 @@ TARGETS="${TARGETS:-$BOOT_TARGETS $DESKTOP_TARGETS $APP_TARGETS $AUDIO_TARGETS $
 
 cd "$AROS_BUILD"
 ok=0; fail=0; failed=""
-for t in $TARGETS; do
-    printf '[rebuild] %-40s ' "$t"
-    if make "$t" > "$LOGDIR/$t.log" 2>&1; then
-        # mmake exits 0 on an UNKNOWN target ("Nothing known about target X"),
-        # silently no-oping -- this masked stale-source deploys for hours
-        # (fixes appeared built but the old library kept shipping). Treat it
-        # as the failure it is.
-        if grep -q "Nothing known about target" "$LOGDIR/$t.log"; then
-            echo "FAIL (unknown target -- see $LOGDIR/$t.log)"; fail=$((fail+1)); failed="$failed $t"
-        else
-            echo "OK"; ok=$((ok+1))
-        fi
-    else
-        echo "FAIL (see $LOGDIR/$t.log)"; fail=$((fail+1)); failed="$failed $t"
-    fi
-done
+# One MetaMake graph deduplicates shared prerequisites without invoking multiple
+# independent top-level make goals or skipping any module dependencies.
+if "$ROOT/graft/build-targets" --build "$AROS_BUILD" --log "$LOGDIR/hosted-runtime.log" $TARGETS; then
+    ok=$(printf '%s\n' "$TARGETS" | wc -w | tr -d ' ')
+else
+    fail=1; failed="explicit module graph"
+fi
 
-[ -n "$FULL_SET" ] && build_workbench_system_base
+[ -n "$FULL_SET" ] && [ "$fail" -eq 0 ] && build_workbench_system_base
 
 # AROS.boot signature: dos's __dos_IsBootable needs :AROS.boot at the boot
 # volume root holding the CPU string, else every boot mis-reports "can't open

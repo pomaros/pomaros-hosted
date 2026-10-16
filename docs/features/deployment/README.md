@@ -76,7 +76,11 @@ Existing `AROS` settings and shared folders retain their paths. On launch, the
 host helper copies the legacy `.macaros-volumes` file to `.pomaros-volumes` only
 when the new file is absent; the original file remains intact. That legacy
 basename is retained solely for migration. New host/guest exchanges use the
-PomAROS names.
+PomAROS names. The new app also imports known GUI settings from the earlier
+preference domains once, filling only missing settings and leaving the old
+domains intact. Fullscreen is not imported: new profiles start windowed.
+For bounded qualification, `POMAROS_FORCE_WINDOWED=1` also rejects fullscreen
+requests while preserving the normal user-controlled fullscreen option.
 
 ## Verifying Deployment
 

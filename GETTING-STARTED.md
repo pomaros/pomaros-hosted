@@ -126,7 +126,9 @@ make pomaros-hosted
 ```
 
 The script configures the isolated stable `../Build/pomaros-hosted` directory
-once and then invokes the existing module rebuild recipe. It reuses
+for the pinned core and then invokes the existing module rebuild recipe. It
+uses four compilation jobs by default (`AROS_BUILD_JOBS=1` selects serial) and
+the core commit timestamp as `SOURCE_DATE_EPOCH`. It reuses
 `../aros-crosstools` and never deletes a configured tree. Override `AROS_SRC`,
 `BUILD`/`AROS_BUILD`, or `XT`/`AROS_CROSSTOOLS` when using another layout; the aliases are accepted by both build scripts.
 

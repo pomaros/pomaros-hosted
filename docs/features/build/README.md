@@ -28,9 +28,12 @@ graft/rebuild-aros.sh            # boot module set + desktop userland -> ~/Sourc
 # TARGETS="kernel-dos kernel-intuition" graft/rebuild-aros.sh   # a subset
 ```
 
-It builds each metatarget in its own `make` call (avoids the mmake stale-DB
-failure), logs per target under `~/Source/aros-project/Build/pomaros-hosted/rebuild-logs/`, continues past
-individual failures with a summary, writes the `AROS.boot` signature, and sets
+It selects explicit metatargets in a single MetaMake graph, preserving their
+normal dependencies while avoiding repeated prerequisite walks and independent
+top-level goals. The exact target list is recorded in `pomaros-targets.json`
+and the combined log in `rebuild-logs/hosted-runtime.log` inside the build tree.
+Unknown targets and build failures fail the graph. It writes the `AROS.boot`
+signature and sets
 up the `objcopy` shim + PATH. It never runs a bare `make` and never rebuilds
 LLVM. If `~/Source/aros-project/Build/pomaros-hosted` isn't configured yet, it prints the one-time configure
 line to run first.

@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+"""Build an explicit module set through one MetaMake dependency graph."""
+import argparse
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import time
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--build', type=Path, required=True)
+parser.add_argument('--log', type=Path)
+parser.add_argument('targets', nargs='+')
+a = parser.parse_args()
+if any(not re.fullmatch(r'[a-zA-Z0-9_-]+', target) for target in a.targets):
+    parser.error('invalid metatarget name')
+a.build = a.build.resolve()
+log = a.log or a.build / 'pomaros-targets.log'
+log.parent.mkdir(parents=True, exist_ok=True)
+if log.exists():
+    log.rename(log.with_name(log.stem + '-' + str(time.time_ns()) + log.suffix))
+batch = a.build / 'pomaros-targets.mk'
+batch.write_text('.PHONY: pomaros-targets\npomaros-targets: $(CONFIGUREFILES)\n'
+                 '\t@+$(MAKE) $(MKARGS) crosstools-toolchain\n'
+                 '\t@+$(MAKE) $(MKARGS) crosstools-toolchain features\n'
+                 '\t@+$(CALL) $(MMAKE) $(MMAKE_OPTIONS) ' +
+                 ' '.join('AROS.' + target for target in a.targets) + '\n')
+(a.build / 'pomaros-targets.json').write_text(json.dumps(a.targets, indent=2) + '\n')
+command = ['make', '-C', str(a.build), '-j' + os.environ.get('AROS_BUILD_JOBS', '4'),
+           '-f', 'Makefile', '-f', str(batch), 'pomaros-targets']
+print('Building ' + str(len(a.targets)) + ' explicit metatargets; log=' + str(log), flush=True)
+with log.open('w') as stream:
+    result = subprocess.run(command, stdout=stream, stderr=subprocess.STDOUT)
+output = log.read_text(errors='replace')
+if result.returncode or 'Nothing known about' in output:
+    print('\n'.join(output.splitlines()[-60:]), file=sys.stderr)
+    raise SystemExit('Explicit module build failed: ' + str(log))
+print('Explicit module build PASS: ' + str(log))

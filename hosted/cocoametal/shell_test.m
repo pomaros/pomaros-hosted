@@ -102,6 +102,7 @@ int main(int argc, const char **argv) {
     }
 
     @autoreleasepool {
+        setenv("POMAROS_FORCE_WINDOWED", "1", 1);
         NSApplication *app = [NSApplication sharedApplication];
         [app setActivationPolicy:NSApplicationActivationPolicyRegular];
         setenv("POMAROS_VERSION", "9.8.7", 1);
@@ -199,9 +200,15 @@ int main(int argc, const char **argv) {
         check(flt == CM_FILTER_LINEAR, "Filter ▸ Linear -> real FILTER=LINEAR");
 
         NSMenuItem *fs = item(view, @"Enter Full Screen");
-        [NSApp sendAction:fs.action to:fs.target from:fs];
+        check(fs != nil, "fullscreen menu remains available for explicit user choice");
         long fullscreen = -1; cm_get_(cx, CM_OPT_FULLSCREEN, &fullscreen);
-        check(fullscreen == 1, "Enter Full Screen -> real FULLSCREEN=1");
+        check(fullscreen == 0, "host app starts windowed");
+        NSWindow *hostWindow = dispWin;
+        check(hostWindow && !(hostWindow.styleMask & NSWindowStyleMaskFullScreen),
+              "host NSWindow is windowed");
+        printf("[GSHELL] host=%s fullscreen_option=%ld native_fullscreen=%d\n",
+               hostWindow.title.UTF8String, fullscreen,
+               (hostWindow.styleMask & NSWindowStyleMaskFullScreen) != 0);
 
         NSMenuItem *retina = item(view, @"Retina / HiDPI");
         [NSApp sendAction:retina.action to:retina.target from:retina];

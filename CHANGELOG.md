@@ -4,7 +4,8 @@
 
 The hosted Mac product is now PomAROS Hosted, with renamed app, release tools,
 menus, diagnostics, and issue links. Host bridges and existing user configuration
-paths are retained. Build tools use a separate stable hosted output directory,
+paths are retained; missing GUI preferences and extra-folder offers are imported
+without replacing newer settings. Build tools use a separate stable hosted output directory,
 preserve existing builds, and reject a hosted configuration that allocates x18.
 
 
@@ -131,7 +132,7 @@ fixed:
 
 ## 2026-08-15 - PomAROS gets its own release home
 
-- **The product now lives in `jonx/PomAROS`.** The graft, documentation,
+- **The hosted product moved to its own repository.** The graft, documentation,
   harness, hosted bridges, QEMU AArch64 bring-up, and their working history have
   moved out of AROS-AArch64. The complete modified operating-system source
   remains in the `aarch64-darwin-graft` branch of `jonx/AROS`.
