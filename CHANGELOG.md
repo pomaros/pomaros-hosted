@@ -13,7 +13,10 @@ in its recorded AROS build directory when opened from Finder. The hosted JIT
 reserves x18 in generated code as well as compiled code; a real execution test
 checks the emitted instructions against an independent 68k interpreter. Fresh
 output trees create the startup-script directory before deployment, and the
-CoreAudio driver selection survives AHI’s final configuration pass.
+CoreAudio driver selection survives AHI’s final configuration pass. Hosted
+builds now compile a separate x18-reserving compiler runtime, include the POSIX
+library and keyboard maps, and can capture their own native window for diagnostics
+on macOS 14.4 or newer.
 
 
 ## 2026-09-18 - One metadata file per folder, shared with other tools

@@ -73,6 +73,7 @@ if [ -f "$bootstrap_archive" ] && [ "$(stat -f %z "$bootstrap_archive")" = 8 ]; 
 fi
 
 [ "${POMAROS_CONFIGURE_ONLY:-0}" = 1 ] && exit 0
+AROS_BUILD="$BUILD" AROS_CROSSTOOLS="$XT" "$ROOT/graft/build-hosted-runtime"
 
 # --- 3) Build the boot module set (rules 3 + 4) ------------------------------
 # Explicit metatargets share one MetaMake graph. This deduplicates prerequisites

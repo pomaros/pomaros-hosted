@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 John Knipper
+"""Build Darwin's x18-reserving compiler runtime without changing its compiler."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import tarfile
+import urllib.request
+
+root = Path(__file__).resolve().parent.parent
+build = Path(os.getenv('AROS_BUILD', os.getenv('BUILD', root.parent / 'Build/pomaros-hosted'))).resolve()
+xt = Path(os.getenv('AROS_CROSSTOOLS', os.getenv('XT', root.parent / 'aros-crosstools'))).resolve()
+config = build / 'bin/darwin-aarch64/gen/config/target.cfg'
+if not config.exists() or not re.search(r'^AROS_TARGET_PLATFORM\s*:=\s*darwin-aarch64$', config.read_text(errors='replace'), re.M):
+    raise SystemExit('Hosted runtime requires a configured darwin-aarch64 output tree')
+compiler_resource = Path(subprocess.check_output([str(xt / 'bin/clang'), '-print-resource-dir'], text=True).strip())
+work = root / 'build/hosted-runtime-source'
+resource = build / 'hosted-runtime'
+sdk = build / 'bin/darwin-aarch64/AROS/Developer'
+work.mkdir(parents=True, exist_ok=True)
+def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+def run(args, **kwargs): subprocess.run([str(x) for x in args], check=True, **kwargs)
+sources = {'compiler-rt': '85798479b6762433a6fc8a87f4cbdb1dc050926220a8240d9e0e126f08e6f25f',
+           'cmake': '9fcd319c6bb87344673f262ef5a6a01262fc9a0a741f3477b7e47e238441268d'}
+identity = {'version': '20.1.0', 'compiler_sha256': sha(xt / 'bin/clang'),
+            'source_sha256': sources, 'flags': '-ffixed-x18 -fno-PIC -fno-pic -fno-PIE -fno-pie',
+            'aarch64_fmv': False, 'sysroot': str(sdk), 'compiler': str(xt / 'bin/clang')}
+stamp = resource / 'build.json'
+archive = resource / 'lib/aarch64-unknown-aros/libclang_rt.builtins.a'
+def invalidate_unsafe_modules():
+    # Older links may have consumed an implicit compiler archive outside make's deps.
+    for name in ['stdc.library', 'cybergraphics.library']:
+        target = sdk.parent / 'Libs' / name
+        if target.exists():
+            code = subprocess.check_output([str(xt / 'bin/llvm-objdump'), '-d', str(target)], text=True)
+            if any(re.match(r'\s*[0-9a-f]+:', line) and re.search(r'\b[wx]18\b', line) for line in code.splitlines()):
+                backup = build / 'rebuild-logs' / (name + '.before-fixed-x18-' + sha(target)[:12])
+                backup.parent.mkdir(parents=True, exist_ok=True)
+                target.rename(backup)
+
+if stamp.exists() and archive.exists():
+    old = json.loads(stamp.read_text())
+    if old.get('identity') == identity and old.get('archive_sha256') == sha(archive):
+        shutil.copyfile(archive, sdk / 'lib/libclang_rt.builtins-aarch64.a')
+        invalidate_unsafe_modules()
+        print('Hosted compiler runtime current: ' + str(archive)); raise SystemExit(0)
+if not (sdk / 'include/aros/stdc/stdlib.h').exists():
+    run([root / 'graft/build-targets', '--build', build, '--log', build / 'rebuild-logs/runtime-headers.log',
+         'kernel-exec-includes', 'compiler-stdc-includes'])
+for name, digest in sources.items():
+    filename = name + '-20.1.0.src.tar.xz'
+    compressed = work / filename
+    if not compressed.exists():
+        urllib.request.urlretrieve('https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.0/' + filename, compressed)
+    if sha(compressed) != digest: raise SystemExit('Source archive hash mismatch: ' + filename)
+    dest = work / (name + '-20.1.0.src')
+    if not dest.exists():
+        with tarfile.open(compressed) as tar: tar.extractall(work, filter='data')
+common = work / 'cmake'
+if not common.exists(): common.symlink_to('cmake-20.1.0.src', target_is_directory=True)
+source = work / 'compiler-rt-20.1.0.src'
+p = source / 'lib/builtins/CMakeLists.txt'
+s = p.read_text()
+# AROS does not implement the host executable-stack API used by this helper.
+if '    enable_execute_stack.c\n' in s: p.write_text(s.replace('    enable_execute_stack.c\n', ''))
+output = work / 'objects'
+command = ['cmake', '-G', 'Ninja', '-S', str(source / 'lib/builtins'), '-B', str(output),
+           '-DCMAKE_SYSTEM_NAME=Generic', '-DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY',
+           '-DCMAKE_C_COMPILER=' + str(xt / 'bin/clang'), '-DCMAKE_ASM_COMPILER=' + str(xt / 'bin/clang'),
+           '-DCMAKE_C_COMPILER_TARGET=aarch64-unknown-aros', '-DCMAKE_ASM_COMPILER_TARGET=aarch64-unknown-aros',
+           '-DCMAKE_SYSROOT=' + str(sdk), '-DCMAKE_BUILD_TYPE=Release', '-DCMAKE_C_FLAGS=' + identity['flags'],
+           '-DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON', '-DLLVM_RUNTIMES_BUILD=ON', '-DCOMPILER_RT_OS_DIR=aros',
+           '-DCOMPILER_RT_BUILTINS_ENABLE_PIC=OFF', '-DCOMPILER_RT_DISABLE_AARCH64_FMV=ON',
+           '-DCMAKE_AR=' + str(xt / 'bin/llvm-ar'), '-DCMAKE_RANLIB=' + str(xt / 'bin/llvm-ranlib')]
+run(command)
+run(['cmake', '--build', output, '--parallel', os.getenv('AROS_BUILD_JOBS', '4')])
+built = output / 'lib/aros/libclang_rt.builtins-aarch64.a'
+asm = subprocess.check_output([str(xt / 'bin/llvm-objdump'), '-d', str(built)], text=True)
+refs = [line for line in asm.splitlines() if re.match(r'\s*[0-9a-f]+:', line) and re.search(r'\b[wx]18\b', line)]
+if refs: raise SystemExit('Hosted runtime computes with x18: ' + '\n'.join(refs[:8]))
+archive.parent.mkdir(parents=True, exist_ok=True)
+include = resource / 'include'
+if include.is_symlink(): include.unlink()
+if not include.exists(): include.symlink_to(compiler_resource / 'include', target_is_directory=True)
+shutil.copyfile(built, archive)
+shutil.copyfile(built, sdk / 'lib/libclang_rt.builtins-aarch64.a')
+stamp.write_text(json.dumps({'identity': identity, 'archive_sha256': sha(archive), 'configure_command': command,
+                            'x18_references': 0}, indent=2) + '\n')
+invalidate_unsafe_modules()
+print('Hosted compiler runtime built, x18 scan PASS: ' + str(archive))

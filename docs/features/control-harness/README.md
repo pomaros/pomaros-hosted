@@ -282,3 +282,11 @@ same build works from Terminal.
 | Parallel isolated instances | **working** via `AROS_CTL_FIFO/LOG/PIDF` |
 | Relocatable (no hardcoded build paths) | **done (2026-06-27)** — discovery + overrides |
 | Typed in-process API (`libAROS`) | planned — see [design.md](design.md) → "Roadmap" |
+
+### Capture the native window
+
+The control FIFO command `O /absolute/path/window.png` captures only this
+process's own native window, including its status bar, on macOS 14.4 or newer.
+It uses ScreenCaptureKit's current-process API and needs no global screen
+recording permission. The existing `S` command still captures the guest
+framebuffer as PPM. Capture completion or an error is written to the host log.

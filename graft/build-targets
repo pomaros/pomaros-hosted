@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shlex
 import subprocess
 import sys
 import time
@@ -20,6 +21,13 @@ if any(not re.fullmatch(r'[a-zA-Z0-9_-]+', target) for target in a.targets):
 if any(not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*=.*', var) for var in a.make_var):
     parser.error('invalid make variable assignment')
 a.build = a.build.resolve()
+runtime = a.build / 'hosted-runtime'
+target_config = a.build / 'bin/darwin-aarch64/gen/config/target.cfg'
+if (runtime / 'lib/aarch64-unknown-aros/libclang_rt.builtins.a').exists() and target_config.exists() and re.search(r'^AROS_TARGET_PLATFORM\s*:=\s*darwin-aarch64$', target_config.read_text(errors="replace"), re.M):
+    if any(var.startswith(('TARGET_LDFLAGS=', 'TARGET_C_LIBS=')) for var in a.make_var):
+        parser.error('TARGET_LDFLAGS override would bypass the hosted runtime policy')
+    a.make_var.append('TARGET_LDFLAGS=$(strip $(CONFIG_LDFLAGS)) -resource-dir=' + shlex.quote(str(runtime)))
+    a.make_var.append('TARGET_C_LIBS=' + shlex.quote(str(runtime / 'lib/aarch64-unknown-aros/libclang_rt.builtins.a')))
 log = a.log or a.build / 'pomaros-targets.log'
 log.parent.mkdir(parents=True, exist_ok=True)
 if log.exists():

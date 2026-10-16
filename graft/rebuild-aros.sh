@@ -57,13 +57,15 @@ if [ "$AROS_SRC/configure" -nt "$AROS_BUILD/config.status" ]; then
 fi
 
 # The boot module set (kickstart) -- section 3 of docs/features/build/README.md.
+AROS_BUILD="$AROS_BUILD" AROS_CROSSTOOLS="$AROS_CROSSTOOLS" "$ROOT/graft/build-hosted-runtime" || exit 6
+
 BOOT_TARGETS="kernel-exec kernel-dos kernel-kernel kernel-dosboot kernel-utility kernel-aros
 kernel-oop kernel-intuition kernel-graphics kernel-layers kernel-keymap
 kernel-debug kernel-bootloader kernel-console kernel-input kernel-keyboard
 kernel-gameport workbench-devs-clipboard kernel-hidd kernel-hidd-gfx kernel-hidd-input
 kernel-hidd-kbd kernel-hidd-mouse kernel-filesystem kernel-lddemon kernel-fs-con
 kernel-fs-ram kernel-expansion kernel-timer kernel-battclock kernel-processor
-kernel-hostlib kernel-unixio kernel-fs-emul kernel-entropy compiler-stdcio
+kernel-hostlib kernel-unixio kernel-fs-emul kernel-entropy compiler-stdcio compiler-posixc
 workbench-libs-muimaster
 workbench-libs-cgfx workbench-libs-datatypes workbench-libs-gadtools
 workbench-libs-iffparse workbench-libs-locale workbench-libs-asl
@@ -73,7 +75,7 @@ compiler-stdc kernel-hidd-cocoa kernel-bootstrap-hosted"
 # The desktop userland -- section 3b. Without these the boot reaches only a CLI
 # or dies in the display-driver / dos.library check.
 BRIDGE_TARGETS="workbench-libs-uuid workbench-libs-bsdsocket hostlibs-emu68k
-workbench-devs-hostdisk kernel-fs-exfat"
+workbench-devs-hostdisk kernel-fs-exfat workbench-devs-keymaps"
 
 DESKTOP_TARGETS="workbench-c workbench-libs-icon workbench-libs-kms
 workbench-libs-lowlevel workbench-libs-diskfont workbench-libs-muiscreen workbench-libs-reaction

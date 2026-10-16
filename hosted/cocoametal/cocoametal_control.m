@@ -22,11 +22,14 @@
  *   R <w> <h>            resize host window content area (logical points)
  *   G <key> <value> [y]  AROS-facing setting event (CM_EV_SETTING)
  *   S <path>             screenshot the framebuffer to <path> (binary PPM)
+ *   O <path>             capture this native window to PNG (macOS 14.4+)
  *   V start <path> [fps] [secs]  start recording to a .mov; if secs>0, auto-stop after secs
  *   V stop               finalize the recording
  */
 
 #import <Foundation/Foundation.h>
+#import <AppKit/AppKit.h>
+#import <ScreenCaptureKit/ScreenCaptureKit.h>
 #include <dispatch/dispatch.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -80,6 +83,39 @@ int cm__control_drain(CMEvent *out, int maxEvents) {
         g_injHead = (g_injHead + 1) % CM_INJ_MAX;
     }
     return n;
+}
+
+void *cm__get_window(CMContext *cx);
+
+static void cm__control_own_window(CMContext *cx, const char *path) {
+    NSWindow *native = (__bridge NSWindow *)cm__get_window(cx);
+    if (!native) return;
+    NSString *destination = [NSString stringWithUTF8String:path];
+    NSInteger number = native.windowNumber;
+    CGFloat scale = native.backingScaleFactor;
+    if (@available(macOS 14.4, *)) {
+        [SCShareableContent getCurrentProcessShareableContentWithCompletionHandler:^(SCShareableContent *content, NSError *error) {
+            if (error) { NSLog(@"[cm-control] own-window failed: %@", error); return; }
+            SCWindow *owned = nil;
+            for (SCWindow *window in content.windows)
+                if (window.windowID == number && window.owningApplication.processID == getpid()) { owned = window; break; }
+            if (!owned) { NSLog(@"[cm-control] own-window unavailable"); return; }
+            SCContentFilter *filter = [[SCContentFilter alloc] initWithDesktopIndependentWindow:owned];
+            SCStreamConfiguration *config = [[SCStreamConfiguration alloc] init];
+            config.width = MAX(1, (size_t)(owned.frame.size.width * scale));
+            config.height = MAX(1, (size_t)(owned.frame.size.height * scale));
+            config.showsCursor = NO;
+            [SCScreenshotManager captureImageWithFilter:filter configuration:config completionHandler:^(CGImageRef image, NSError *failure) {
+                if (!image || failure) { NSLog(@"[cm-control] own-window failed: %@", failure); return; }
+                NSBitmapImageRep *rep = [[NSBitmapImageRep alloc] initWithCGImage:image];
+                NSData *png = [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+                NSError *writeError = nil;
+                if (![png writeToFile:destination options:NSDataWritingAtomic error:&writeError])
+                    NSLog(@"[cm-control] own-window write failed: %@", writeError);
+                else NSLog(@"[cm-control] own-window captured -> %@", destination);
+            }];
+        }];
+    } else NSLog(@"[cm-control] own-window requires macOS 14.4");
 }
 
 /* ---- screenshot: framebuffer -> binary PPM (P6) via the public readback ---- */
@@ -175,6 +211,11 @@ static void cm__control_exec(CMContext *cx, char *line) {
             e.type = CM_EV_SETTING; e.code = key; e.x = value; e.y = y;
             cm__inj_push(&e);
         }
+        break;
+    }
+    case 'O': {
+        char path[1024];
+        if (sscanf(line + 1, " %1023s", path) == 1) cm__control_own_window(cx, path);
         break;
     }
     case 'S': {

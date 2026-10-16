@@ -132,7 +132,7 @@ hosted-cocoametal: | build
 		hosted/cocoametal/d1_test.m \
 		-o build/host-cocoametal \
 		-framework Metal -framework Foundation -framework CoreGraphics \
-		-framework ImageIO -framework QuartzCore -framework AppKit
+		-framework ImageIO -framework QuartzCore -framework AppKit -weak_framework ScreenCaptureKit
 	BIN=build/host-cocoametal ./harness/run-hosted.sh '[D1] PASS'
 
 # Item 1 (INTERFACE.md §1c): the dlopen-loadable cocoametal.dylib — the REAL
@@ -154,7 +154,7 @@ cocoametal-dylib: | build
 		hosted/cocoametal/cocoametal_media.m hosted/cocoametal/cocoametal_media_ui.m \
 		-o $(COCOAMETAL_DYLIB) \
 		-framework Metal -framework Foundation -framework CoreGraphics \
-		-framework QuartzCore -framework AppKit -framework ImageIO \
+		-framework QuartzCore -framework AppKit -weak_framework ScreenCaptureKit -framework ImageIO \
 		-framework AVFoundation -framework CoreVideo -framework CoreMedia \
 		-framework DiskArbitration
 	codesign -s - -f $(COCOAMETAL_DYLIB)
@@ -201,7 +201,7 @@ cocoametal-media: | build
 cocoametal-prefs: cocoametal-dylib
 	clang -fobjc-arc -arch arm64 -O2 -Wall -Wextra \
 		-Ihosted/cocoametal hosted/cocoametal/prefs_test.m -o build/cocoametal-prefs \
-		-framework AppKit -framework Foundation
+		-framework AppKit -weak_framework ScreenCaptureKit -framework Foundation
 	BIN=build/cocoametal-prefs ./harness/run-hosted.sh '[PREFS] PASS'
 
 # Regenerate the embedded shader library after editing cmshader.metal.
@@ -221,7 +221,7 @@ cocoametal-shader:
 cocoametal-shell: cocoametal-dylib
 	clang -fobjc-arc -arch arm64 -O2 -Wall -Wextra \
 		-Ihosted/cocoametal hosted/cocoametal/shell_test.m -o build/cocoametal-shell \
-		-framework AppKit -framework Foundation -framework AVFoundation -framework CoreMedia
+		-framework AppKit -weak_framework ScreenCaptureKit -framework Foundation -framework AVFoundation -framework CoreMedia
 	BIN=build/cocoametal-shell ./harness/run-hosted.sh '[GSHELL] PASS'
 
 # Status bar LEDs + theme ([STATUS]): dlopen the REAL build/cocoametal.dylib, let
@@ -234,7 +234,7 @@ cocoametal-shell: cocoametal-dylib
 cocoametal-statusbar: cocoametal-dylib
 	clang -fobjc-arc -arch arm64 -O2 -Wall -Wextra \
 		-Ihosted/cocoametal hosted/cocoametal/statusbar_test.m -o build/cocoametal-statusbar \
-		-framework AppKit -framework Foundation
+		-framework AppKit -weak_framework ScreenCaptureKit -framework Foundation
 	BIN=build/cocoametal-statusbar ./harness/run-hosted.sh '[STATUS] PASS'
 
 # D3 host-support (INTERFACE.md §2a + §8): the HIDD-shaped behavioral harness —
@@ -268,7 +268,7 @@ cocoametal-d2t: | build
 		hosted/cocoametal/d2t_test.m \
 		-o build/cocoametal-d2t \
 		-framework Metal -framework Foundation -framework CoreGraphics \
-		-framework QuartzCore -framework AppKit -framework CoreFoundation
+		-framework QuartzCore -framework AppKit -weak_framework ScreenCaptureKit -framework CoreFoundation
 	BIN=build/cocoametal-d2t ./harness/run-hosted.sh '[D2t] PASS'
 
 # D4/D5 (INTERFACE.md §5 — input): the REAL cm_pump_events drain. Drives the input
@@ -286,7 +286,7 @@ cocoametal-input: | build
 		hosted/cocoametal/input_test.m \
 		-o build/cocoametal-input \
 		-framework Metal -framework Foundation -framework CoreGraphics \
-		-framework QuartzCore -framework AppKit -framework CoreFoundation
+		-framework QuartzCore -framework AppKit -weak_framework ScreenCaptureKit -framework CoreFoundation
 	BIN=build/cocoametal-input ./harness/run-hosted.sh '[D4D5] PASS'
 
 # SET (INTERFACE.md §9 — settings & options, ABI v2): the host settings panel +
@@ -307,7 +307,7 @@ cocoametal-settings: | build
 		hosted/cocoametal/cocoametal_gpu.m hosted/cocoametal/settings_test.m \
 		-o build/cocoametal-settings \
 		-framework Metal -framework Foundation -framework CoreGraphics \
-		-framework QuartzCore -framework AppKit -framework CoreFoundation
+		-framework QuartzCore -framework AppKit -weak_framework ScreenCaptureKit -framework CoreFoundation
 	BIN=build/cocoametal-settings ./harness/run-hosted.sh '[SET] PASS'
 
 # FS (INTERFACE.md §9 — CM_OPT_FULLSCREEN now REAL): cm_set_option(CM_OPT_FULLSCREEN,1)
@@ -329,7 +329,7 @@ cocoametal-fullscreen: | build
 		hosted/cocoametal/cocoametal_gpu.m hosted/cocoametal/fullscreen_test.m \
 		-o build/cocoametal-fullscreen \
 		-framework Metal -framework Foundation -framework CoreGraphics \
-		-framework QuartzCore -framework AppKit -framework CoreFoundation
+		-framework QuartzCore -framework AppKit -weak_framework ScreenCaptureKit -framework CoreFoundation
 	BIN=build/cocoametal-fullscreen TIMEOUT=$${TIMEOUT:-30} ./harness/run-hosted.sh '[FS] PASS'
 
 # LIVE (INTERFACE.md §2a — the live present FILLS the drawable): the readback test
@@ -352,7 +352,7 @@ cocoametal-livedraw: | build
 		hosted/cocoametal/cocoametal_gpu.m hosted/cocoametal/livedraw_test.m \
 		-o build/cocoametal-livedraw \
 		-framework Metal -framework Foundation -framework CoreGraphics \
-		-framework QuartzCore -framework AppKit -framework CoreFoundation
+		-framework QuartzCore -framework AppKit -weak_framework ScreenCaptureKit -framework CoreFoundation
 	BIN=build/cocoametal-livedraw TIMEOUT=$${TIMEOUT:-30} ./harness/run-hosted.sh '[LIVE] PASS'
 
 # SHOW (human-facing — NOT in the regression matrix): a PERSISTENT on-screen build so
@@ -369,7 +369,7 @@ cocoametal-show: | build
 		hosted/cocoametal/cocoametal_gpu.m hosted/cocoametal/show.m \
 		-o build/cocoametal-show \
 		-framework Metal -framework Foundation -framework CoreGraphics \
-		-framework QuartzCore -framework AppKit -framework CoreFoundation
+		-framework QuartzCore -framework AppKit -weak_framework ScreenCaptureKit -framework CoreFoundation
 	@echo ">> running build/cocoametal-show — a window opens, then goes fullscreen; auto-exits ~20s (or press a key / Esc)"
 	build/cocoametal-show
 
@@ -457,7 +457,7 @@ hosted-clipboard: | build
 	clang -fobjc-arc -arch arm64 -O2 -Wall -Wextra \
 		hosted/clipboard/pasteboard.m hosted/clipboard/c_test.m \
 		-o build/host-clipboard \
-		-framework Foundation -framework AppKit
+		-framework Foundation -framework AppKit -weak_framework ScreenCaptureKit
 	BIN=build/host-clipboard ./harness/run-hosted.sh '[C] PASS'
 
 # The deployable clipboard host shim: build/libpasteboard.dylib — the artifact the
@@ -470,7 +470,7 @@ pasteboard-dylib: | build
 		-install_name @rpath/libpasteboard.dylib \
 		-exported_symbols_list hosted/clipboard/pasteboard.exports \
 		hosted/clipboard/pasteboard.m -o $(PASTEBOARD_DYLIB) \
-		-framework Foundation -framework AppKit
+		-framework Foundation -framework AppKit -weak_framework ScreenCaptureKit
 	codesign -s - -f $(PASTEBOARD_DYLIB)
 	@echo ">> built $(PASTEBOARD_DYLIB) (exported host_pb_* symbols:)"
 	@nm -gU $(PASTEBOARD_DYLIB) | grep ' _host_' || true

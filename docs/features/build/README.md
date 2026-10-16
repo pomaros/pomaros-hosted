@@ -345,6 +345,22 @@ selected LLVM compiler, archiver, and
 ranlib, discards only stale AHI objects when that profile changes, and verifies
 the generated driver choices and CoreAudio Makefile before compiling AHI.
 
+### Hosted compiler runtime
+
+The normal build wrappers also run `graft/build-hosted-runtime`. Compiler flags
+alone cannot reserve x18 inside a previously built compiler runtime archive.
+This helper builds the full pinned LLVM 20.1.0 builtins from verified source
+archives with `-ffixed-x18`, disables optional SME multiversioning helpers, and
+checks every emitted instruction for x18 use. It needs CMake, Ninja, and internet
+access on its first run; subsequent runs reuse the recorded compiler/source hash.
+
+The archive lives in the hosted output's `hosted-runtime` resource directory.
+`build-targets` selects it through the target link flags and `TARGET_C_LIBS`;
+AHI also finds its copy in this SDK's `Developer/lib`. The compiler and its
+original runtime remain unchanged, including when a VM uses the same toolchain.
+Known old stdc/cybergraphics links containing x18 are preserved outside the OS
+image and relinked. The helper rejects a VM/native output directory.
+
 ## 6. Troubleshooting — symptom → cause
 
 | Symptom | Cause | Fix |
