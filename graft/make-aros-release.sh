@@ -40,12 +40,15 @@ APP="${AROS_APP:-$ROOT/build/PomAROS.app}"
 COMPAT="$HERE/pomaros-compatibility.sh"
 RELEASE_README="$HERE/release-README.md"
 NOTICES="$ROOT/notices"
+PRODUCT_NOTICES="$ROOT/THIRD-PARTY-NOTICES.md"
 REPORT_ENV="$HERE/report-env.sh"
 VERSION_FILE="${POMAROS_VERSION_FILE:-$ROOT/VERSION}"
 [ -r "$VERSION_FILE" ] || { echo "missing release version file: $VERSION_FILE" >&2; exit 1; }
 . "$VERSION_FILE"
 VERSION="${POMAROS_VERSION:-}"
 BUILD_NUMBER="${POMAROS_BUILD_NUMBER:-}"
+RELEASE_PROFILE="${POMAROS_RELEASE_PROFILE:-core}"
+case "$RELEASE_PROFILE" in core) PRODUCT_NOTICES="$HERE/release-core-notices.md" ;; complete) ;; *) echo "invalid release profile" >&2; exit 2 ;; esac
 INCLUDE_MOONSTONE="${POMAROS_INCLUDE_MOONSTONE:-0}"
 AROS_SOURCE_TREE="${POMAROS_AROS_SOURCE:-$ROOT/../aros-core-pomaros}"
 ZED_SOURCE_TREE="${POMAROS_ZED_SOURCE:-$ROOT/../zed-aros}"
@@ -100,7 +103,7 @@ INFO_PLIST='<?xml version="1.0" encoding="UTF-8"?>
 # boots the embedded AROS from a read/write host share (~/AROS/Shared by default).
 LAUNCHER='#!/bin/sh
 set -eu
-D="$(cd "$(dirname "$0")" && pwd)"              # Contents/MacOS
+D="$(cd "$(dirname "$0")" && pwd)"              # Contents/Resources
 APP="$(cd "$D/.." && pwd)"                       # Contents
 AROSROOT="$APP/Resources/AROS"
 BOOTD="$AROSROOT/boot/darwin"
@@ -264,11 +267,13 @@ write_build_manifest() {
     manifest_failed=0
     {
         echo "format=pomaros-build-manifest-v1"
-        echo "product=PomAROS"
+        echo "product=PomAROS Hosted"
+        echo "profile=$RELEASE_PROFILE"
         echo "version=$VERSION"
         echo "build=$BUILD_NUMBER"
         echo "generated_utc=$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
-        source_specs="PomAROS|$ROOT|origin AROS|$AROS_SOURCE_TREE|fork Zed|$ZED_SOURCE_TREE|jonx Ferail|$FERAIL_SOURCE_TREE|origin"
+        source_specs="PomAROS|$ROOT|origin AROS|$AROS_SOURCE_TREE|origin"
+        [ "$RELEASE_PROFILE" = complete ] && source_specs="$source_specs Zed|$ZED_SOURCE_TREE|jonx Ferail|$FERAIL_SOURCE_TREE|origin"
         [ "$INCLUDE_MOONSTONE" = 1 ] && source_specs="$source_specs Moonstone|$MOONSTONE_SOURCE_TREE|origin"
         for source_spec in $source_specs; do
             source_name=${source_spec%%|*}
@@ -327,7 +332,8 @@ write_build_manifest() {
 require_clean_sources() {
     [ "${POMAROS_REQUIRE_CLEAN_SOURCES:-0}" = 1 ] || return 0
     source_failure=0
-    source_specs="PomAROS|$ROOT AROS|$AROS_SOURCE_TREE Zed|$ZED_SOURCE_TREE Ferail|$FERAIL_SOURCE_TREE"
+    source_specs="PomAROS|$ROOT AROS|$AROS_SOURCE_TREE"
+    [ "$RELEASE_PROFILE" = complete ] && source_specs="$source_specs Zed|$ZED_SOURCE_TREE Ferail|$FERAIL_SOURCE_TREE"
     [ "$INCLUDE_MOONSTONE" = 1 ] && source_specs="$source_specs Moonstone|$MOONSTONE_SOURCE_TREE"
     for source_spec in $source_specs; do
         source_name=${source_spec%%|*}
@@ -355,14 +361,8 @@ make_dmg() {
     cp -f "$ROOT/RELEASE-NOTES.md" "$STAGE/RELEASE-NOTES.md"
     cp -f "$COMPAT" "$STAGE/Check PomAROS Compatibility.command"
     chmod +x "$STAGE/Check PomAROS Compatibility.command"
-    if [ -n "${POMAROS_SIGN_IDENTITY:-}" ]; then
-        codesign --force --options runtime --timestamp \
-            --sign "$POMAROS_SIGN_IDENTITY" "$STAGE/Check PomAROS Compatibility.command"
-    else
-        codesign --force --sign - "$STAGE/Check PomAROS Compatibility.command"
-    fi
     cp -f "$ROOT/LICENSE" "$STAGE/LICENSE"
-    cp -f "$ROOT/THIRD-PARTY-NOTICES.md" "$STAGE/THIRD-PARTY-NOTICES.md"
+    cp -f "$PRODUCT_NOTICES" "$STAGE/THIRD-PARTY-NOTICES.md"
     [ -d "$NOTICES" ] || { echo "make-aros-release.sh: missing notices directory: $NOTICES" >&2; exit 1; }
     /usr/bin/ditto "$NOTICES" "$STAGE/Licenses"
     ln -s /Applications "$STAGE/Applications"
@@ -384,20 +384,28 @@ if [ "${1:-}" = "--check" ]; then
     [ -f "$A/Resources/AROS/AROS.boot" ];               ck $? "AROS.boot embedded"
     [ -d "$A/Resources/AROS/Prefs/Presets/Themes/AROSDefault" ]; ck $? "AROSDefault theme embedded"
     [ -e "$A/Resources/AROS/System/Wanderer/Wanderer" ]; ck $? "Wanderer embedded"
+    if [ "$RELEASE_PROFILE" = complete ]; then
     [ -e "$A/Resources/AROS/C/FFViewX" ];               ck $? "FFViewX embedded (C:FFViewX)"
     [ -e "$A/Resources/AROS/Libs/gpufx.library" ];      ck $? "gpufx.library embedded (LIBS:)"
     [ -e "$A/Resources/AROS/C/RustHello" ];             ck $? "RustHello embedded (C:RustHello)"
     [ -e "$A/Resources/AROS/C/Zed" ];                   ck $? "Zed embedded (C:Zed)"
     [ -e "$A/Resources/AROS/C/Ferail" ];                ck $? "Ferail embedded (C:Ferail)"
+    fi
     [ -e "$A/Resources/AROS/Libs/emu68k.library" ];     ck $? "legacy 68k execution library embedded"
     [ -e "$A/Resources/AROS/L/exfat-handler" ];         ck $? "exFAT filesystem handler embedded"
-    [ -e "$A/Resources/AROS/Devs/DOSDrivers/EXFAT0" ];  ck $? "exFAT DOSDriver embedded"
+    if [ "$RELEASE_PROFILE" = complete ]; then
+    [ -e "$A/Resources/AROS/Devs/DOSDrivers/EXFAT0" ]; ck $? "exFAT DOSDriver embedded"
+    fi
     [ -e "$A/Resources/AROS/Devs/hostdisk.device" ];    ck $? "host media device embedded"
     [ -e "$A/Resources/AROS/C/MediaWatch" ];            ck $? "host media watcher embedded"
+    if [ "$RELEASE_PROFILE" = complete ]; then
     [ -f "$A/Resources/AROS/C/Zed.info" ];              ck $? "Zed icon"
     [ -f "$A/Resources/AROS/C/Ferail.info" ];           ck $? "Ferail icon"
     grep -q '^:C/Zed$'       "$A/Resources/AROS/.backdrop" 2>/dev/null; ck $? "Zed on the desktop (.backdrop)"
     grep -q '^:C/Ferail$'    "$A/Resources/AROS/.backdrop" 2>/dev/null; ck $? "Ferail on the desktop (.backdrop)"
+    else
+        [ ! -e "$A/Resources/AROS/C/Zed" ] && [ ! -e "$A/Resources/AROS/C/Ferail" ]; ck $? "unqualified applications excluded"
+    fi
     if grep -q '^Moonstone$' "$A/Resources/Documentation/COMPONENTS.txt" 2>/dev/null; then
         [ -e "$A/Resources/AROS/C/Moonstone" ];             ck $? "optional Moonstone embedded"
         [ -d "$A/Resources/AROS/Moonstone/extracted/moonahdk" ]; ck $? "Moonstone game assets"
@@ -433,8 +441,8 @@ if [ "${1:-}" = "--check" ]; then
         [ -f "$A/Frameworks/$m.dylib" ]; ck $? "Frameworks/$m.dylib"
     done
     [ -f "$A/Resources/report-env.sh" ];                  ck $? "bounded report environment helper"
-    grep -q 'report-env.sh' "$A/MacOS/PomAROS" 2>/dev/null; ck $? "launcher configures local Reports folder"
-    grep -q 'export POMAROS_VERSION POMAROS_BUILD_NUMBER' "$A/MacOS/PomAROS" 2>/dev/null; ck $? "launcher passes bundle identity to About"
+    grep -q 'report-env.sh' "$A/Resources/launch-hosted.sh" 2>/dev/null; ck $? "launcher configures local Reports folder"
+    grep -q 'export POMAROS_VERSION POMAROS_BUILD_NUMBER' "$A/Resources/launch-hosted.sh" 2>/dev/null; ck $? "launcher passes bundle identity to About"
     [ -x "$A/MacOS/PomAROS" ];                          ck $? "launcher executable"
     [ -f "$A/Resources/Documentation/README.md" ];      ck $? "release README embedded"
     [ -f "$A/Resources/Documentation/RELEASE-NOTES.md" ]; ck $? "release notes embedded"
@@ -473,8 +481,8 @@ SRC="$(cd "$BOOTD/../.." && pwd)"   # .../darwin-aarch64/AROS
 
 # require the prepared desktop payloads — this script does NOT re-stage them
 for p in AROS.boot Fonts Prefs/Presets/Themes/AROSDefault System/Wanderer/Wanderer \
-    Devs/Monitors/Cocoa C/Zed C/Ferail Libs/emu68k.library L/exfat-handler \
-    Devs/DOSDrivers/EXFAT0 Devs/hostdisk.device C/MediaWatch; do
+    Devs/Monitors/Cocoa Libs/emu68k.library L/exfat-handler \
+    Devs/hostdisk.device C/MediaWatch; do
     [ -e "$SRC/$p" ] || { echo "make-aros-release.sh: $SRC missing $p — boot desktop once via run-window.sh first" >&2; exit 1; }
 done
 if [ "$INCLUDE_MOONSTONE" = 1 ]; then
@@ -504,9 +512,16 @@ for x in $EXCLUDE_C; do rm -f "$DST/C/$x" "$DST/C/$x.info"; done
 # volume's .backdrop, so the two apps land on the desktop without moving them
 # off the command path. The icons themselves ship with this script (made by
 # make-aros-icon.py from each project's own artwork).
+if [ "$RELEASE_PROFILE" = complete ]; then
 cp -f "$HERE/icons/Zed.info"       "$DST/C/Zed.info"
 cp -f "$HERE/icons/Ferail.info"    "$DST/C/Ferail.info"
 printf ':C/Zed\n:C/Ferail\n' > "$DST/.backdrop"
+
+else
+    rm -f "$DST/C/Zed" "$DST/C/Zed.info" "$DST/C/Ferail" "$DST/C/Ferail.info"
+    rm -f "$DST/C/FFViewX" "$DST/C/FFViewX.info" "$DST/C/FFView" "$DST/C/FFView.info" "$DST/C/RustHello" "$DST/Libs/gpufx.library"
+    : > "$DST/.backdrop"
+fi
 
 if [ "$INCLUDE_MOONSTONE" = 1 ]; then
     cp -f "$HERE/icons/Moonstone.info" "$DST/C/Moonstone.info"
@@ -586,11 +601,15 @@ cp "$ROOT/RELEASE-NOTES.md" "$APP/Contents/Resources/Documentation/RELEASE-NOTES
 cp "$ROOT/LICENSE" "$APP/Contents/Resources/Documentation/LICENSE"
 cp "$ROOT/THIRD-PARTY-NOTICES.md" "$APP/Contents/Resources/Documentation/THIRD-PARTY-NOTICES.md"
 /usr/bin/ditto "$NOTICES" "$APP/Contents/Resources/Documentation/Licenses"
-printf 'Zed\nFerail\n' > "$APP/Contents/Resources/Documentation/COMPONENTS.txt"
+printf 'AROS\nPomAROS host bridges\nEmu68 MPL sources\n' > "$APP/Contents/Resources/Documentation/COMPONENTS.txt"
+if [ "$RELEASE_PROFILE" = complete ]; then
+    printf 'Zed\nFerail\n' >> "$APP/Contents/Resources/Documentation/COMPONENTS.txt"
+fi
 if [ "$INCLUDE_MOONSTONE" = 1 ]; then
     printf 'Moonstone\n' >> "$APP/Contents/Resources/Documentation/COMPONENTS.txt"
 fi
-printf '%s' "$LAUNCHER"   > "$APP/Contents/MacOS/PomAROS"; chmod +x "$APP/Contents/MacOS/PomAROS"
+printf '%s' "$LAUNCHER" > "$APP/Contents/Resources/launch-hosted.sh"
+/usr/bin/clang -Os -arch arm64 -mmacosx-version-min=12.0 "$HERE/release-launcher.c" -o "$APP/Contents/MacOS/PomAROS"
 printf '%s' "$INFO_PLIST" | sed \
     -e "s|@POMAROS_VERSION@|$VERSION|g" \
     -e "s|@POMAROS_BUILD_NUMBER@|$BUILD_NUMBER|g" \

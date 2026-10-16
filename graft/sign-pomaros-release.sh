@@ -9,7 +9,7 @@ DMG="${AROS_DMG:-$ROOT/build/PomAROS.dmg}"
 ENTITLEMENTS="${POMAROS_ENTITLEMENTS:-$HERE/aros-host-release.entitlements.plist}"
 IDENTITY="${POMAROS_SIGN_IDENTITY:-}"
 NOTARY_PROFILE="${POMAROS_NOTARY_PROFILE:-D4Mac}"
-SIGN_SCOPE="${POMAROS_SIGN_SCOPE:-outer}"
+SIGN_SCOPE="${POMAROS_SIGN_SCOPE:-full}"
 MODE="${1:---notarize}"
 
 case "$MODE" in
