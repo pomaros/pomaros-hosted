@@ -31,4 +31,8 @@ The five standard bitmap font families (XEN, arial, fixed, stop and ttcourier)
 come from the public core workbench/fonts tree, retaining its LEGAL/default APL
 provenance. Optional outline font families are excluded from this profile.
 
+LLVM compiler-rt 20.1.0 builtins are linked into the AROS runtime components.
+See Licenses/LLVM-COMPILER-RT-NOTICE.md and the verbatim
+Licenses/LLVM-COMPILER-RT-LICENSE.txt for their source and licence terms.
+
 Apple system frameworks are loaded from macOS and are not redistributed.
