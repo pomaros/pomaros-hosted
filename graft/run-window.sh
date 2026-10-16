@@ -127,6 +127,7 @@ ensure_desktop_payloads() {
 
 write_startup_sequence() {
     startup="$AROS/S/Startup-Sequence"
+    mkdir -p "$AROS/S" || return 1
 
     # Stage the PIPE: mount description (the L:pipe-handler binary is a build
     # artifact; the startup Mount below is guarded by If EXISTS).
@@ -156,6 +157,9 @@ write_startup_sequence() {
                     'If NOT EXISTS "RAM:ENV"' \
                     '    MakeDir "RAM:ENV"' \
                     '    Assign "ENV:" "RAM:ENV"' \
+                    'EndIf' \
+                    'If EXISTS "ENVARC:"' \
+                    '    Copy >NIL: "ENVARC:" "ENV:" ALL NOPRO NOREQ QUIET' \
                     'EndIf' \
                     'Assign "T:" "RAM:T"' \
                     'Assign "CLIPS:" "SYS:clips"' \

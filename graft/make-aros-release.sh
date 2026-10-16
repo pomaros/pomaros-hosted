@@ -163,6 +163,9 @@ If NOT EXISTS "RAM:ENV"
     MakeDir "RAM:ENV"
     Assign "ENV:" "RAM:ENV"
 EndIf
+If EXISTS "ENVARC:"
+    Copy >NIL: "ENVARC:" "ENV:" ALL NOPRO NOREQ QUIET
+EndIf
 Assign "T:" "RAM:T"
 Assign "CLIPS:" "RAM:Clipboards"
 If EXISTS "C:SetClock"

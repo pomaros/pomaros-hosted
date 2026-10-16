@@ -14,10 +14,16 @@ Apple Virtualization.framework, Apple Silicon native, and Raspberry Pi targets
 share the AROS source architecture; hosted keeps its Darwin adaptation and
 reserves Apple's `x18` register. Their platform binaries are distinct.
 
+![PomAROS Hosted running in a native Mac window, with its AROS console and host status bar.](docs/images/pomaros-hosted.png)
+
 ## Migration status
 
 This repository has been renamed to PomAROS Hosted. No PomAROS release has been
 published yet; earlier version and signing notes describe the inherited product.
+The rebuilt development app has passed windowed startup, host file exchange,
+CoreAudio playback, network and 68k library initialization, and clean shutdown.
+The screenshot shows its console view. Full desktop interaction and the bundled
+third-party applications still need separate release qualification.
 Build from source with [GETTING-STARTED.md](GETTING-STARTED.md). The product
 repository is [pomaros/pomaros-hosted](https://github.com/pomaros/pomaros-hosted).
 
@@ -42,6 +48,9 @@ from the public release; developers can restore it for a private build with
 
 ## Current limitations
 
+- Source builds produce a development app with an unsigned outer bundle. Its
+  embedded engine and bridges are ad-hoc signed; a signed PomAROS release image
+  has not been qualified.
 - Ferail is at an early stage. Its file-management views work, but it cannot yet
   launch programs or open files by double-clicking them. Launch applications
   from Wanderer or the AROS Shell instead.
@@ -49,7 +58,7 @@ from the public release; developers can restore it for a private build with
   LhA work, but compatibility varies and programs that depend on unimplemented
   operating-system calls or classic Amiga hardware may fail. Use **Help -> Show
   Reports** after a failure to collect the bounded local compatibility report.
-- The release uses an interim signing arrangement. The delivery DMG and outer
+- The inherited release pipeline uses an interim signing arrangement. The delivery DMG and outer
   `PomAROS.app` bundle are Developer ID signed, while the hosted AROS engine and
   its bridge libraries retain ad-hoc signatures and run without Apple's
   hardened runtime. This preserves the current hosted scheduler behavior; it

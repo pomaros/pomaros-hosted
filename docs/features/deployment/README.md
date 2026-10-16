@@ -76,7 +76,8 @@ If no config or hostvolume key is present, launchers default to
 `~/AROS/Shared` as `MacRO:` and `MacRW:`.
 
 PomAROS host/guest exchanges use `.pomaros-media`, `.pomaros-volumes`, and
-`.pomaros-keymap`. New GUI preference profiles start windowed.
+`.pomaros-keymap`. New GUI preference profiles start windowed. Desktop startup restores
+`ENVARC:` into the fresh `ENV:` RAM directory before IPrefs and Wanderer.
 For bounded qualification, `POMAROS_FORCE_WINDOWED=1` also rejects fullscreen
 requests while preserving the normal user-controlled fullscreen option.
 
