@@ -2460,3 +2460,14 @@ pomaros-hosted:
 pomaros-hosted-check:
 	POMAROS_FORCE_WINDOWED=1 $(MAKE) hosted-abi cocoametal-abi pasteboard-abi coreaudio-abi bsdsock-abi cocoametal-shell cocoametal-prefs hosted-hostvolume hosted-jit68k-hardened
 	./graft/make-aros-app.sh --check
+
+.PHONY: hosted-jit68k-x18
+hosted-jit68k-x18: emu68k-dylib
+	@mkdir -p build/jit-x18-code
+	@rm -f build/jit-x18-code/block-*.bin
+	cp build/libjit68k.a build/libjit68k-x18.a
+	ar d build/libjit68k-x18.a jit_region.o
+	clang $(JIT68K_CFLAGS) -Djit_finalize=jit_finalize_actual -c hosted/jit68k/jit_region.c -o build/jit-region-x18.o
+	clang $(JIT68K_CFLAGS) hosted/jit68k/x18_test.c build/jit-region-x18.o -Wl,-force_load,build/libjit68k-x18.a -o build/jit-x18-test
+	build/jit-x18-test build/jit-x18-code
+	python3 hosted/jit68k/scan_x18.py build/jit-x18-code /opt/homebrew/opt/llvm/bin/llvm-objdump

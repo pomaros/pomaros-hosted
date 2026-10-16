@@ -17,11 +17,11 @@ Per-subsystem design and status lives in the
       mkv route in the picture group), and launching FFView from the datatype.
 
 ## OS / build
-- [ ] **Full OS rebuild with `-ffixed-x18`** — the make.cfg config is committed and
-      `gfx.hidd` is rebuilt; rebuild the rest so every module is x18-safe. Pending the
-      AROS maintainers' call on reserving x18 ABI-wide vs preserving it in the host
-      context switch. See the x18 finding in the
-      [decision log](../history/DECISION-LOG.md).
+- [ ] **Qualify the shared core's hosted desktop** — build and run the full
+      Darwin target with its hosted-only `-ffixed-x18` policy, including generated
+      JIT code. Native Apple, VM/QEMU and Raspberry Pi targets retain their own
+      register policy; there is no ABI-wide x18 reservation. The common source
+      revision is pinned in `CORE.lock`; platform binaries remain distinct.
 
 ## Rust on AROS
 - The Rust `std` port keeps its own resume map (errno/time/env/fs/thread/net plus the

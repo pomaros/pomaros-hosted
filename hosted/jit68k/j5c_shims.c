@@ -15,8 +15,8 @@
  *           decoder passes (Emu68 passes &m68k_ptr[i] cast to uintptr_t — a HOST pointer
  *           into the instruction stream, NOT a 68k address). No software ICache.
  *   the PC helpers EMIT_AdvancePC / EMIT_FlushPC / EMIT_GetOffsetPC / EMIT_ResetOffsetPC
- *           — minimal REG_PC bookkeeping (our register block never reads PC, so these
- *           just keep _pc_rel and emit the same add/sub REG_PC the real translator would).
+ *           — software-only offset bookkeeping: hosted PC-relative operands are handled
+ *           in C. REG_PC is Darwin's reserved x18 and must never be computed with.
  *   M68K_GetSRMask  — returns the current opcode's architectural flag-write mask from
  *           the linked GetSR_LineX decoder metadata.  This materialises every flag the
  *           instruction changes while preserving flags it does not (notably MOVE's X).
@@ -97,9 +97,9 @@ uint32_t cache_read_32(enum CacheType type, uint32_t address)
 
 /* ===================================================================================
  * PC bookkeeping shims (live in M68k_Translator.c upstream — re-hosted here, minimal).
- * Our register-direct block never reads the 68k PC, but the decoders still call
- * EMIT_AdvancePC after each opcode; we keep the same _pc_rel accumulator + REG_PC
- * add/sub the real translator emits, so the emitted block is well-formed.
+ * The hosted dispatcher owns st->pc; PC-relative operands take its C path.
+ * The decoders still need offset accounting, but REG_PC is Darwin's reserved
+ * x18, never seeded by this engine. Do not emit dead add/sub instructions to it.
  * =================================================================================== */
 int32_t _pc_rel = 0;
 
@@ -107,8 +107,6 @@ uint32_t *EMIT_AdvancePC(uint32_t *ptr, uint8_t offset)
 {
     _pc_rel += (int)offset;
     if (_pc_rel > 120 || _pc_rel < -120) {
-        if (_pc_rel > 0) *ptr++ = add_immed(REG_PC, REG_PC, _pc_rel);
-        else             *ptr++ = sub_immed(REG_PC, REG_PC, -_pc_rel);
         _pc_rel = 0;
     }
     return ptr;
@@ -116,8 +114,6 @@ uint32_t *EMIT_AdvancePC(uint32_t *ptr, uint8_t offset)
 
 uint32_t *EMIT_FlushPC(uint32_t *ptr)
 {
-    if (_pc_rel > 0)      *ptr++ = add_immed(REG_PC, REG_PC, _pc_rel);
-    else if (_pc_rel < 0) *ptr++ = sub_immed(REG_PC, REG_PC, -_pc_rel);
     _pc_rel = 0;
     return ptr;
 }
@@ -126,8 +122,6 @@ uint32_t *EMIT_GetOffsetPC(uint32_t *ptr, int8_t *offset)
 {
     int new_offset = _pc_rel + *offset;
     if (new_offset > 127 || new_offset < -127) {
-        if (_pc_rel > 0) *ptr++ = add_immed(REG_PC, REG_PC, _pc_rel);
-        else             *ptr++ = sub_immed(REG_PC, REG_PC, -_pc_rel);
         _pc_rel = 0;
         new_offset = *offset;
     }

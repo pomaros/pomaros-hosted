@@ -17,6 +17,14 @@ Output goes to stdout, the exit code is the program's own `D0`, and any fault
 writes a self-contained crash-bundle `.tar.gz`. It runs *system-friendly* 68k
 software — a CPU+FPU JIT with a stub OS, not a full-chipset emulator.
 
+## Hosted platform register check
+
+`make hosted-jit68k-x18` runs the production engine's real decoder objects against
+an independent interpreter, captures emitted executable code, and disassembles it.
+It rejects computational use of Darwin's reserved `x18`/`w18`, with an explicit
+negative control. PC bookkeeping stays in C; only stack save/restore references
+are permitted in the emitted frame. This policy is specific to hosted Darwin.
+
 ## Provenance — the one non-clean-room part of this repo
 
 The JIT's 68k decoders and AArch64 emitter are **adopted from
