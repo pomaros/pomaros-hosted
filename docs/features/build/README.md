@@ -347,8 +347,10 @@ The hosted audio stage selects CoreAudio explicitly. Shared SDK headers for PCI
 and Apple hardware do not imply that those physical drivers are available in a
 hosted process. Only this stage sets `ac_cv_header_asm_io_h=no` and
 `ac_cv_header_aros_apple_audio_h=no`; native and VM builds retain their own driver
-selection. The script verifies the generated driver choices and the CoreAudio
-Makefile before compiling and installing AHI.
+selection. This configuration runs before the main graph because AHIRecord can
+pull AHI in as a dependency. It uses the selected LLVM compiler, archiver, and
+ranlib, discards only stale AHI objects when that profile changes, and verifies
+the generated driver choices and CoreAudio Makefile before compiling AHI.
 
 ## 6. Troubleshooting — symptom → cause
 

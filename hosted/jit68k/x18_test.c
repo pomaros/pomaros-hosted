@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 John Knipper */
 /* Execute the production decoder/engine objects and capture their real MAP_JIT
  * bytes at the existing cache-finalization seam. No production emitter hook. */
 #include "j5d_jit68k.h"
@@ -50,7 +52,9 @@ int main(int argc, char **argv)
     assert(mem && refmem);
     mem[0] = 0x70; mem[1] = 0; /* moveq #0,d0 */
     for (unsigned i = 0; i < 100; i++) { mem[2+i*2] = 0x52; mem[3+i*2] = 0x80; }
-    mem[202] = 0x4e; mem[203] = 0x75; /* rts; >120 bytes crosses PC offset flush */
+    mem[202] = 0x60; mem[203] = 2; /* bra.s to a separate terminal block */
+    mem[204] = 0x4e; mem[205] = 0x71; /* skipped nop */
+    mem[206] = 0x4e; mem[207] = 0x75; /* rts; >120 bytes crosses PC offset flush */
     memcpy(refmem, mem, size);
     j5d_sandbox sb = {mem, origin, size}, refsb = {refmem, origin, size};
     struct j5d_m68k_state state = {0}, ref = {0};
@@ -61,6 +65,8 @@ int main(int argc, char **argv)
     assert(result == 100 && reference == 100);
     assert(memcmp(state.d, ref.d, sizeof state.d) == 0);
     assert(memcmp(state.a, ref.a, sizeof state.a) == 0);
+    assert(state.pc == origin + 206 && state.pc == ref.pc);
+    assert((state.ccr & 0x1f) == (ref.ccr & 0x1f));
     j5d_stats stats; j5d_get_stats(&stats);
     assert(stats.blocks_translated && stats.blocks_executed && captures);
     char path[1024]; snprintf(path, sizeof path, "%s/negative.bin", dumpdir);

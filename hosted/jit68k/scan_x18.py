@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 John Knipper
 """Disassemble captured real JIT blocks; reject computational platform-register use."""
 from pathlib import Path
 import re

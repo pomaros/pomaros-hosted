@@ -8,7 +8,10 @@ paths are retained. New GUI preference profiles start windowed. Build tools use 
 preserve existing builds, select the LLVM archive tools, and reject a hosted
 configuration that allocates x18. Fresh rebuilds include the guest bridge
 modules, desktop preferences, icons, and themes. Launches pass custom host
-configuration paths through to the GUI process.
+configuration paths through to the GUI process. The development app also starts
+in its recorded AROS build directory when opened from Finder. The hosted JIT
+reserves x18 in generated code as well as compiled code; a real execution test
+checks the emitted instructions against an independent 68k interpreter.
 
 
 ## 2026-09-18 - One metadata file per folder, shared with other tools

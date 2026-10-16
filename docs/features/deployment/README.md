@@ -43,7 +43,10 @@ native app shell with the right process/menu name.
 `graft/make-aros-app.sh` creates `build/PomAROS.app`, which carries its own
 copies of the bootstrap, config, host dylibs, settings schema, and
 `aros-host-conf.sh`. Treat the bundle as another runnable deployment target; if
-it exists, `deploy-check` compares its embedded copies too.
+it exists, `deploy-check` compares its embedded copies too. This development
+app records the external AROS boot directory and starts there so `SYS:` resolves
+correctly even when launched from Finder. Keep that build directory available;
+the separate release packager creates the self-contained distribution.
 
 ## Host Config
 

@@ -10,6 +10,7 @@
 #       required legacy engine: libemu68k.dylib
 #       optional shims: libpasteboard.dylib, libcoreaudio.dylib, libbsdsockhost.dylib
 #   Contents/Resources/settings.json (AROS_SETTINGS_SCHEMA)
+#   Contents/Resources/aros-bootdir (external development build working directory)
 #   Contents/Info.plist
 # The launcher exports AROS_DARWIN_THREADED, points the dylib at the bundled schema,
 # and sources aros-host-conf.sh so the GUI's aros-host.conf drives the boot.
@@ -76,13 +77,17 @@ if [ -n "${AROS_HOST_MEMORY:-}" ] && [ -f "$D/AROSBootstrap.conf" ]; then
     grep -v "^memory " "$D/AROSBootstrap.conf" > "$D/.c.tmp" 2>/dev/null || cp "$D/AROSBootstrap.conf" "$D/.c.tmp"
     printf "memory %s\n" "$AROS_HOST_MEMORY" >> "$D/.c.tmp"; mv "$D/.c.tmp" "$D/AROSBootstrap.conf"
 fi
+BOOTD="$(cat "$APP/Contents/Resources/aros-bootdir")"
+[ -d "$BOOTD" ] || { echo "PomAROS Hosted: external AROS build is unavailable; rebuild the development app." >&2; exit 1; }
+cd "$BOOTD" || exit 1
 exec "$D/AROSBootstrap" -c "$D/AROSBootstrap.conf"'
 
 assemble() {   # assemble <bootd> <app>
-    _bd="$1"; _app="$2"
+    _bd="$(cd "$1" && pwd)"; _app="$2"
     rm -rf "$_app"
     mkdir -p "$_app/Contents/MacOS" "$_app/Contents/Frameworks" "$_app/Contents/Resources"
     cp "$_bd/AROSBootstrap" "$_app/Contents/MacOS/AROSBootstrap"
+    printf '%s\n' "$_bd" > "$_app/Contents/Resources/aros-bootdir"
     [ -f "$_bd/AROSBootstrap.conf" ] && cp "$_bd/AROSBootstrap.conf" "$_app/Contents/MacOS/AROSBootstrap.conf"
     cp "$DYLIB"  "$_app/Contents/Frameworks/cocoametal.dylib"
     [ -f "$PASTEBOARD" ] && cp "$PASTEBOARD" "$_app/Contents/Frameworks/libpasteboard.dylib"
@@ -120,13 +125,16 @@ if [ "${1:-}" = "--check" ]; then
     [ -f "$DYLIB" ]  || { echo "[APP] SKIP: build/cocoametal.dylib missing (run: make cocoametal-dylib)"; exit 0; }
     [ -f "$SCHEMA" ] || { echo "[APP] FAIL: settings.json missing"; exit 1; }
     TMP="$(mktemp -d)"; BD="$TMP/bootd"; mkdir -p "$BD"
-    printf '#!/bin/sh\nexit 0\n' > "$BD/AROSBootstrap"; chmod +x "$BD/AROSBootstrap"
+    printf '#!/bin/sh\n[ "$(pwd)" = "$POMAROS_TEST_BOOTDIR" ]\n' > "$BD/AROSBootstrap"; chmod +x "$BD/AROSBootstrap"
     printf 'module /x/exec.library\nmemory 64\n' > "$BD/AROSBootstrap.conf"
     assemble "$BD" "$TMP/PomAROS.app"
     A="$TMP/PomAROS.app/Contents"
     plutil -lint "$A/Info.plist" >/dev/null 2>&1; ck $? "Info.plist is valid"
     [ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$A/Info.plist" 2>/dev/null)" = "$VERSION" ]; ck $? "bundle version matches VERSION"
     [ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$A/Info.plist" 2>/dev/null)" = "$BUILD_NUMBER" ]; ck $? "bundle build number matches VERSION"
+    AROS_HOST_CONF=/dev/null AROS_RUN_DIR="$TMP/run" CFFIXED_USER_HOME="$TMP/profile" \
+        POMAROS_TEST_BOOTDIR="$BD" "$A/MacOS/PomAROS" >/dev/null 2>&1
+    ck $? "launcher starts bootstrap in the external AROS boot directory"
     [ -x "$A/MacOS/PomAROS" ];                       ck $? "MacOS/PomAROS launcher present + executable"
     [ -f "$A/MacOS/AROSBootstrap" ];              ck $? "MacOS/AROSBootstrap present"
     [ -f "$A/Frameworks/cocoametal.dylib" ];      ck $? "Frameworks/cocoametal.dylib present"

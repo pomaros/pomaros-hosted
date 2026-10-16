@@ -12,10 +12,13 @@ import time
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--build', type=Path, required=True)
 parser.add_argument('--log', type=Path)
+parser.add_argument('--make-var', action='append', default=[], metavar='NAME=VALUE')
 parser.add_argument('targets', nargs='+')
 a = parser.parse_args()
 if any(not re.fullmatch(r'[a-zA-Z0-9_-]+', target) for target in a.targets):
     parser.error('invalid metatarget name')
+if any(not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*=.*', var) for var in a.make_var):
+    parser.error('invalid make variable assignment')
 a.build = a.build.resolve()
 log = a.log or a.build / 'pomaros-targets.log'
 log.parent.mkdir(parents=True, exist_ok=True)
@@ -35,7 +38,8 @@ target_manifest = json.dumps(a.targets, indent=2) + '\n'
 (a.build / 'pomaros-targets.json').write_text(target_manifest)
 log.with_suffix('.targets.json').write_text(target_manifest)
 command = ['make', '-C', str(a.build), '-j' + os.environ.get('AROS_BUILD_JOBS', '4'),
-           '-f', 'Makefile', '-f', str(batch), 'pomaros-targets']
+           '-f', 'Makefile', '-f', str(batch), *a.make_var, 'pomaros-targets']
+log.with_suffix('.invocation.json').write_text(json.dumps({'command': command, 'SOURCE_DATE_EPOCH': os.getenv('SOURCE_DATE_EPOCH')}, indent=2) + '\n')
 print('Building ' + str(len(a.targets)) + ' explicit metatargets; log=' + str(log), flush=True)
 with log.open('w') as stream:
     result = subprocess.run(command, stdout=stream, stderr=subprocess.STDOUT)

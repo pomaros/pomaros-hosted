@@ -2458,7 +2458,7 @@ pomaros-hosted:
 	./graft/make-aros-app.sh
 
 pomaros-hosted-check:
-	POMAROS_FORCE_WINDOWED=1 $(MAKE) hosted-abi cocoametal-abi pasteboard-abi coreaudio-abi bsdsock-abi cocoametal-shell cocoametal-prefs hosted-hostvolume hosted-jit68k-hardened
+	POMAROS_FORCE_WINDOWED=1 $(MAKE) hosted-abi cocoametal-abi pasteboard-abi coreaudio-abi bsdsock-abi cocoametal-shell cocoametal-prefs hosted-hostvolume hosted-jit68k-hardened hosted-jit68k-x18
 	./graft/make-aros-app.sh --check
 
 .PHONY: hosted-jit68k-x18
