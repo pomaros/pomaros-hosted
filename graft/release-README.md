@@ -16,4 +16,4 @@ licences and source obligations. Apple notarization status is recorded beside
 the final DMG; successful notarization does not establish application coverage.
 
 Source and project information: https://github.com/pomaros and
-https://github.com/jonx. Current source repositories remain private.
+https://github.com/jonx. Host integration sources are public; the shared AROS checkout remains private.

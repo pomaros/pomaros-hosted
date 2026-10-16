@@ -15,7 +15,9 @@ The Emu68 files are under MPL 2.0, isolated from the surrounding host code.
 See Licenses/EMU68-NOTICE and Licenses/MPL-2.0.txt for upstream revision and
 file-level provenance. Corresponding source is retained in the PomAROS Hosted
 source checkout (hosted/jit68k) and the pinned shared AROS checkout recorded in
-BUILD-MANIFEST.txt. Those repositories remain private at this stage.
+BUILD-MANIFEST.txt. The host and Emu68 integration sources are public at
+https://github.com/pomaros/pomaros-hosted. The shared AROS checkout remains
+private at this stage.
 
 This candidate is for internal testing by John. It has not been approved for
 public redistribution. Before redistribution, provide exact corresponding
