@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-16 - PomAROS Hosted migration
+
+The hosted Mac product is now PomAROS Hosted, with renamed app, release tools,
+menus, diagnostics, and issue links. Host bridges and existing user configuration
+paths are retained. Build tools use a separate stable hosted output directory,
+preserve existing builds, and reject a hosted configuration that allocates x18.
+
+
 ## 2026-09-18 - One metadata file per folder, shared with other tools
 
 - **AROS comments and protection bits now live in one `.ameta` file per host
@@ -46,7 +54,7 @@ fixed:
   all.
 - **Settings changed outside the app are picked up.** The config file is shared
   with the command-line tools, so a disk shared with `aros-ctl media`, an edit
-  made by hand, or a change from another Macaros is noticed, applied, and shown
+  made by hand, or a change from another PomAROS is noticed, applied, and shown
   in the window while everything keeps running.
 - **Settings that need a restart say so, where you change them.** RAM and the
   shared folder are marked "next launch", and the moment you change one it says
@@ -58,9 +66,9 @@ fixed:
   marked "next launch", because a mounted volume cannot be moved out from under
   open files, and the window no longer pretends otherwise.
 
-## 2026-08-28 - Mount a real USB stick inside Macaros
+## 2026-08-28 - Mount a real USB stick inside PomAROS
 
-- **Macaros can now mount a physical Mac disk, and you choose which one.** An
+- **PomAROS can now mount a physical Mac disk, and you choose which one.** An
   exFAT (or FAT) stick, SD card, or attached disk image can be handed to AROS,
   where it appears as an ordinary volume. Files written on the Mac read inside
   AROS, and files AROS writes come back byte-exact on the Mac, with the volume
@@ -121,9 +129,9 @@ fixed:
   not Apple-notarized, and publication requires a boot from the exact signed
   disk image.
 
-## 2026-08-15 - Macaros gets its own release home
+## 2026-08-15 - PomAROS gets its own release home
 
-- **The product now lives in `jonx/Macaros`.** The graft, documentation,
+- **The product now lives in `jonx/PomAROS`.** The graft, documentation,
   harness, hosted bridges, QEMU AArch64 bring-up, and their working history have
   moved out of AROS-AArch64. The complete modified operating-system source
   remains in the `aarch64-darwin-graft` branch of `jonx/AROS`.
@@ -132,7 +140,7 @@ fixed:
   complete licence material, and explicit checks for Zed, Ferail, transparent
   68k execution, and exFAT. Moonstone is absent by default and remains a private
   opt-in build.
-- **The hosted ABI is stated as part of the product.** Macaros is a place to
+- **The hosted ABI is stated as part of the product.** PomAROS is a place to
   test our own AROS and application-platform concepts; a bare-metal Apple
   Silicon version is not planned. Developers must reserve Apple platform
   register `x18`, because Darwin signal delivery cannot preserve a guest value
@@ -173,7 +181,7 @@ fixed:
 ## 2026-08-07 - The window frame belongs to the Mac, the inside to AROS
 
 - **Clicking the window's title bar no longer reaches AROS.** A right-click on
-  the Macaros title bar used to pop the AROS menus, because every click on the
+  the PomAROS title bar used to pop the AROS menus, because every click on the
   window was handed to the guest no matter where it landed. Mouse input now
   only reaches AROS when it lands on the AROS screen itself; the title bar and
   the rest of the window frame behave like any Mac window (a title-bar
@@ -313,10 +321,10 @@ fixed:
 
 ## 2026-08-03 - A 68k program can hand AROS structures it built itself
 
-- **The window says Macaros.** The title bar, the Settings windows and the names
+- **The window says PomAROS.** The title bar, the Settings windows and the names
   of saved screenshots and recordings all read "AROS", the name of the system
   running inside, instead of the name of the app running it. The host now titles
-  its own chrome from the app itself, so everything the Mac shows reads Macaros
+  its own chrome from the app itself, so everything the Mac shows reads PomAROS
   and the display driver no longer decides what the app is called.
 - **A program's own gadgets now cross.** Classic Amiga code allocates its
   `Gadget` list itself and gives it to Intuition, which then keeps and renders
@@ -544,9 +552,9 @@ fixed:
   Programs that drive the Amiga hardware directly are not supported yet, and
   the set of OS functions available to 68k code is still small and growing.
 
-## 2026-08-01 - Macaros 0.2: three applications, on the desktop, in one download
+## 2026-08-01 - PomAROS 0.2: three applications, on the desktop, in one download
 
-- **The desktop has application icons now.** Macaros boots to Wanderer with
+- **The desktop has application icons now.** PomAROS boots to Wanderer with
   Zed, Ferail and Moonstone sitting on the backdrop, each with its own
   artwork, each one double-click away. They stay in `C:` as well, so the shell
   keeps working exactly as before.
@@ -566,7 +574,7 @@ fixed:
 - **The editor's settings survive an update.** In the release its home is the
   shared Mac folder, not the volume inside the app bundle, which is read-only
   and replaced wholesale on every install.
-- **A crashing application no longer takes Macaros with it.** Quitting the file
+- **A crashing application no longer takes PomAROS with it.** Quitting the file
   manager ended the whole session: it aborts on exit, and the crash reporter
   then walked a broken frame chain, faulted inside itself, and stopped the
   host before it could say anything. The reporter now distrusts that chain,
@@ -816,7 +824,7 @@ fixed:
 
 ## 2026-07-22 - dynamic display resolution
 
-- The Macaros window is resizable and the AROS screen resolution follows in
+- The PomAROS window is resizable and the AROS screen resolution follows in
   both directions. Drag the window edge and AROS snaps to the nearest of 16
   display modes when you let go; pick a mode in ScreenMode Preferences and the
   window resizes to match. Fullscreen letterboxes the mode instead of resizing.
@@ -866,9 +874,9 @@ fixed:
 - `kms.library` falls back to `.akmd` text keymap descriptors, so non-default
   keymaps load on aarch64.
 
-## 2026-07-08 - Macaros.app v0.1
+## 2026-07-08 - PomAROS.app v0.1
 
-- Signed and notarized, self-contained `Macaros.app` DMG built by
+- Signed and notarized, self-contained `PomAROS.app` DMG built by
   `graft/make-aros-release.sh`; a `RustHello` sample in the bundle; docs refresh.
 
 ## 2026-07-07 - GPU compute (gpufx)
@@ -891,7 +899,7 @@ fixed:
 First public snapshot of the port. State at release:
 
 - Hosted AROS boots to a crash-free Wanderer desktop in a native Cocoa/Metal
-  window on Apple Silicon (Macaros.app), with keyboard/mouse, clipboard
+  window on Apple Silicon (PomAROS.app), with keyboard/mouse, clipboard
   bridge, CoreAudio sound, host BSD sockets (TCP/IP + DNS), a host-volume
   handler, and opt-in crash containment.
 - 68k JIT (`run68k`): classic Amiga hunk binaries run via an AArch64

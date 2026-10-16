@@ -1,31 +1,26 @@
-# Macaros
+# PomAROS Hosted
 
-Macaros packages [AROS](https://aros.org), the open-source AmigaOS-compatible
+PomAROS packages [AROS](https://aros.org), the open-source AmigaOS-compatible
 operating system, as a native Apple Silicon Mac application. AROS runs as an
 arm64 process, presents the Wanderer desktop in a Cocoa/Metal window, and uses
 macOS for display, sound, networking, clipboard, and access to shared files.
 
-![The Macaros Wanderer desktop on Apple Silicon](docs/aros-apple-silicon-macaros.png)
+![The PomAROS Wanderer desktop on Apple Silicon](docs/aros-apple-silicon-pomaros.png)
 
-Macaros is not an emulator for one historic Amiga model. It is a hosted build
+PomAROS is not an emulator for one historic Amiga model. It is a hosted build
 of AROS itself, compiled for AArch64 and integrated with the Mac.
 
-It is also a test bed for our own AROS concepts. A bare-metal Apple Silicon
-version is not planned; macOS deliberately remains the hardware-facing host.
+PomAROS Hosted is the macOS process target in the PomAROS family. QEMU,
+Apple Virtualization.framework, Apple Silicon native, and Raspberry Pi targets
+share the AROS source architecture; hosted keeps its Darwin adaptation and
+reserves Apple's `x18` register. Their platform binaries are distinct.
 
-## Download
+## Migration status
 
-Download the current Developer ID-signed disk image from the
-[Macaros releases page](https://github.com/jonx/Macaros/releases/latest). Macaros
-0.2.1 requires an Apple Silicon Mac running macOS 12 or newer. Before installing,
-run **Check Macaros Compatibility.command** from the disk image; it checks the
-machine, available space, bundled runtime, legacy 68k components, and signature.
-
-Macaros 0.2.1 is not Apple-notarized because its embedded hosted runtime uses
-the interim signing arrangement documented below. If Gatekeeper blocks the
-first launch, Control-click **Macaros.app**, choose **Open**, and confirm once;
-on macOS versions that require it, use **System Settings -> Privacy & Security
--> Open Anyway**.
+This repository has been renamed to PomAROS Hosted. No PomAROS release has been
+published yet; earlier version and signing notes describe the inherited product.
+Build from source with [GETTING-STARTED.md](GETTING-STARTED.md). The product
+repository is [pomaros/pomaros-hosted](https://github.com/pomaros/pomaros-hosted).
 
 Release changes are recorded in [CHANGELOG.md](CHANGELOG.md), with the complete
 scope and developer ABI requirements in [RELEASE-NOTES.md](RELEASE-NOTES.md).
@@ -44,7 +39,7 @@ scope and developer ABI requirements in [RELEASE-NOTES.md](RELEASE-NOTES.md).
 
 The normal release includes Zed and Ferail. Moonstone is deliberately excluded
 from the public release; developers can restore it for a private build with
-`MACAROS_INCLUDE_MOONSTONE=1` after providing its binary and assets.
+`POMAROS_INCLUDE_MOONSTONE=1` after providing its binary and assets.
 
 ## Current limitations
 
@@ -56,7 +51,7 @@ from the public release; developers can restore it for a private build with
   operating-system calls or classic Amiga hardware may fail. Use **Help -> Show
   Reports** after a failure to collect the bounded local compatibility report.
 - The release uses an interim signing arrangement. The delivery DMG and outer
-  `Macaros.app` bundle are Developer ID signed, while the hosted AROS engine and
+  `PomAROS.app` bundle are Developer ID signed, while the hosted AROS engine and
   its bridge libraries retain ad-hoc signatures and run without Apple's
   hardened runtime. This preserves the current hosted scheduler behavior; it
   does not mean that the embedded host code has an independent Developer ID
@@ -65,7 +60,7 @@ from the public release; developers can restore it for a private build with
 
 ## Repository boundary
 
-This repository owns the Macaros product and integration layer:
+This repository owns the PomAROS product and integration layer:
 
 ```
 graft/       build, deployment, control, compatibility, and release tools
@@ -77,13 +72,13 @@ docs/        current feature docs, project records, and the initial bring-up arc
 The original standalone QEMU kernel and Phase 1/Phase 2 notes now live under
 [`docs/hosted/initial-platform-bringup/`](docs/hosted/initial-platform-bringup/README.md).
 They are retained as a working reference for adding AROS support to another
-platform, not as the current Macaros implementation plan.
+platform, not as the current PomAROS implementation plan.
 
 The source projects remain separate so their histories and responsibilities do
 not become tangled:
 
-- [jonx/AROS](https://github.com/jonx/AROS/tree/aarch64-darwin-graft) is the
-  working AROS source fork containing the active AArch64/Darwin port.
+- `aros-core-pomaros` is the shared operating-system source; `CORE.lock` records
+  its repository, branch, and tested revision.
 - [jonx/AROS-AArch64](https://github.com/jonx/AROS-AArch64) is retained as a
   redirect to this repository so old links and history remain understandable.
 - [jonx/zed-aros](https://github.com/jonx/zed-aros) and
@@ -101,15 +96,15 @@ split, see [docs/project/COLLABORATOR-GUIDE.md](docs/project/COLLABORATOR-GUIDE.
 - An Apple Silicon Mac
 - macOS 12 or newer
 - Xcode Command Line Tools and Homebrew
-- A sibling checkout of the `aarch64-darwin-graft` branch of `jonx/AROS`
+- A sibling shared AROS checkout at the revision in `CORE.lock`
 
 The complete source-build path is in
 [GETTING-STARTED.md](GETTING-STARTED.md). A typical checkout layout is:
 
 ```text
 Source/
-├── Macaros/
-├── aros-upstream/    jonx/AROS, branch aarch64-darwin-graft
+├── pomaros-hosted/
+├── aros-core-pomaros/    shared AROS source at CORE.lock revision
 ├── zed-aros/
 └── Ferail/
 ```
@@ -119,7 +114,12 @@ Use `-ffixed-x18` for C/C++, the checked-in Rust target with `+reserve-x18`, and
 avoid `x18` in assembly. [RELEASE-NOTES.md](RELEASE-NOTES.md) explains the
 Darwin signal/preemption failure that makes this mandatory.
 
-After the AROS runtime has been built and staged, the principal commands are:
+With the pinned common source and preserved AROS toolchain available,
+`make pomaros-hosted` rebuilds the hosted runtime, host bridges, and development
+app. `make pomaros-hosted-check` runs the host bridge checks. The development
+app references the stable external build tree; release packaging embeds it.
+
+For incremental bridge changes, the principal commands are:
 
 ```sh
 make cocoametal-dylib pasteboard-dylib coreaudio-dylib bsdsock-dylib
@@ -160,7 +160,7 @@ only after the exact unsigned candidate has been tested.
 
 ## Security and licences
 
-Macaros is experimental systems software. Review [SECURITY.md](SECURITY.md)
+PomAROS is experimental systems software. Review [SECURITY.md](SECURITY.md)
 before exposing important data through a writable shared volume.
 
 The integration code is distributed under the AROS Public License 1.1; bundled

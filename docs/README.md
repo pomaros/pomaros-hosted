@@ -1,6 +1,6 @@
-# Macaros documentation
+# PomAROS documentation
 
-Start with the root [README](../README.md) to run Macaros and
+Start with the root [README](../README.md) to run PomAROS and
 [Getting started](../GETTING-STARTED.md) to build it.
 
 ## Current documentation
@@ -11,7 +11,7 @@ Start with the root [README](../README.md) to run Macaros and
 - [Collaborator guide](project/COLLABORATOR-GUIDE.md) — repository ownership and
   working rules.
 - [Repository strategy](project/REPOSITORY-STRATEGY.md) — boundaries between
-  Macaros, the AROS fork, Zed, and Ferail.
+  PomAROS, the AROS fork, Zed, and Ferail.
 - [Project backlog](project/BACKLOG.md) — current cross-cutting follow-up work.
 
 ## Historical and porting material

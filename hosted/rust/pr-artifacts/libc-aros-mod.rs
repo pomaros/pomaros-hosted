@@ -11,7 +11,7 @@
 // Scope: exactly the posixc / pthread / stdc surface the std pal declares today, so
 // migrating the pal is 1:1 -- each `mod c { unsafe extern "C" { ... } }` block in
 // library/std/src/sys/*/aros.rs is deleted and replaced with `use libc::*`. Values are
-// AROS-specific (from ../aros-upstream compiler/crt/posixc headers), NOT NetBSD/unix
+// AROS-specific (from ../aros-core-pomaros compiler/crt/posixc headers), NOT NetBSD/unix
 // defaults: O_RDONLY is 1 (not 0), mode_t is 16-bit, time_t is 32-bit.
 //
 // The bsdsocket surface (socket/connect/recv/... /Dup2Socket/WaitSelect) is

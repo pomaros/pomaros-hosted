@@ -21,12 +21,12 @@ layer (Cocoa/Metal/Apple), which stays on the jonx fork. Current design doc:
   force-delete + full rebuild; the desktop stack now has 0 x18 refs, guarded
   by `graft/deploy-check x18`.
 - **FP/NEON never saved across task switches:** fixed in
-  `../aros-upstream/arch/all-darwin/kernel/cpu_aarch64.h` (commit 7f55baf7).
+  `../aros-core-pomaros/arch/all-darwin/kernel/cpu_aarch64.h` (commit 7f55baf7).
   NEON blob in AROSCPUContext + PREPARE_INITIAL_CONTEXT.
 - **CrashLab** = `C:CrashLab` guest program, triggers each fault class
   (NULLREAD/NULLWRITE/NULLJUMP/WILDWRITE/ILLEGAL/STACKSMASH/DEADEND/GURU/
   BUSYLOOP/FORBIDLOOP/CRASHTASK), each prints `[CRASHLAB] NAME:`. Source:
-  `../aros-upstream/developer/debug/test/crash/crashlab.c` (commit 53240bbe).
+  `../aros-core-pomaros/developer/debug/test/crash/crashlab.c` (commit 53240bbe).
 - **crash-smoke** = `graft/crash-smoke`, the before/after survival matrix.
   BEFORE matrix: every fault class took the instance down.
 - **`aros-ctl tasks`** = SIGINFO -> kernel `core_DiagHandler` -> walks all
@@ -155,7 +155,7 @@ Guest commits (crash-containment branch): f7fa964f (trap-path fixes),
 
 ## Key file references
 
-Guest (`../aros-upstream`, branch crash-containment):
+Guest (`../aros-core-pomaros`, branch crash-containment):
 
 - `arch/all-unix/kernel/kernel.c` -- core_DiagHandler + forensics
 - `arch/all-unix/bootstrap/kickstart.c` -- SIGINFO mask, kick() threaded path

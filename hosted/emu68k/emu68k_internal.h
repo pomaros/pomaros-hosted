@@ -266,7 +266,7 @@ struct emu68k_run {
      * one host-side pump, but a 68k task observes the corresponding CIA state
      * when it consumes each IDCMP message. */
     unsigned int          mouse_buttons;
-    /* The raw all-library-call trace goes to Macaros's stderr capture rather
+    /* The raw all-library-call trace goes to PomAROS's stderr capture rather
      * than Bridge Lab, so it needs its own per-run bound.  Otherwise a guest
      * tight loop can grow /tmp/aros-window.log without limit. */
     unsigned long         trace_calls_count;

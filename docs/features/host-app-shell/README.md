@@ -1,20 +1,20 @@
-# Host app shell — Macaros
+# Host app shell — PomAROS
 
 **Status: built.** Makes the AROS window a **first-class macOS app**: an app menu
 bar, an About panel (the macaron), a custom icon, and a schema-driven **Settings**
 window — all delivered by the cocoametal dylib, so it travels with the display,
 not as a separate process.
 
-**Macaros** = a macaron: AROS on a Mac.
+**PomAROS** = a macaron: AROS on a Mac.
 
 ## Package it
 
 ```sh
-graft/make-aros-app.sh        # a dev Macaros.app that wraps the local boot tree
-graft/make-aros-release.sh    # a SELF-CONTAINED, relocatable Macaros.app (+ --dmg)
+graft/make-aros-app.sh        # a dev PomAROS.app that wraps the local boot tree
+graft/make-aros-release.sh    # a SELF-CONTAINED, relocatable PomAROS.app (+ --dmg)
 ```
 
-`make-aros-app.sh` is the developer wrapper (points at your `~/Source/aros-project/aros-build`);
+`make-aros-app.sh` is the developer wrapper (points at your `~/Source/aros-project/Build/pomaros-hosted`);
 `make-aros-release.sh` embeds the whole prepared AROS volume so the `.app` boots
 the Wanderer desktop on a clean Mac, ready to Developer-ID sign + notarize.
 `--dmg` wraps it with [`graft/release-README.md`](../../../graft/release-README.md)
@@ -29,13 +29,13 @@ editor ([Zed](../zed-editor/README.md)) and the file manager
 `SYS:.backdrop`, which lists one `:path` per leave-out icon.
 
 Moonstone remains available to private builds through
-`MACAROS_INCLUDE_MOONSTONE=1`, but its binary, icon, environment variable, and
+`POMAROS_INCLUDE_MOONSTONE=1`, but its binary, icon, environment variable, and
 assets are absent from the standard release.
 
 The release differs from the dev tree in two ways that the editor depends on:
 `HOME` is `MacRW:` (the embedded volume is inside a signed bundle and must stay
 read-only), and the launcher writes `AROS_FSW_ROOTS` into the share as
-`.macaros-boot` because only it knows where the share landed.
+`.pomaros-boot` because only it knows where the share landed.
 
 ### Making an icon
 
@@ -111,7 +111,7 @@ settings between tabs whenever one becomes live. Any entry with
 
 `aros-host.conf` is shared with the command-line tools, so it is not only
 written by the window. The running process watches the file: whatever writes it
-— `aros-ctl media`, another Macaros, a text editor — is noticed, applied, and
+— `aros-ctl media`, another PomAROS, a text editor — is noticed, applied, and
 shown in the window if it is open. That is also the path for machine settings
 the guest applies to itself: `"apply": "guestFile"` leaves the value in the host
 share (`MacRW:`), where a small task inside AROS picks it up, which is the only

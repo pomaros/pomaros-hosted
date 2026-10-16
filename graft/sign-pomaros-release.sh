@@ -1,15 +1,15 @@
 #!/bin/sh
-# Sign, notarize, staple, and package an already-built Macaros release app.
+# Sign, notarize, staple, and package an already-built PomAROS release app.
 set -eu
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/.." && pwd)"
-APP="${AROS_APP:-$ROOT/build/Macaros.app}"
-DMG="${AROS_DMG:-$ROOT/build/Macaros.dmg}"
-ENTITLEMENTS="${MACAROS_ENTITLEMENTS:-$HERE/aros-host-release.entitlements.plist}"
-IDENTITY="${MACAROS_SIGN_IDENTITY:-}"
-NOTARY_PROFILE="${MACAROS_NOTARY_PROFILE:-D4Mac}"
-SIGN_SCOPE="${MACAROS_SIGN_SCOPE:-outer}"
+APP="${AROS_APP:-$ROOT/build/PomAROS.app}"
+DMG="${AROS_DMG:-$ROOT/build/PomAROS.dmg}"
+ENTITLEMENTS="${POMAROS_ENTITLEMENTS:-$HERE/aros-host-release.entitlements.plist}"
+IDENTITY="${POMAROS_SIGN_IDENTITY:-}"
+NOTARY_PROFILE="${POMAROS_NOTARY_PROFILE:-D4Mac}"
+SIGN_SCOPE="${POMAROS_SIGN_SCOPE:-outer}"
 MODE="${1:---notarize}"
 
 case "$MODE" in
@@ -18,11 +18,11 @@ case "$MODE" in
 esac
 case "$SIGN_SCOPE" in
     full|outer) ;;
-    *) echo "MACAROS_SIGN_SCOPE must be 'full' or 'outer'" >&2; exit 2 ;;
+    *) echo "POMAROS_SIGN_SCOPE must be 'full' or 'outer'" >&2; exit 2 ;;
 esac
 
 [ -n "$IDENTITY" ] || {
-    echo "set MACAROS_SIGN_IDENTITY to a Developer ID Application identity" >&2
+    echo "set POMAROS_SIGN_IDENTITY to a Developer ID Application identity" >&2
     echo "available identities:" >&2
     security find-identity -v -p codesigning >&2 || true
     exit 2
@@ -35,7 +35,7 @@ security find-identity -v -p codesigning | grep -Fq "\"$IDENTITY\"" || {
 }
 if [ "$MODE" = --notarize ] && [ "$SIGN_SCOPE" = outer ]; then
     echo "outer-only releases cannot currently pass Apple notarization" >&2
-    echo "use --package-test, or use MACAROS_SIGN_SCOPE=full after the scheduler is hardened-runtime compatible" >&2
+    echo "use --package-test, or use POMAROS_SIGN_SCOPE=full after the scheduler is hardened-runtime compatible" >&2
     exit 2
 fi
 
@@ -51,7 +51,7 @@ if [ "$SIGN_SCOPE" = full ]; then
     echo ">> signing hosted AROS runtime"
     for binary in \
         "$APP/Contents/Resources/AROS/boot/darwin/AROSBootstrap" \
-        "$APP/Contents/Resources/AROS/boot/darwin/Macaros"; do
+        "$APP/Contents/Resources/AROS/boot/darwin/PomAROS"; do
         [ -f "$binary" ] || { echo "missing hosted runtime: $binary" >&2; exit 1; }
         codesign --force --options runtime --timestamp \
             --entitlements "$ENTITLEMENTS" --sign "$IDENTITY" "$binary"
@@ -61,7 +61,7 @@ else
     for binary in \
         "$APP"/Contents/Frameworks/*.dylib \
         "$APP/Contents/Resources/AROS/boot/darwin/AROSBootstrap" \
-        "$APP/Contents/Resources/AROS/boot/darwin/Macaros"; do
+        "$APP/Contents/Resources/AROS/boot/darwin/PomAROS"; do
         [ -f "$binary" ] || { echo "missing embedded host code: $binary" >&2; exit 1; }
         details=$(codesign -dvv "$binary" 2>&1 || true)
         printf '%s\n' "$details" | grep -q 'Signature=adhoc' || {
@@ -100,7 +100,7 @@ fi
 xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null
 
 if [ "$SIGN_SCOPE" = full ]; then
-    ZIP="$ROOT/build/Macaros-notary.zip"
+    ZIP="$ROOT/build/PomAROS-notary.zip"
     rm -f "$ZIP"
     /usr/bin/ditto -c -k --keepParent "$APP" "$ZIP"
 

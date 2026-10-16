@@ -15,7 +15,7 @@ description: >-
 
 Two different rules, decided by WHERE the thing lands:
 
-**Repos John owns (`github.com/jonx/*`: AROS, AROS-AArch64, Macaros, aros-raspi).**
+**Repos John owns (`github.com/jonx/*`: AROS, AROS-AArch64, PomAROS, aros-raspi).**
 Push freely. Branches, backups, force-push to his own working branches, new
 repos. No need to ask. This is his workspace and keeping it backed up is a
 good thing.

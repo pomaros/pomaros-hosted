@@ -1,6 +1,6 @@
 #!/bin/sh
-# make-aros-release.sh — build a SELF-CONTAINED, relocatable Macaros.app that boots
-# the full AROS Wanderer desktop on a clean Mac (no ~/Source/aros-project/aros-build, no ../aros-upstream).
+# make-aros-release.sh — build a SELF-CONTAINED, relocatable PomAROS.app that boots
+# the full AROS Wanderer desktop on a clean Mac (no ~/Source/aros-project/Build/pomaros-hosted, no ../aros-core-pomaros).
 #
 # Sibling to make-aros-app.sh (the dev wrapper). The difference is self-containment:
 # this EMBEDS a release-filtered AROS volume (fonts + AROSDefault theme + Cocoa
@@ -10,19 +10,19 @@
 # bundle itself stays read-only so the notarization seal holds).
 #
 # NO DUPLICATION of the deployment: the source tree is the one graft/run-window.sh
-# has already prepared in ~/Source/aros-project/aros-build (desktop payloads staged, media + rust
+# has already prepared in ~/Source/aros-project/Build/pomaros-hosted (desktop payloads staged, media + rust
 # artifacts installed). We copy its runtime payload, normalise the conf paths, and
 # bake the desktop Startup-Sequence. Developer files, test disks, logs, caches,
 # and crash reports are deliberately outside the release boundary.
 #
-#   ./make-aros-release.sh                 build build/Macaros.app (unsigned)
-#   ./make-aros-release.sh --dmg           …then wrap it in build/Macaros.dmg
+#   ./make-aros-release.sh                 build build/PomAROS.app (unsigned)
+#   ./make-aros-release.sh --dmg           …then wrap it in build/PomAROS.dmg
 #   ./make-aros-release.sh --dmg-only      wrap an existing signed app without rebuilding it
 #   ./make-aros-release.sh --check         static self-containment audit of an existing build
 #   AROS_APP=/path ./make-aros-release.sh  build elsewhere
 #
 # Signing/notarization is a SEPARATE step; see RELEASE.md and
-# graft/sign-macaros-release.sh.
+# graft/sign-pomaros-release.sh.
 set -eu
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -35,29 +35,29 @@ COREAUDIO="${AROS_CTL_COREAUDIO_DYLIB:-$ROOT/build/libcoreaudio.dylib}"
 BSDSOCK="${AROS_CTL_BSDSOCK_DYLIB:-$ROOT/build/libbsdsockhost.dylib}"
 EMU68K="${AROS_CTL_EMU68K_DYLIB:-$ROOT/build/libemu68k.dylib}"
 SCHEMA="$ROOT/hosted/cocoametal/settings.json"
-ICON="${AROS_CTL_ICON:-$ROOT/hosted/cocoametal/Macaros.icns}"
-APP="${AROS_APP:-$ROOT/build/Macaros.app}"
-COMPAT="$HERE/macaros-compatibility.sh"
+ICON="${AROS_CTL_ICON:-$ROOT/hosted/cocoametal/PomAROS.icns}"
+APP="${AROS_APP:-$ROOT/build/PomAROS.app}"
+COMPAT="$HERE/pomaros-compatibility.sh"
 RELEASE_README="$HERE/release-README.md"
 NOTICES="$ROOT/notices"
 REPORT_ENV="$HERE/report-env.sh"
-VERSION_FILE="${MACAROS_VERSION_FILE:-$ROOT/VERSION}"
+VERSION_FILE="${POMAROS_VERSION_FILE:-$ROOT/VERSION}"
 [ -r "$VERSION_FILE" ] || { echo "missing release version file: $VERSION_FILE" >&2; exit 1; }
 . "$VERSION_FILE"
-VERSION="${MACAROS_VERSION:-}"
-BUILD_NUMBER="${MACAROS_BUILD_NUMBER:-}"
-INCLUDE_MOONSTONE="${MACAROS_INCLUDE_MOONSTONE:-0}"
-AROS_SOURCE_TREE="${MACAROS_AROS_SOURCE:-$ROOT/../aros-upstream}"
-ZED_SOURCE_TREE="${MACAROS_ZED_SOURCE:-$ROOT/../zed-aros}"
-FERAIL_SOURCE_TREE="${MACAROS_FERAIL_SOURCE:-$ROOT/../Ferail}"
-MOONSTONE_SOURCE_TREE="${MACAROS_MOONSTONE_SOURCE:-$ROOT/../MoonstoneCS}"
+VERSION="${POMAROS_VERSION:-}"
+BUILD_NUMBER="${POMAROS_BUILD_NUMBER:-}"
+INCLUDE_MOONSTONE="${POMAROS_INCLUDE_MOONSTONE:-0}"
+AROS_SOURCE_TREE="${POMAROS_AROS_SOURCE:-$ROOT/../aros-core-pomaros}"
+ZED_SOURCE_TREE="${POMAROS_ZED_SOURCE:-$ROOT/../zed-aros}"
+FERAIL_SOURCE_TREE="${POMAROS_FERAIL_SOURCE:-$ROOT/../Ferail}"
+MOONSTONE_SOURCE_TREE="${POMAROS_MOONSTONE_SOURCE:-$ROOT/../MoonstoneCS}"
 # The editor is the memory-hungry payload; 512 MB boots the desktop but cannot
 # hold Zed.
 MEMORY="${AROS_HOST_MEMORY:-1280}"
 
-case "$VERSION" in *[!0-9.]*|'') echo "invalid MACAROS_VERSION: $VERSION" >&2; exit 2 ;; esac
-case "$BUILD_NUMBER" in *[!0-9]*|'') echo "invalid MACAROS_BUILD_NUMBER: $BUILD_NUMBER" >&2; exit 2 ;; esac
-case "$INCLUDE_MOONSTONE" in 0|1) ;; *) echo "MACAROS_INCLUDE_MOONSTONE must be 0 or 1" >&2; exit 2 ;; esac
+case "$VERSION" in *[!0-9.]*|'') echo "invalid POMAROS_VERSION: $VERSION" >&2; exit 2 ;; esac
+case "$BUILD_NUMBER" in *[!0-9]*|'') echo "invalid POMAROS_BUILD_NUMBER: $BUILD_NUMBER" >&2; exit 2 ;; esac
+case "$INCLUDE_MOONSTONE" in 0|1) ;; *) echo "POMAROS_INCLUDE_MOONSTONE must be 0 or 1" >&2; exit 2 ;; esac
 
 # Developer probes and superseded application builds must not ship.
 EXCLUDE_C="AEdit AHISmoke BevelProbe BrkProbe CRT64Probe CatalogProbe ClockTest \
@@ -82,14 +82,14 @@ MOONSTONE_SRC="${MOONSTONE_SRC:-$HOME/AROS/Shared/Moonstone}"
 INFO_PLIST='<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-  <key>CFBundleName</key><string>Macaros</string>
-  <key>CFBundleDisplayName</key><string>Macaros</string>
-  <key>CFBundleIdentifier</key><string>org.aros.hosted</string>
-  <key>CFBundleExecutable</key><string>Macaros</string>
-  <key>CFBundleIconFile</key><string>Macaros</string>
+  <key>CFBundleName</key><string>PomAROS</string>
+  <key>CFBundleDisplayName</key><string>PomAROS Hosted</string>
+  <key>CFBundleIdentifier</key><string>org.pomaros.hosted</string>
+  <key>CFBundleExecutable</key><string>PomAROS</string>
+  <key>CFBundleIconFile</key><string>PomAROS</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>@MACAROS_VERSION@</string>
-  <key>CFBundleVersion</key><string>@MACAROS_BUILD_NUMBER@</string>
+  <key>CFBundleShortVersionString</key><string>@POMAROS_VERSION@</string>
+  <key>CFBundleVersion</key><string>@POMAROS_BUILD_NUMBER@</string>
   <key>NSHumanReadableCopyright</key><string>Copyright © 2026 John Knipper. AROS under the AROS Public License.</string>
   <key>NSHighResolutionCapable</key><true/>
   <key>LSMinimumSystemVersion</key><string>12.0</string>
@@ -108,14 +108,14 @@ STATE="${AROS_STATE_DIR:-$HOME/Library/Application Support/AROS}"
 mkdir -p "$STATE"
 AROS_RUN_DIR="$STATE"; export AROS_RUN_DIR
 [ -f "$APP/Resources/report-env.sh" ] && . "$APP/Resources/report-env.sh"
-MACAROS_VERSION="$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP/Info.plist" 2>/dev/null || true)"
-MACAROS_BUILD_NUMBER="$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP/Info.plist" 2>/dev/null || true)"
-export MACAROS_VERSION MACAROS_BUILD_NUMBER
+POMAROS_VERSION="$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP/Info.plist" 2>/dev/null || true)"
+POMAROS_BUILD_NUMBER="$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP/Info.plist" 2>/dev/null || true)"
+export POMAROS_VERSION POMAROS_BUILD_NUMBER
 
 # The desktop remains usable without the optional legacy engine, but do not let
 # a damaged installation make 68k programs fail without an explanation.
 if [ ! -f "$APP/Frameworks/libemu68k.dylib" ]; then
-    /usr/bin/osascript -e "display alert \"Legacy 68k support is unavailable\" message \"The Macaros 68k engine is missing. Reinstall Macaros from the release disk image. Native AROS programs are unaffected.\" as warning" >/dev/null 2>&1 || true
+    /usr/bin/osascript -e "display alert \"Legacy 68k support is unavailable\" message \"The PomAROS 68k engine is missing. Reinstall PomAROS from the release disk image. Native AROS programs are unaffected.\" as warning" >/dev/null 2>&1 || true
 fi
 
 # Bundle-relative conf: expand @AROSROOT@ from the read-only template into the
@@ -138,7 +138,7 @@ export AROS_HOST_VOLUME
 # bundle is sealed), so hand the mapping over through the share itself.
 SHARE="${SHARE:-$(printf "%s\\n" "$AROS_HOST_VOLUME" | sed -n "s/^MacRW:\\([^;]*\\).*$/\\1/p" | head -1)}"
 if [ -n "$SHARE" ] && [ -d "$SHARE" ]; then
-    printf "SetEnv AROS_FSW_ROOTS \"MacRW:=%s\"\\n" "$SHARE" > "$SHARE/.macaros-boot" 2>/dev/null || true
+    printf "SetEnv AROS_FSW_ROOTS \"MacRW:=%s\"\\n" "$SHARE" > "$SHARE/.pomaros-boot" 2>/dev/null || true
 fi
 
 cd "$BOOTD"
@@ -146,7 +146,7 @@ exec env AROS_DARWIN_THREADED=1 \
     DYLD_FALLBACK_LIBRARY_PATH="$APP/Frameworks" \
     AROS_SETTINGS_SCHEMA="$APP/Resources/settings.json" \
     AROS_HOST_VOLUME="$AROS_HOST_VOLUME" \
-    ./Macaros -c "$STATE/AROSBootstrap.conf"'
+    ./PomAROS -c "$STATE/AROSBootstrap.conf"'
 
 # Desktop Startup-Sequence — the exact set graft/run-window.sh writes for
 # AROS_CTL_STARTUP_MODE=desktop (kept in sync with that recipe). Baked into the
@@ -185,8 +185,8 @@ If EXISTS "C:MediaWatch"
 EndIf
 SetEnv HOME "MacRW:"
 SetEnv MOONSTONE_ROOT "SYS:Moonstone"
-If EXISTS "MacRW:.macaros-boot"
-    Execute "MacRW:.macaros-boot"
+If EXISTS "MacRW:.pomaros-boot"
+    Execute "MacRW:.pomaros-boot"
 EndIf
 Assign "LOCALE:" "SYS:Locale"
 Assign "LIBS:" "SYS:Classes" ADD
@@ -244,24 +244,25 @@ L/con-handler L/pipe-handler"
 find_bootd() {
     if [ -n "${AROS_CTL_BOOTD:-}" ]; then printf '%s\n' "$AROS_CTL_BOOTD"; return; fi
     for d in \
-        "${BUILD:-$HOME/Source/aros-project/aros-build}/bin/darwin-aarch64/AROS/boot/darwin" \
-        "$HOME/Source/aros-project/aros-build/bin/darwin-aarch64/AROS/boot/darwin" ; do
-        [ -x "$d/AROSBootstrap" ] && { printf '%s\n' "$d"; return; }
+        "${BUILD:-${AROS_BUILD:-$ROOT/../Build/pomaros-hosted}}/bin/darwin-aarch64/AROS/boot/darwin" \
+        "$ROOT/build/AROS/boot/darwin"; do
+        [ -x "$d/AROSBootstrap" ] || continue
+        printf '%s\n' "$d"
+        return
     done
-    printf '%s\n' ""
 }
 
 write_build_manifest() {
     manifest="$APP/Contents/Resources/Documentation/BUILD-MANIFEST.txt"
-    require_clean="${MACAROS_REQUIRE_CLEAN_SOURCES:-0}"
+    require_clean="${POMAROS_REQUIRE_CLEAN_SOURCES:-0}"
     manifest_failed=0
     {
-        echo "format=macaros-build-manifest-v1"
-        echo "product=Macaros"
+        echo "format=pomaros-build-manifest-v1"
+        echo "product=PomAROS"
         echo "version=$VERSION"
         echo "build=$BUILD_NUMBER"
         echo "generated_utc=$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
-        source_specs="Macaros|$ROOT|origin AROS|$AROS_SOURCE_TREE|fork Zed|$ZED_SOURCE_TREE|jonx Ferail|$FERAIL_SOURCE_TREE|origin"
+        source_specs="PomAROS|$ROOT|origin AROS|$AROS_SOURCE_TREE|fork Zed|$ZED_SOURCE_TREE|jonx Ferail|$FERAIL_SOURCE_TREE|origin"
         [ "$INCLUDE_MOONSTONE" = 1 ] && source_specs="$source_specs Moonstone|$MOONSTONE_SOURCE_TREE|origin"
         for source_spec in $source_specs; do
             source_name=${source_spec%%|*}
@@ -312,15 +313,15 @@ write_build_manifest() {
     } > "$manifest"
     if [ "$manifest_failed" = 1 ]; then
         echo "make-aros-release.sh: source manifest contains dirty or missing inputs" >&2
-        echo "unset MACAROS_REQUIRE_CLEAN_SOURCES for an internal candidate" >&2
+        echo "unset POMAROS_REQUIRE_CLEAN_SOURCES for an internal candidate" >&2
         exit 1
     fi
 }
 
 require_clean_sources() {
-    [ "${MACAROS_REQUIRE_CLEAN_SOURCES:-0}" = 1 ] || return 0
+    [ "${POMAROS_REQUIRE_CLEAN_SOURCES:-0}" = 1 ] || return 0
     source_failure=0
-    source_specs="Macaros|$ROOT AROS|$AROS_SOURCE_TREE Zed|$ZED_SOURCE_TREE Ferail|$FERAIL_SOURCE_TREE"
+    source_specs="PomAROS|$ROOT AROS|$AROS_SOURCE_TREE Zed|$ZED_SOURCE_TREE Ferail|$FERAIL_SOURCE_TREE"
     [ "$INCLUDE_MOONSTONE" = 1 ] && source_specs="$source_specs Moonstone|$MOONSTONE_SOURCE_TREE"
     for source_spec in $source_specs; do
         source_name=${source_spec%%|*}
@@ -337,7 +338,7 @@ require_clean_sources() {
 }
 
 make_dmg() {
-    DMG="${AROS_DMG:-$ROOT/build/Macaros.dmg}"
+    DMG="${AROS_DMG:-$ROOT/build/PomAROS.dmg}"
     STAGE="${AROS_DMG_STAGE:-$ROOT/build/dmg-root}"
     [ -d "$APP" ] || { echo "make-aros-release.sh: missing app for DMG: $APP" >&2; exit 1; }
     [ -x "$COMPAT" ] || { echo "make-aros-release.sh: missing compatibility checker: $COMPAT" >&2; exit 1; }
@@ -346,13 +347,13 @@ make_dmg() {
     /usr/bin/ditto "$APP" "$STAGE/$(basename "$APP")"
     cp -f "$RELEASE_README" "$STAGE/README.md"
     cp -f "$ROOT/RELEASE-NOTES.md" "$STAGE/RELEASE-NOTES.md"
-    cp -f "$COMPAT" "$STAGE/Check Macaros Compatibility.command"
-    chmod +x "$STAGE/Check Macaros Compatibility.command"
-    if [ -n "${MACAROS_SIGN_IDENTITY:-}" ]; then
+    cp -f "$COMPAT" "$STAGE/Check PomAROS Compatibility.command"
+    chmod +x "$STAGE/Check PomAROS Compatibility.command"
+    if [ -n "${POMAROS_SIGN_IDENTITY:-}" ]; then
         codesign --force --options runtime --timestamp \
-            --sign "$MACAROS_SIGN_IDENTITY" "$STAGE/Check Macaros Compatibility.command"
+            --sign "$POMAROS_SIGN_IDENTITY" "$STAGE/Check PomAROS Compatibility.command"
     else
-        codesign --force --sign - "$STAGE/Check Macaros Compatibility.command"
+        codesign --force --sign - "$STAGE/Check PomAROS Compatibility.command"
     fi
     cp -f "$ROOT/LICENSE" "$STAGE/LICENSE"
     cp -f "$ROOT/THIRD-PARTY-NOTICES.md" "$STAGE/THIRD-PARTY-NOTICES.md"
@@ -360,7 +361,7 @@ make_dmg() {
     /usr/bin/ditto "$NOTICES" "$STAGE/Licenses"
     ln -s /Applications "$STAGE/Applications"
     echo ">> building $DMG ..."
-    hdiutil create -quiet -volname "Macaros $VERSION" -srcfolder "$STAGE" -ov -format UDZO "$DMG"
+    hdiutil create -quiet -volname "PomAROS $VERSION" -srcfolder "$STAGE" -ov -format UDZO "$DMG"
     rm -rf "$STAGE"
     echo ">> built $DMG ($(du -sh "$DMG" | awk '{print $1}'))"
 }
@@ -426,9 +427,9 @@ if [ "${1:-}" = "--check" ]; then
         [ -f "$A/Frameworks/$m.dylib" ]; ck $? "Frameworks/$m.dylib"
     done
     [ -f "$A/Resources/report-env.sh" ];                  ck $? "bounded report environment helper"
-    grep -q 'report-env.sh' "$A/MacOS/Macaros" 2>/dev/null; ck $? "launcher configures local Reports folder"
-    grep -q 'export MACAROS_VERSION MACAROS_BUILD_NUMBER' "$A/MacOS/Macaros" 2>/dev/null; ck $? "launcher passes bundle identity to About"
-    [ -x "$A/MacOS/Macaros" ];                          ck $? "launcher executable"
+    grep -q 'report-env.sh' "$A/MacOS/PomAROS" 2>/dev/null; ck $? "launcher configures local Reports folder"
+    grep -q 'export POMAROS_VERSION POMAROS_BUILD_NUMBER' "$A/MacOS/PomAROS" 2>/dev/null; ck $? "launcher passes bundle identity to About"
+    [ -x "$A/MacOS/PomAROS" ];                          ck $? "launcher executable"
     [ -f "$A/Resources/Documentation/README.md" ];      ck $? "release README embedded"
     [ -f "$A/Resources/Documentation/RELEASE-NOTES.md" ]; ck $? "release notes embedded"
     [ -f "$A/Resources/Documentation/LICENSE" ];        ck $? "AROS licence embedded"
@@ -519,9 +520,9 @@ mkdir -p "$DST/Prefs/Env-Archive"
 printf 'MacRW:' > "$DST/Prefs/Env-Archive/HOME"
 rm -f "$DST/Prefs/Env-Archive/AROS_FSW_ROOTS"   # dev paths; the launcher writes the real one
 
-# The menu-bar/app binary must be named Macaros; keep it inside the boot dir so
+# The menu-bar/app binary must be named PomAROS; keep it inside the boot dir so
 # cwd-relative host resolution matches run-window.sh.
-cp -f "$DST/boot/darwin/AROSBootstrap" "$DST/boot/darwin/Macaros"
+cp -f "$DST/boot/darwin/AROSBootstrap" "$DST/boot/darwin/PomAROS"
 
 # Bake the desktop Startup-Sequence.
 mkdir -p "$DST/S"
@@ -536,7 +537,7 @@ fi
 # forms to a tree-relative path), then add the extra module set if the file exists.
 TMPL="$DST/boot/darwin/AROSBootstrap.conf.tmpl"
 {
-    echo "# Macaros self-contained boot config (generated by make-aros-release.sh)."
+    echo "# PomAROS self-contained boot config (generated by make-aros-release.sh)."
     echo "# @AROSROOT@ is expanded to the bundle's embedded AROS tree at launch."
     printf 'memory %s\n' "$MEMORY"
     # A crashing application should cost the user that application, not the
@@ -570,7 +571,7 @@ cp "$DYLIB" "$APP/Contents/Frameworks/cocoametal.dylib"
 [ -f "$BSDSOCK" ]    && cp "$BSDSOCK"    "$APP/Contents/Frameworks/libbsdsockhost.dylib"
 cp "$EMU68K" "$APP/Contents/Frameworks/libemu68k.dylib"
 cp "$SCHEMA" "$APP/Contents/Resources/settings.json"
-[ -f "$ICON" ] && cp "$ICON" "$APP/Contents/Resources/Macaros.icns"
+[ -f "$ICON" ] && cp "$ICON" "$APP/Contents/Resources/PomAROS.icns"
 [ -f "$HERE/aros-host-conf.sh" ] && cp "$HERE/aros-host-conf.sh" "$APP/Contents/Resources/aros-host-conf.sh"
 cp "$REPORT_ENV" "$APP/Contents/Resources/report-env.sh"
 mkdir -p "$APP/Contents/Resources/Documentation"
@@ -583,10 +584,10 @@ printf 'Zed\nFerail\n' > "$APP/Contents/Resources/Documentation/COMPONENTS.txt"
 if [ "$INCLUDE_MOONSTONE" = 1 ]; then
     printf 'Moonstone\n' >> "$APP/Contents/Resources/Documentation/COMPONENTS.txt"
 fi
-printf '%s' "$LAUNCHER"   > "$APP/Contents/MacOS/Macaros"; chmod +x "$APP/Contents/MacOS/Macaros"
+printf '%s' "$LAUNCHER"   > "$APP/Contents/MacOS/PomAROS"; chmod +x "$APP/Contents/MacOS/PomAROS"
 printf '%s' "$INFO_PLIST" | sed \
-    -e "s|@MACAROS_VERSION@|$VERSION|g" \
-    -e "s|@MACAROS_BUILD_NUMBER@|$BUILD_NUMBER|g" \
+    -e "s|@POMAROS_VERSION@|$VERSION|g" \
+    -e "s|@POMAROS_BUILD_NUMBER@|$BUILD_NUMBER|g" \
     > "$APP/Contents/Info.plist"
 write_build_manifest
 
@@ -598,4 +599,4 @@ if [ "${1:-}" = "--dmg" ]; then
 fi
 
 echo ">> next: test-boot (relocated), then Developer-ID sign + notarize + staple."
-echo ">>   open '$APP'      # or Contents/MacOS/Macaros for stdout"
+echo ">>   open '$APP'      # or Contents/MacOS/PomAROS for stdout"

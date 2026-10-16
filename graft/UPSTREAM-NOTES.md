@@ -356,7 +356,7 @@ especially on macOS. Each is a candidate patch for `aros-development-team`.
       missing path was incidental, the concurrency was the trigger).
     Depending on what the corruption hit, the symptom was a containment
     requester, a silent deadend reboot, or a wedge — matching every flavor
-    Feraille logged. *Fix (aros-upstream `crash-containment`, T-FDLOCK):* a
+    Feraille logged. *Fix (aros-core-pomaros `crash-containment`, T-FDLOCK):* a
     `SignalSemaphore fd_sem` in `PosixCIntBase` — `__getfdesc` obtains
     shared; every table/pool mutation obtains exclusive; `__open`/`opendir`/
     `pipe`/`dup`/`dup2`/`fcntl(F_DUPFD)` find+claim atomically under it
@@ -463,7 +463,7 @@ did. New issues found (candidate patches / bug reports):
     **Mechanism.** Preemption relies solely on `setitimer(ITIMER_REAL)` →
     **process-directed** `SIGALRM` (`arch/all-unix/timer/timer_init.c`). On
     darwin a process-directed signal goes to an arbitrary thread with it
-    unblocked, and the Macaros process has many (cocoa main, NSEventThread,
+    unblocked, and the PomAROS process has many (cocoa main, NSEventThread,
     Metal, libdispatch). `core_IRQ` then **drops** any `SIGALRM` that lands on
     a non-AROS thread (`arch/all-unix/kernel/kernel.c:~500`, the
     `pthread_self() != aros_host_thread` guard), on the assumption "the next
@@ -479,7 +479,7 @@ did. New issues found (candidate patches / bug reports):
     lands on the thread actually running the guest and preempts a CPU-bound
     task. Verify against `C:ClockTest pure` (must reach `[D]`, not hang).
 
-    **FIXED (aros-upstream `crash-containment`): core_IRQ now FORWARDS a
+    **FIXED (aros-core-pomaros `crash-containment`): core_IRQ now FORWARDS a
     mis-delivered tick to AROS's thread with `pthread_kill(aros_host_thread,
     sig)` instead of dropping it** (async-signal-safe; classic signals
     coalesce; a masked target just keeps it pending until the guest's next
@@ -532,7 +532,7 @@ did. New issues found (candidate patches / bug reports):
     AROS thread, which is parked in dispatch_sync). Unreachable pre-tick-
     forwarding — dropped ticks meant host calls were never interrupted, so
     darwin was safe by accident. Fixed like Windows-hosted: USE_FORBID_LOCK
-    on darwin (aros-upstream `061b4b98`; free on a 1-cpu guest — no other
+    on darwin (aros-core-pomaros `061b4b98`; free on a 1-cpu guest — no other
     guest task can run during a host call anyway) plus a cached watchdog
     env probe in cocoametal (`d15750f`). Diagnosed from a macOS `sample`
     of the wedged process. Upstream candidate together with item 38 —

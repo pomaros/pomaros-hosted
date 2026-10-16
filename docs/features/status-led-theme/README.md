@@ -1,10 +1,10 @@
 # Status-bar LEDs + Theme switch
 
-Amiga-style **Power + Activity LEDs** in the Macaros window's status bar, plus a
+Amiga-style **Power + Activity LEDs** in the PomAROS window's status bar, plus a
 **Dark / Light / System** appearance switch so the whole app — title bar, menus,
 Settings, and the status bar — reads as one coherent theme.
 
-All host-side (`hosted/cocoametal/`). **No `../aros-upstream` change; the cocoametal
+All host-side (`hosted/cocoametal/`). **No `../aros-core-pomaros` change; the cocoametal
 ABI stays at version 2.**
 
 ## What you see
@@ -13,7 +13,7 @@ The footer under the AROS image is now a native-material status bar (an
 `NSVisualEffectView`, so it tracks the active appearance for free):
 
 ```
-Macaros — AROS on Apple Silicon                    PWR ●   ACT ●
+PomAROS — AROS on Apple Silicon                    PWR ●   ACT ●
 ```
 
 - **PWR** — green while AROS is running; amber on a soft power-down / reset request,

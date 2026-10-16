@@ -8,7 +8,7 @@
 //! on both sides, so this is a transparent byte pump — no parsing.
 //!
 //! This is the standalone form of the "embed the language server in the
-//! Macaros host" design: the same pump logic later moves into the cocoametal
+//! PomAROS host" design: the same pump logic later moves into the cocoametal
 //! host so the server starts with AROS automatically.
 //!
 //!   host-lsp-bridge [--port N] [--] <server> [server args...]

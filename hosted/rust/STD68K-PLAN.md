@@ -9,7 +9,7 @@
 
 ## What "std" means here (decided)
 
-std needs an OS. There is no m68k AROS userland to link (checked: `../aros-upstream`
+std needs an OS. There is no m68k AROS userland to link (checked: `../aros-core-pomaros`
 has the m68k SOURCE (`arch/m68k-amiga`, `arch/m68k-all`, posixc) but no built m68k
 SDK and no m68k crosstools on this machine; building them is the Route-B/C world).
 So the OS surface is OURS: **run68k's stub library grows into a small "stub DOS"**
@@ -22,7 +22,7 @@ missing subsystems get the std `unsupported` wiring for this target: **thread, T
 net, process** (run68k is single-task; spawn/connect return errors at runtime or
 compile to the unsupported pal).
 
-`../aros-upstream` contributions: posixc sources as the SEMANTIC REFERENCE
+`../aros-core-pomaros` contributions: posixc sources as the SEMANTIC REFERENCE
 (errno numbering, open flags — same NetBSD-flavored values the aarch64 pal already
 encodes), `arch/m68k-all/include` as the ABI ground truth, `tools/elf2hunk` as the
 fallback link route (vlink is primary).

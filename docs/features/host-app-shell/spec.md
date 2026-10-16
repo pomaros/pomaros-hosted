@@ -1,6 +1,6 @@
 # Implementation spec — Host app shell (macOS app frontend for hosted AROS)
 
-> Status: built - the Macaros first-class Mac app (menu bar, About, icon, schema-driven Settings) ships; packaged by graft/make-aros-app.sh, Settings built into the cocoametal dylib. · Target: aarch64-darwin hosted · Drafted 2026-06-26
+> Status: built - the PomAROS first-class Mac app (menu bar, About, icon, schema-driven Settings) ships; packaged by graft/make-aros-app.sh, Settings built into the cocoametal dylib. · Target: aarch64-darwin hosted · Drafted 2026-06-26
 > Companion to [design.md](design.md). Process: [../CLEANROOM.md](../CLEANROOM.md).
 
 ## Provenance banner
@@ -129,7 +129,7 @@ Use the label **"Settings…"** (Ventura+), not "Preferences…".
 | **View** | Enter Full Screen (⌃⌘F) · Scaling ▸ · Filter ▸ · Scanlines (toggle) · Retina/HiDPI · Show/Hide Toolbar | `CM_OPT_FULLSCREEN`/`SCALE_MODE`/`FILTER`/`EFFECT` (`cocoametal.h:116–122`) |
 | **Machine** | Reset (⌃⌘R) · Power ▸ (Request Power Down · Force Shut Down · Force Quit) · ── · Capture Input (⌃⌘I) · Volumes ▸ (eject/reveal) · Share Clipboard (✓) · Send Key ▸ | `CM_OPT_POWER`; capture grab; `cm_volume_*`; `CM_OPT_CLIPBOARD_SHARE`; synthesized rawkeys |
 | **Window** | Minimize (⌘M) · Zoom · Bring All to Front | standard |
-| **Help** | Report a Compatibility Problem… · Show Reports · ── · AROS Website · Open Macaros Issue Tracker | local reports; URLs |
+| **Help** | Report a Compatibility Problem… · Show Reports · ── · AROS Website · Open PomAROS Issue Tracker | local reports; URLs |
 
 `[PUB-UTM]`: the **Machine** menu and its graded **Power ▸** submenu mirror UTM's
 "Virtual Machine"/"Power" shape (Apache-2.0,

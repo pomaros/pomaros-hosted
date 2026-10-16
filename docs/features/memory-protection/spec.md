@@ -3,7 +3,7 @@
 > Status: spec (not started) · Target: aarch64-darwin hosted · Drafted 2026-06-29
 > Governed by the independent-work process in [../CLEANROOM.md](../CLEANROOM.md): written
 > from public APIs (Apple/POSIX VM + threads), published structure layouts, this project's
-> `aros-upstream` tree, and this repo's own spikes — never from third-party MP/RT/VM source.
+> `aros-core-pomaros` tree, and this repo's own spikes — never from third-party MP/RT/VM source.
 > Design rationale: [design.md](design.md).
 
 This spec scopes the **POCs in `hosted/`** that the design's two buildable routes rest on.
@@ -37,11 +37,11 @@ follow-up, not part of the POC.
 
 - **`mmap`/`mprotect(PROT_NONE)`** — POSIX; on Darwin/aarch64 the port already calls
   `mprotect` via `KrnSetProtection`
-  ([setprotection.c:15-44](../../../../aros-upstream/arch/all-unix/kernel/setprotection.c)).
+  ([setprotection.c:15-44](../../../../aros-core-pomaros/arch/all-unix/kernel/setprotection.c)).
   The POC may call `mprotect` directly in the harness.
 - **Fault → decode.** The fault address arrives in the host `ucontext`/`siginfo`; the upstream
   handler already decodes it and walks a frame chain
-  ([kernel.c:111-266](../../../../aros-upstream/arch/all-unix/kernel/kernel.c)). The POC's
+  ([kernel.c:111-266](../../../../aros-core-pomaros/arch/all-unix/kernel/kernel.c)). The POC's
   harness handler must record: faulting address, which guard region it hit, the running task,
   and a backtrace. *Do not* call async-signal-unsafe functions in the handler (no `OpenLibrary`,
   no allocation) — mirror crash-handling's read-only-list discipline
@@ -141,7 +141,7 @@ Neither POC requires a GUI session or any macOS permission prompt.
 ## Provenance
 
 Independent work under [../CLEANROOM.md](../CLEANROOM.md). Built from POSIX/Apple VM + thread
-APIs, published AROS structure layouts, this project's `aros-upstream` tree and `hosted/`
+APIs, published AROS structure layouts, this project's `aros-core-pomaros` tree and `hosted/`
 spikes. No third-party memory-protection, resource-tracking, virtual-memory, or
 multi-instance/sandbox implementation source was read or consulted; any resemblance is
 coincidental.

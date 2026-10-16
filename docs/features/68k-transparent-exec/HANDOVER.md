@@ -55,9 +55,9 @@ maintain is the bottom boundary.
 
 | path | what it is |
 |---|---|
-| `~/Source/aros-project/Macaros` | **this repo** — the host/graft layer: JIT, bridge, tooling, docs |
-| `~/Source/aros-project/aros-upstream` | the AROS OS source; OS-side code lives here, incl. `emu68k.library`. Current checkout is `checkpoint/emu68k-progdir-20260807` at `b594c9ba09` plus the uncommitted generated/runtime side of this update. Do not publish it: commits and pushes are authorized only to the user's own `jonx` repositories. |
-| `~/Source/aros-project/aros-build` | the build tree (`make hostlibs-emu68k` here builds the OS-side module) |
+| `~/Source/aros-project/pomaros-hosted` | **this repo** — the host/graft layer: JIT, bridge, tooling, docs |
+| `~/Source/aros-project/aros-core-pomaros` | the AROS OS source; OS-side code lives here, incl. `emu68k.library`. Current checkout is `checkpoint/emu68k-progdir-20260807` at `b594c9ba09` plus the uncommitted generated/runtime side of this update. Do not publish it: commits and pushes are authorized only to the user's own `jonx` repositories. |
+| `~/Source/aros-project/Build/pomaros-hosted` | the build tree (`make hostlibs-emu68k` here builds the OS-side module) |
 | `~/Source/aros-project/aros-crosstools` | the prebuilt cross toolchain — never rebuild it |
 | `~/Source/aros-project/references/aros-m68k-20260804/libs` | the real m68k library binaries we run guest-side |
 | `hosted/jit68k/` | the 68k JIT engine (`j5d_engine.c`), hunk loader (`j4_loader.c`), diagnostics (`j5n_diag.c`) |
@@ -72,12 +72,12 @@ maintain is the bottom boundary.
 | `graft/gen-struct-layouts` | generates 68k-vs-native structure layouts from the AROS headers |
 | `graft/emu68k-bridge-policy.json` | **the policy** — the reviewed decisions the generator cannot infer |
 | `graft/68k-corpus` | the test harness: boots AROS, runs a directory of 68k programs, collects verdicts |
-| `arch/all-darwin/libs/emu68k/` (in `aros-upstream`) | the OS-side module + the generated crossing files |
+| `arch/all-darwin/libs/emu68k/` (in `aros-core-pomaros`) | the OS-side module + the generated crossing files |
 | `docs/features/68k-transparent-exec/` | design, plan, and this handover |
 
 Two ground rules that predate this document: **never run a bare `make`** in the
 build tree (it tries to rebuild the toolchain), and OS-side edits go in
-`aros-upstream`, not here.
+`aros-core-pomaros`, not here.
 
 ## The goal
 
@@ -132,7 +132,7 @@ The unit of work is **a library**, never a function.
    - a `grep -c` for duplicate `case` labels beats finding them in a compiler
      error
 6. **THEN one build.** Building is the slow step. Batch every change first.
-   `make emu68k-dylib` (host side) and `make hostlibs-emu68k` in `~/Source/aros-project/aros-build`
+   `make emu68k-dylib` (host side) and `make hostlibs-emu68k` in `~/Source/aros-project/Build/pomaros-hosted`
    (OS side); deploy with `cp build/libemu68k.dylib ~/lib/`.
 7. **THEN one test pass.** Put every fixture in ONE directory
    (`build/t3all`) and run the corpus once with the whole tail set routed
@@ -144,8 +144,8 @@ The unit of work is **a library**, never a function.
    rexxsyslib.library,rexxsupport.library" \
    EMU68K_LIBS_PATH=/Users/jkn/Source/aros-project/references/aros-m68k-20260804/libs \
    EMU68K_MAX_SECONDS=40 CORPUS_TIMEOUT=300 \
-   /Users/jkn/Source/aros-project/Macaros/graft/68k-corpus \
-   /Users/jkn/Source/aros-project/Macaros/build/t3all <out>
+   /Users/jkn/Source/aros-project/pomaros-hosted/graft/68k-corpus \
+   /Users/jkn/Source/aros-project/pomaros-hosted/build/t3all <out>
    ```
    Use absolute paths: a compound command that `cd`s elsewhere silently breaks
    relative ones and the corpus never runs (cost an hour twice).
@@ -382,7 +382,7 @@ TurboCalc Demo disables saving, so `hosted/emu68k/nativelib/genaslsave.s` is
 the focused proof for save mode.  It requests `ASLFR_DoSaveMode`, displays the
 native Save requester with initial drawer/file values, and on acceptance reads
 the returned guest `fr_File` and `fr_Drawer`.  The live result was
-`[T3ASL] SAVE ACCEPTED`, with Macaros still running.  Multi-select remains an
+`[T3ASL] SAVE ACCEPTED`, with PomAROS still running.  Multi-select remains an
 intentional named gap because its retained `WBArg` array and BPTR locks need a
 reviewed guest representation; no native pointer is leaked for that case.
 
@@ -510,7 +510,7 @@ Fix, deployed in both trees (2026-08-06 evening):
   actually requested.  Both call sites pass it (OpenWindow: facade
   IDCMPFlags; ModifyIDCMP: D0).
 
-Both sides built clean (`make hostlibs-emu68k` in `~/Source/aros-project/aros-build`,
+Both sides built clean (`make hostlibs-emu68k` in `~/Source/aros-project/Build/pomaros-hosted`,
 `make emu68k-dylib` here); dylib deployed to `~/lib` and re-signed;
 `hosted-emu68k-t3setsignal` and `t3hello` PASS.  The first rerun attempt
 proves nothing: a staged macOS update consumed the container's free space
@@ -937,7 +937,7 @@ resolves its environment lookups past AROSBootstrap's exported guest-libc
 trace path appear to be ignored.  The same focused fixture verifies the host
 lookup before it exercises the signal contract.
 
-The harness no longer kills an existing Macaros process unless explicitly
+The harness no longer kills an existing PomAROS process unless explicitly
 requested (`AROS_CTL_RESTART=1`, `stop`, or `kill`).  A Stage 2 run may be
 restarted when needed; the launcher removes the previous result before it
 starts RX. A successful boot alone is not a Stage 2 proof: retain the fresh
@@ -945,7 +945,7 @@ Bridge Lab trace and verify that the result file contains `STAGE2-PASS` with
 both formula and value checks.
 
 `aros-ctl run` is now owned by a non-keepalive launchd plist rather than the
-calling shell or a submitted inferred-keepalive job. It launches `Macaros`
+calling shell or a submitted inferred-keepalive job. It launches `PomAROS`
 directly, carries only explicitly enabled optional trace variables, and sets
 the working directory to the selected boot directory. Consequently a payload
 return does not kill the OS, empty diagnostic variables do not accidentally
@@ -976,7 +976,7 @@ when no native side effect occurred.  Otherwise restart and replay a recorded
 launch/input script.  Rewinding CPU state alone is unsafe because AROS windows,
 ports, files and allocations are native state.  The standalone JIT runner is
 appropriate for CPU/hunk/isolated fixtures; GUI breadth testing still needs a
-scripted Macaros instance.
+scripted PomAROS instance.
 
 ### Wordworth 7 breadth run — current result (2026-08-07)
 
@@ -1038,7 +1038,7 @@ sources/build checks pass.  With these repairs the real `Wordworth` launcher
 consumes its Workbench message and renders the retail Wordworth 7 registration
 screen; Name, Organisation and Licence gadgets accept focus and text.  The
 same result is proven with the FTH `WwProg`; neither run produces a bridge
-refusal or Macaros crash before the gate.  A prior test instance was
+refusal or PomAROS crash before the gate.  A prior test instance was
 intentionally parked at the FTH specimen's Licence field.  Its bounded trace is
 `/Users/jkn/AROS/Shared/wordworth7-unlocked-bridge.trace.jsonl` and its private
 payload is `/Users/jkn/AROS/Shared/wordworth7-unlocked-startup`.  Keep that
@@ -1088,7 +1088,7 @@ independent interpreter.
 After that fix, the real `Imagine.fp` reaches its complete 800x600 project/
 render screen and waits normally on its IDCMP port.  Mouse DOWN and UP events
 are pumped, taken and replied; toggling `Auto Dither` visibly changes the
-control.  There is no bridge refusal, JIT fault or Macaros crash in the current
+control.  There is no bridge refusal, JIT fault or PomAROS crash in the current
 run.  Its bounded trace is
 `/Users/jkn/AROS/Shared/imagine4-after-move.trace.jsonl`.  The live instance was
 left running for interactive testing.  Continue breadth testing from this
@@ -1338,7 +1338,7 @@ classic tool may jump through a reset vector) interacting with layout.
 
 Run `make hosted-emu68k-t3gen` for the generated/handwritten boundary suite and
 `make hosted-emu68k-t3mui` for the separately loaded Zune class.  The corpus
-harness refuses to replace a live Macaros instance unless an operator opts in;
+harness refuses to replace a live PomAROS instance unless an operator opts in;
 do not set that override for routine verification.  Every outcome below is a
 named verdict, none an unexplained hang:
 
@@ -1394,9 +1394,9 @@ Do not commit or push that checkout: authorization is only for the user's own
   across every waterline library plus the GadTools adapter.
 - `graft/gen-struct-layouts`, `graft/emu68k-bridge-policy.json`, generated host
   headers, and generated files under
-  `aros-upstream/arch/all-darwin/libs/emu68k/`: the complete six-library type,
+  `aros-core-pomaros/arch/all-darwin/libs/emu68k/`: the complete six-library type,
   object, layout, function, and refusal inventory.
-- `aros-upstream/.../emu68k_oscall.c`: native-side special cases including DOS
+- `aros-core-pomaros/.../emu68k_oscall.c`: native-side special cases including DOS
   guest-pointer handling, graphics pixel buffers, Intuition retained facades,
   cybergraphics CMode lists/framebuffer locks, recursive BOOPSI superclass
   creation/disposal, persistent guest-class dispatchers for later native input

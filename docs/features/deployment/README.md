@@ -1,7 +1,7 @@
 # Deployment workflow — Darwin/aarch64 hosted AROS
 
 This port has several runnable copies of the same moving parts: the AROS boot
-tree, host dylibs in `~/lib`, the Cocoa monitor copied from `Storage/Monitors` to
+tree, host dylibs in `build/host-libs`, the Cocoa monitor copied from `Storage/Monitors` to
 `Devs/Monitors`, and the app settings/config files. Most "it still runs the old
 bug" reports come from one of those copies being stale.
 
@@ -21,7 +21,7 @@ the explicit sanity pass when you are switching between manual and harness runs.
 
 ## What Gets Deployed
 
-Host-side files copied to `~/lib`:
+Host-side files copied to `build/host-libs` (override `AROS_HOST_LIB_DIR`):
 
 - `build/cocoametal.dylib`
 - `build/libpasteboard.dylib`
@@ -37,10 +37,10 @@ AROS boot image updates:
 - selected kickstart modules are appended to `AROSBootstrap.conf` if missing
 - optional memory setting updates the `memory` line in `AROSBootstrap.conf`
 
-The launchers also copy/sign `AROSBootstrap` as `Macaros` so macOS presents the
+The launchers also copy/sign `AROSBootstrap` as `PomAROS` so macOS presents the
 native app shell with the right process/menu name.
 
-`graft/make-aros-app.sh` creates `build/Macaros.app`, which carries its own
+`graft/make-aros-app.sh` creates `build/PomAROS.app`, which carries its own
 copies of the bootstrap, config, host dylibs, settings schema, and
 `aros-host-conf.sh`. Treat the bundle as another runnable deployment target; if
 it exists, `deploy-check` compares its embedded copies too.
@@ -72,6 +72,12 @@ MacRW:<path>;WRITE
 If no config or hostvolume key is present, launchers default to
 `~/AROS/Shared` as `MacRO:` and `MacRW:`.
 
+Existing `AROS` settings and shared folders retain their paths. On launch, the
+host helper copies the legacy `.macaros-volumes` file to `.pomaros-volumes` only
+when the new file is absent; the original file remains intact. That legacy
+basename is retained solely for migration. New host/guest exchanges use the
+PomAROS names.
+
 ## Verifying Deployment
 
 Run:
@@ -86,12 +92,12 @@ The important lines:
 - `Cocoa deployed` should be `OK`
 - `effective AROS_HOST_VOLUME` should show the config-derived mount spec, or say
   the launcher default will be used
-- the app-bundle section should be `OK` when `build/Macaros.app` exists; `SKIP`
+- the app-bundle section should be `OK` when `build/PomAROS.app` exists; `SKIP`
   only means the bundle has not been built
 - key desktop files should be present: `Prefs/Zune`, `Prefs/Wanderer`,
   `System/About`, `Tools`, `Utilities`
 
-`WARN` on a host dylib/schema means `~/lib` is stale. Run
+`WARN` on a host dylib/schema means `build/host-libs` is stale. Run
 `./graft/aros-ctl deploy`.
 
 `WARN` on `Cocoa deployed` means the boot image is still using an older monitor.
@@ -158,7 +164,7 @@ Generate them straight into the boot tree (each writes into `AROSDIR`, i.e. the
 tree you already boot) — one metatarget per `make` call, same env as the build doc:
 
 ```sh
-cd ~/Source/aros-project/aros-build
+cd ~/Source/aros-project/Build/pomaros-hosted
 make iconset-Gorilla-wbench-icons    # drawer + Prefs/System/Tools/Utilities .info (pulls in additional-icons)
 make workbench-images                # Themes → Prefs/Presets/Themes, Wallpapers, AROS.logo
 ```

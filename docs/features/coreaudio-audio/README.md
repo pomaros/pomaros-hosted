@@ -13,7 +13,7 @@ Implemented pieces:
   `hosted/coreaudio/coreaudio_shim.h`, `hosted/coreaudio/coreaudio.exports`,
   `build/libcoreaudio.dylib`
 - AROS AHI sub-driver:
-  `../aros-upstream/workbench/devs/AHI/Drivers/CoreAudio/`
+  `../aros-core-pomaros/workbench/devs/AHI/Drivers/CoreAudio/`
 - AHI mode file: `DEVS:AudioModes/COREAUDIO`
 - AROS playback smoke command: `C:AHISmoke`
 - host harness: `graft/audio-smoke` / `make audio-smoke`
@@ -91,7 +91,7 @@ hashes for stale-build checks and now also checks:
 - `C:AHISmoke`
 
 `graft/make-aros-app.sh` bundles `libcoreaudio.dylib` in
-`Macaros.app/Contents/Frameworks/` when the build artifact exists; its
+`PomAROS.app/Contents/Frameworks/` when the build artifact exists; its
 `--check` mode verifies the bundled dylib and signature.
 
 ## App Shell Volume
@@ -109,7 +109,7 @@ The AHI audio build is now part of the standard rebuild — no manual rescue.
 `graft/rebuild-aros.sh` builds it (target group `AUDIO_TARGETS`), or by hand:
 
 ```sh
-cd ~/Source/aros-project/aros-build
+cd ~/Source/aros-project/Build/pomaros-hosted
 make AHI-coreaudio-bridge-darwin     # the host-CoreAudio bridge linklib FIRST
 make workbench-devs-AHI-quick        # subsystem + drivers (installs all 4 pieces)
 make workbench-c-ahismoke            # the AHISmoke test client
@@ -134,7 +134,7 @@ Two things made it first-class (`workbench/devs/AHI/mmakefile.src`):
   `duplicate symbol __aros_libreq_SysBase`.
 
 The translation catalogs (`workbench/devs/AHI/{AHI,Device}/translations`) must
-be present as git submodules; they are already initialized in `../aros-upstream`.
+be present as git submodules; they are already initialized in `../aros-core-pomaros`.
 
 ## Streaming Clients (Moonstone)
 

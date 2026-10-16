@@ -1,12 +1,12 @@
 #!/bin/sh
 # Build and run the exFAT host tests.
 #
-# These compile the production headers from ../../../aros-upstream/rom/filesys/exfat
+# These compile the production headers from ../../../aros-core-pomaros/rom/filesys/exfat
 # so the tests exercise the real rules, not a copy of them.
 set -e
 
 HERE=$(cd "$(dirname "$0")" && pwd)
-SRC=${AROS_UPSTREAM:-$HERE/../../../aros-upstream}/rom/filesys/exfat
+SRC=${AROS_UPSTREAM:-$HERE/../../../aros-core-pomaros}/rom/filesys/exfat
 
 if [ ! -f "$SRC/exfat_bounds.h" ]; then
     echo "cannot find $SRC/exfat_bounds.h" >&2
@@ -15,7 +15,7 @@ if [ ! -f "$SRC/exfat_bounds.h" ]; then
 fi
 
 CC=${CC:-cc}
-CFLAGS="-O2 -std=c99 -Wall -Wextra -Wconversion -Wsign-conversion -Werror -I${AROS_UPSTREAM:-$HERE/../../../aros-upstream}/compiler/include"
+CFLAGS="-O2 -std=c99 -Wall -Wextra -Wconversion -Wsign-conversion -Werror -I${AROS_UPSTREAM:-$HERE/../../../aros-core-pomaros}/compiler/include"
 
 # Plain build, then again under the sanitisers. The bounds code is all
 # integer arithmetic, so UBSan is the one that matters.
@@ -39,7 +39,7 @@ done
 # still runs on a bare machine, but a skip is reported loudly.
 
 XT=${AROS_CROSSTOOLS:-$HOME/Source/aros-project/aros-crosstools}
-BUILD=${AROS_BUILD:-$HOME/Source/aros-project/aros-build}/bin/darwin-aarch64
+BUILD=${AROS_BUILD:-$HOME/Source/aros-project/Build/pomaros-hosted}/bin/darwin-aarch64
 
 echo "== gate 1: aarch64 AROS =="
 if [ -x "$XT/bin/clang" ] && [ -d "$BUILD/gen/include" ]; then

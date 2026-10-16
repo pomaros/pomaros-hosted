@@ -4,7 +4,7 @@
 > is the **only** description of behaviour Role B implements from, together with the
 > approved public sources named here.
 >
-> Branch `exfat-handler` on `../aros-upstream`, off `dos64-packets`.
+> Branch `exfat-handler` on `../aros-core-pomaros`, off `dos64-packets`.
 > Status: **revision 2, implemented and accepted for the Phase 1 read-only
 > core.** The completed writable extension is specified separately in
 > [write-spec.md](write-spec.md); its mutation, recovery and formatting gates

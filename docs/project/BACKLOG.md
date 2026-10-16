@@ -11,7 +11,7 @@ Per-subsystem design and status lives in the
 - [x] **Datatypes integration** — `ffmpeg.datatype` (libavcodec-backed picture
       datatype) decodes a video's first frame so MultiView / the desktop preview
       media. Done 2026-07-13, verified live (MultiView opens test.avi → first
-      frame shown). Class + `FFmpeg.dtd` in aros-upstream; build via
+      frame shown). Class + `FFmpeg.dtd` in aros-core-pomaros; build via
       `hosted/ffmpeg/build-datatype.sh`. Follow-ups: an *animation* datatype
       (multi-frame playback in MultiView), more container descriptors (mp4/mov/
       mkv route in the picture group), and launching FFView from the datatype.

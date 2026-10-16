@@ -16,7 +16,7 @@ The backtrace is the first line of defence; deeper digging uses the
 
 - **MUNGWALL** (`AROS_HOST_ARGS=mungwall …`) — guards every `AllocMem`/pool alloc,
   for a suspected allocator/memory bug.
-- **host lldb** (`lldb -p "$(cat /tmp/aros-cm.pid)"`) — `Macaros` is a darwin
+- **host lldb** (`lldb -p "$(cat /tmp/aros-cm.pid)"`) — `PomAROS` is a darwin
   process, so lldb catches the fault address before AROS's guru.
 
 ## Docs

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Update the one release-identity file consumed by both Macaros app builders.
+# Update the one release-identity file consumed by both PomAROS app builders.
 set -eu
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -29,11 +29,11 @@ esac
 tmp="$VERSION_FILE.tmp.$$"
 trap 'rm -f "$tmp"' EXIT INT TERM
 {
-    echo '# Single source of truth for Macaros release identity.'
-    printf 'MACAROS_VERSION=%s\n' "$new_version"
-    printf 'MACAROS_BUILD_NUMBER=%s\n' "$new_build"
+    echo '# Single source of truth for PomAROS release identity.'
+    printf 'POMAROS_VERSION=%s\n' "$new_version"
+    printf 'POMAROS_BUILD_NUMBER=%s\n' "$new_build"
 } > "$tmp"
 mv "$tmp" "$VERSION_FILE"
 trap - EXIT INT TERM
 
-echo "Macaros release version is now $new_version (build $new_build)"
+echo "PomAROS release version is now $new_version (build $new_build)"

@@ -78,7 +78,7 @@ static int saw_amiga_chord(CMEvent *ev, int n, int key) {
 static int dir_has_png(NSString *dir) {
     NSArray<NSString *> *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:dir error:NULL];
     for (NSString *f in files)
-        if ([f hasPrefix:@"Macaros-screenshot-"] && [f hasSuffix:@".png"]) return 1;
+        if ([f hasPrefix:@"PomAROS-screenshot-"] && [f hasSuffix:@".png"]) return 1;
     return 0;
 }
 
@@ -104,11 +104,11 @@ int main(int argc, const char **argv) {
     @autoreleasepool {
         NSApplication *app = [NSApplication sharedApplication];
         [app setActivationPolicy:NSApplicationActivationPolicyRegular];
-        setenv("MACAROS_VERSION", "9.8.7", 1);
-        setenv("MACAROS_BUILD_NUMBER", "321", 1);
+        setenv("POMAROS_VERSION", "9.8.7", 1);
+        setenv("POMAROS_BUILD_NUMBER", "321", 1);
 
         /* Machine settings live in a shared config file that belongs to the
-         * person running Macaros. This test changes settings, so it works on a
+         * person running PomAROS. This test changes settings, so it works on a
          * copy of its own and never touches theirs. */
         NSString *confDir = [NSTemporaryDirectory() stringByAppendingPathComponent:@"cm-gshell-conf"];
         [[NSFileManager defaultManager] removeItemAtPath:confDir error:NULL];
@@ -136,7 +136,7 @@ int main(int argc, const char **argv) {
         /* (1a) The window carries the HOST app name, not the guest's cm_open title
          * argument (deliberately "AROS [GSHELL]" above). */
         NSWindow *dispWin = [NSApp windows].firstObject;
-        check(dispWin && [dispWin.title isEqual:@"Macaros"],
+        check(dispWin && [dispWin.title isEqual:@"PomAROS"],
               "display window is titled by the host app, not the cm_open argument");
         NSMenu *file = sub(bar, @"File"), *edit = sub(bar, @"Edit"),
                *view = sub(bar, @"View"), *machine = sub(bar, @"Machine");
@@ -149,13 +149,13 @@ int main(int argc, const char **argv) {
               "Machine ▸ Reset + Power ▸ Force Quit present");
         check(item(help, @"Report a Compatibility Problem…") &&
               item(help, @"Show Reports") &&
-              item(help, @"Open Macaros Issue Tracker"),
-              "Help exposes local reports and the Macaros issue tracker separately");
-        NSMenuItem *about = item(bar.itemArray.firstObject.submenu, @"About Macaros");
+              item(help, @"Open PomAROS Issue Tracker"),
+              "Help exposes local reports and the PomAROS issue tracker separately");
+        NSMenuItem *about = item(bar.itemArray.firstObject.submenu, @"About PomAROS");
         [NSApp sendAction:about.action to:about.target from:about];
         NSWindow *aboutWin = nil;
         for (NSWindow *w in [NSApp windows])
-            if ([w.title isEqual:@"About Macaros"]) { aboutWin = w; break; }
+            if ([w.title isEqual:@"About PomAROS"]) { aboutWin = w; break; }
         check(aboutWin && view_has_label(aboutWin.contentView, @"Version 9.8.7 (build 321)"),
               "About reads release version and build number at runtime");
         CMEvent ev[16]; int n = cm_pump_(cx, ev, 16);
@@ -179,7 +179,7 @@ int main(int argc, const char **argv) {
                                   withIntermediateDirectories:YES attributes:nil error:NULL];
         setenv("AROS_RUN_DIR", shotDir.UTF8String, 1);
         [NSApp sendAction:shot.action to:shot.target from:shot];
-        check(dir_has_png(shotDir), "Take Screenshot wrote Macaros-screenshot-*.png to AROS_RUN_DIR");
+        check(dir_has_png(shotDir), "Take Screenshot wrote PomAROS-screenshot-*.png to AROS_RUN_DIR");
         [[NSFileManager defaultManager] removeItemAtPath:shotDir error:NULL];
 
         /* (2a) host-acted: Scanlines -> cm_set_option(EFFECT) inside the dylib */
@@ -264,7 +264,7 @@ int main(int argc, const char **argv) {
         [NSApp sendAction:settings.action to:settings.target from:settings];
         NSWindow *sw = nil;
         for (NSWindow *w in [NSApp windows])
-            if ([w.title hasPrefix:@"Macaros Settings"]) { sw = w; break; }
+            if ([w.title hasPrefix:@"PomAROS Settings"]) { sw = w; break; }
         check(sw != nil, "Settings… opened the schema-driven settings window");
         check(sw && sw.toolbar.items.count >= 4, "settings window generated tab toolbar from schema");
         check(sw && view_has_label(sw.contentView, @"Schema:"),

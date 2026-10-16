@@ -2,14 +2,14 @@
 
 > **Historical document.** This was the initial integration map from the
 > standalone experiments into AROS. It is useful when approaching another AROS
-> platform port, but its status and branch references are not current Macaros
+> platform port, but its status and branch references are not current PomAROS
 > instructions. Start with the [build documentation](../../features/build/README.md)
 > for the maintained workflow.
 
 Phase 2's hosted spikes (H1–H8) de-risked the entire *host-facing* surface of a
 hosted AROS on Apple Silicon. This file is the bridge: exactly where each proven
 idea plugs into the real AROS source tree, grounded against
-`../aros-upstream` (file paths + line numbers below). It turns "the
+`../aros-core-pomaros` (file paths + line numbers below). It turns "the
 mountain" from a gesture into a punch list.
 
 The honest headline: **the graft is integration, not spiking** — and as of
@@ -22,7 +22,7 @@ and `graft/WORKFLOW.md`.
 
 ## What AROS already has (grounded)
 
-- **A darwin hosted flavour.** `configure` (`aros-upstream/configure:10800`) sets
+- **A darwin hosted flavour.** `configure` (`aros-core-pomaros/configure:10800`) sets
   `aros_target_arch="darwin"`, `aros_flavour="emulation"`, pulls the SDK via
   `xcrun --show-sdk-path`, and switches on `target_cpu`.
 - **A unix/darwin host kernel.** `arch/all-unix/` provides the hosted host side
@@ -35,7 +35,7 @@ and `graft/WORKFLOW.md`.
 ## What's missing or broken for AArch64 (the punch list)
 
 ### 1. `configure`: no AArch64 case in the darwin flavour — and it's stale
-`aros-upstream/configure:10815` switches `target_cpu` over `i386 / x86_64 / ppc /
+`aros-core-pomaros/configure:10815` switches `target_cpu` over `i386 / x86_64 / ppc /
 arm`, then **hard-errors** on anything else (`:10904`,
 *"Unsupported target CPU for darwin hosted flavour"*). Add an `*aarch64*|*arm64*`
 case setting `aros_target_cpu="aarch64"`, the object format, `llvm_target_cpu=
@@ -108,7 +108,7 @@ first thing that will surface unknowns — and the first real build to attempt.
 
 ## Live grounding (run on this Apple-Silicon Mac)
 
-Not just read — *run*. `aros-upstream/configure --target=aarch64-darwin
+Not just read — *run*. `aros-core-pomaros/configure --target=aarch64-darwin
 --disable-crosstools`, out-of-tree, on this M-series Mac:
 
 - **The target is accepted.** `checking for AROS style target... aarch64-darwin`,
@@ -131,7 +131,7 @@ Not just read — *run*. `aros-upstream/configure --target=aarch64-darwin
 
 The graft is no longer theory: AROS now *configures and starts compiling* for a
 brand-new `darwin-aarch64` target. Work is on the `aarch64-darwin-graft` branch of
-`aros-upstream`; the exact recipe is `graft/build-darwin-aarch64.sh`. What works,
+`aros-core-pomaros`; the exact recipe is `graft/build-darwin-aarch64.sh`. What works,
 in order:
 
 1. **Target string.** AROS parses `$target` as `<arch>-<cpu>` (configure:3655), so

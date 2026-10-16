@@ -11,7 +11,7 @@ REPO="$(cd "$DIR/../.." && pwd)"
 RUSTDIR="$REPO/hosted/rust"
 RSLIB="$DIR/target/aarch64-unknown-aros/release/libgpufx_bench.a"
 
-T="${AROS_BUILD:-$HOME/Source/aros-project/aros-build}/bin/darwin-aarch64"
+T="${AROS_BUILD:-$HOME/Source/aros-project/Build/pomaros-hosted}/bin/darwin-aarch64"
 XTOOLS="${AROS_CROSSTOOLS:-$HOME/Source/aros-project/aros-crosstools}"
 GEN="$T/gen"; DEV="$T/AROS/Developer"; LIBDIR="$DEV/lib"
 CDIR="$T/AROS/C"; COLLECT="$T/tools/collect-aros"

@@ -7,8 +7,8 @@
 set -eu
 
 HERE=$(cd "$(dirname "$0")" && pwd)
-SRC=${AROS_UPSTREAM:-$HERE/../../../aros-upstream}
-A64=${AROS_BUILD:-$HOME/Source/aros-project/aros-build}
+SRC=${AROS_UPSTREAM:-$HERE/../../../aros-core-pomaros}
+A64=${AROS_BUILD:-$HOME/Source/aros-project/Build/pomaros-hosted}
 M68K=${AROS_M68K_BUILD:-$HOME/Source/aros-project/aros-m68k-build}
 
 # A directly buildable module is insufficient: normal hosted/native images

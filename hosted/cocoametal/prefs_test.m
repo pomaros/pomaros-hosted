@@ -9,7 +9,7 @@
  * are used.
  *
  * The config file half is the interesting one: it is written here by a plain
- * file write, exactly as `aros-ctl media`, another Macaros, or a text editor
+ * file write, exactly as `aros-ctl media`, another PomAROS, or a text editor
  * would, and the running process must notice and follow it.
  */
 #import <AppKit/AppKit.h>
@@ -99,7 +99,7 @@ int main(void) {
 
         /* The keyboard layout is machine state the guest applies to itself, so
          * the choice is left where the guest's watcher reads it. */
-        NSString *keymapFile = [share stringByAppendingPathComponent:@".macaros-keymap"];
+        NSString *keymapFile = [share stringByAppendingPathComponent:@".pomaros-keymap"];
         [fm removeItemAtPath:keymapFile error:NULL];
         cm_watch_(cx);
         cm_reload_(cx);

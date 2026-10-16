@@ -345,8 +345,8 @@ static void update_boot_marker(NSTextField *note, const CMSetting *s) {
     note.textColor = pending ? [NSColor systemOrangeColor] : [NSColor secondaryLabelColor];
     note.toolTip = pending
         ? @"The machine is still running with the previous value. Quit and start "
-           "Macaros again to use this one."
-        : @"Taken when Macaros starts; changing it here applies at the next launch.";
+           "PomAROS again to use this one."
+        : @"Taken when PomAROS starts; changing it here applies at the next launch.";
 }
 
 @interface CMSettingsWC : NSObject <NSToolbarDelegate>
@@ -653,7 +653,7 @@ static int load_schema_once(void) {
     return n;
 }
 
-/* The config file is shared: the command-line tools write it, another Macaros
+/* The config file is shared: the command-line tools write it, another PomAROS
  * may write it, and a person may edit it. Whoever changed it, the running
  * machine follows and the open window shows the new value. */
 static CMContext *gPrefsContext = NULL;

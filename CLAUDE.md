@@ -1,11 +1,11 @@
-# Macaros - agent routing
+# PomAROS Hosted - agent routing
 
 Hosted AROS on Apple Silicon (aarch64-darwin). **This repo is the host/graft
 layer only.** The AROS OS source (kernel, modules, libraries) is a *separate*
-checkout at `../aros-upstream` (branch `aarch64-darwin-graft`). Edit OS code
-there, not here; commit it there and push to the jonx fork (`git remote`
-`fork` = github.com/jonx/AROS), which is the off-machine backup and the place
-we publish from.
+checkout at `../aros-core-pomaros` (branch `pomaros-common`). Edit OS code
+there, not here. Coordinate core edits with its owner. Use `CORE.lock` for the
+reviewed shared source revision. Push only to the new private product origin;
+upstream publication still needs John's explicit authorization.
 
 ## Before you build or run — read first, every time
 
@@ -17,12 +17,12 @@ already solve them; read the doc instead of rediscovering the trap.
     breaks on darwin-incomplete modules.
   - Build explicit module **metatargets** (`kernel-dos`, `kernel-kernel`,
     `kernel-dosboot`, …), one target per `make` call.
-  - Build in a **stable** dir (`~/Source/aros-project/aros-build`), never a session scratchpad or /tmp
+  - Build in a **stable** dir (`~/Source/aros-project/Build/pomaros-hosted`), never a session scratchpad or /tmp
     (both get GC'd half-deleted → the "I keep having to redo it" loop).
   - Reuse the prebuilt toolchain (`~/Source/aros-project/aros-crosstools`); never rebuild LLVM.
 - **A fix appears not to take when you run it** → read
   [docs/features/deployment/README.md](docs/features/deployment/README.md).
-  There are several runnable copies of the same artifacts (`~/lib`, the boot
+  There are several runnable copies of the same artifacts (`build/host-libs`, the boot
   image, app settings). You are probably editing one and running another.
 
 ## Where knowledge lives — read it, do not re-derive
@@ -76,7 +76,7 @@ a real file before you finish.
 **When you finish a user-visible feature or a notable fix, add a line to
 [CHANGELOG.md](CHANGELOG.md) in the same turn** — reader-facing (what changed
 and why it matters, not a commit echo), newest first, under a `## YYYY-MM-DD -
-title` header (reuse the day's header if one exists). This is the Macaros repository's
+title` header (reuse the day's header if one exists). This is the PomAROS repository's
 public changelog; OS-side detail stays in the fork's git history. Skip it only
 for pure internal churn (refactors, doc-only edits, tooling that users never
 see).

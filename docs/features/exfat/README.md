@@ -1,6 +1,6 @@
 # exFAT handler status and development guide
 
-The `exfat-handler` branch in `../aros-upstream` now contains a writable,
+The `exfat-handler` branch in `../aros-core-pomaros` now contains a writable,
 format-capable `FATX` handler with removable-media change handling and shared
 MBR/GPT/USB content discovery. It supports exclusive update handles,
 create/delete, truncate, VDL growth and allocation-changing resize. It is implemented

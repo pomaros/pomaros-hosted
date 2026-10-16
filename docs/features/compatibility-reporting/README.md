@@ -2,11 +2,11 @@
 
 **Status: local collection and menu access built; review/export/submission UI remains.**
 The first implementation keeps bounded compatibility evidence in one private local
-folder and exposes it through the Macaros Help menu. The later stages described below
+folder and exposes it through the PomAROS Help menu. The later stages described below
 turn those files into reviewable packages and let the user explicitly choose whether
 to save, share, or submit them.
 
-The reporting UI belongs to **Macaros**, not to an AROS application. Macaros can still
+The reporting UI belongs to **PomAROS**, not to an AROS application. PomAROS can still
 capture the framebuffer, open a consent sheet, and save a report when a 68k program has
 stopped or the guest is unhealthy. The 68k runtime and AROS remain responsible for
 producing the technical evidence: capability gaps, library-call traces, stacks, task
@@ -19,13 +19,13 @@ dumps, and crash bundles.
        local Reports folder
               |
               v
-   Macaros review + redaction
+   PomAROS review + redaction
               |
               v
     Save / Share / explicit Send
 ```
 
-Nothing is uploaded merely because a problem occurred. Macaros may retain bounded
+Nothing is uploaded merely because a problem occurred. PomAROS may retain bounded
 technical reports locally, but every submission requires a review sheet and an explicit
 **Send** action. Screenshots, program binaries, and guest-memory snapshots have separate
 consent controls.
@@ -39,12 +39,12 @@ report root. Raw call tracing remains opt-in and has a fixed 10,000-call ceiling
 The opt-in block and task debug streams are also capped and cannot be configured above
 100,000 records.
 
-The Macaros **Help** menu provides:
+The PomAROS **Help** menu provides:
 
 - **Report a Compatibility Problem...**, which explains that reports remain local and
-  offers the report folder or the Macaros issue tracker;
+  offers the report folder or the PomAROS issue tracker;
 - **Show Reports**, which reveals the local folder in Finder; and
-- **Open Macaros Issue Tracker**, kept separate from the compatibility workflow.
+- **Open PomAROS Issue Tracker**, kept separate from the compatibility workflow.
 
 Nothing is sent automatically. The full review, redaction, export, and submission UI in
 the specification is not built yet. Existing development surfaces that remain useful:
@@ -58,7 +58,7 @@ the specification is not built yet. Existing development surfaces that remain us
 - Standalone JIT faults write a `.tar.gz` crash bundle and print its path; see
   [run68k crash bundles](../../../hosted/jit68k/run68k.md#crash-bundles).
 - Standalone engine runs can opt into structured bridge traces through
-  `EMU68K_BRIDGE_TRACE` and `EMU68K_BRIDGE_TRACE_LEVEL`; Macaros launchers configure
+  `EMU68K_BRIDGE_TRACE` and `EMU68K_BRIDGE_TRACE_LEVEL`; PomAROS launchers configure
   the bounded local trace automatically.
 
 The packaged folder is `~/Library/Application Support/AROS/Reports`; development

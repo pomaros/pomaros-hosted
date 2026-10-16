@@ -25,17 +25,17 @@ ships. The work is published as John's, product-neutral, with no AI attribution.
 - **Name no other products or brands** in code, comments, or PR text.
 - Plain, concise English. No em-dashes (John is French, non-native).
 - **A wrapped-grep "no matches" is not evidence.** The shell `grep` here skips
-  non-UTF-8 files silently, and 21% of `../aros-upstream` is non-UTF-8. Before
+  non-UTF-8 files silently, and 21% of `../aros-core-pomaros` is non-UTF-8. Before
   claiming something is absent, or counting call sites, follow
   [search-evidence](../search-evidence/SKILL.md).
 
 ## Repos and trees (see docs/features/build + deployment)
 
-- OS source: `../aros-upstream`, branch `aarch64-darwin-graft`. Edit, build, and
+- OS source: `../aros-core-pomaros`, branch `aarch64-darwin-graft`. Edit, build, and
   commit here. Push to remote `fork` (github.com/jonx/AROS).
-- Pristine upstream: `../aros-upstream-master` (a worktree; keep it at
+- Pristine upstream: `../aros-core-pomaros-master` (a worktree; keep it at
   `origin/master` for grepping current master).
-- Build tree: `~/Source/aros-project/aros-build`. Crosstools: `~/Source/aros-project/aros-crosstools`. Never rebuild LLVM.
+- Build tree: `~/Source/aros-project/Build/pomaros-hosted`. Crosstools: `~/Source/aros-project/aros-crosstools`. Never rebuild LLVM.
 - PR branches are cut off `origin/master` (clean, upstream-targetable), but
   `origin/master` cannot build on darwin (no host layer) so you VERIFY on the
   `aarch64-darwin-graft` tree. Confirm the touched file is identical on both
@@ -50,14 +50,14 @@ ships. The work is published as John's, product-neutral, with no AI attribution.
      Vampire, SMP, x86 install/boot, X11/SDL, native-GPU drivers (nouveau, ata,
      ahci, intelgma...).
    - Already resolved? Grep the TODO text or symptom **tree-wide** in
-     `../aros-upstream-master` (not just the original path). Watch for
+     `../aros-core-pomaros-master` (not just the original path). Watch for
      renames/moves: a file can be renamed and the TODO travel with it, so a
      missing-at-old-path result is NOT proof it's gone.
 2. **Reproduce** on the hosted build with `graft/aros-ctl` (run / wait / type /
    enter / shot). Ground the bug in an observed artifact before touching code.
 3. **Root-cause** in the source. Read the actual code path; do not guess.
-4. **Fix** in the `aros-upstream` working tree (minimal change).
-5. **Build** the specific metatarget in `~/Source/aros-project/aros-build`
+4. **Fix** in the `aros-core-pomaros` working tree (minimal change).
+5. **Build** the specific metatarget in `~/Source/aros-project/Build/pomaros-hosted`
    (`PATH=~/Source/aros-project/aros-crosstools/bin:$PATH; make <metatarget>`). Never a bare `make`.
    Find the metatarget name in the module's `mmakefile.src` (`mmake=...`).
 6. **Verify**: `aros-ctl deploy` -> `run` -> drive the repro -> `shot`. Test
@@ -65,7 +65,7 @@ ships. The work is published as John's, product-neutral, with no AI attribution.
    (console write path, exec, dos), also confirm no regression to normal use.
 7. **Author the PR branch** off `origin/master` in a dedicated worktree
    (`git worktree add`), apply the same change, commit (no trailer), then
-   **revert the working tree** in `aros-upstream` so the graft branch stays
+   **revert the working tree** in `aros-core-pomaros` so the graft branch stays
    clean (the fix lives only on the PR branch).
 8. **Ship**: `git push -u fork <branch>`, then
    `gh pr create --repo aros-development-team/AROS --base master --head
@@ -82,21 +82,21 @@ ships. The work is published as John's, product-neutral, with no AI attribution.
 ## Gotchas learned
 
 - `aros-ctl type` drops `>` (the shell redirect char). To test redirection,
-  write a script file host-side into `SYS:` (= `~/Source/aros-project/aros-build/bin/darwin-aarch64/
+  write a script file host-side into `SYS:` (= `~/Source/aros-project/Build/pomaros-hosted/bin/darwin-aarch64/
   AROS/`) and `execute` it, or craft a file and `type`/`execute` it.
 - `Type` flushes in 8192-byte writes, so a byte placed at file offset 8191
   reliably splits across two `Write()`s (useful for split-sequence repros).
 - The `app/todo` bot auto-files an issue per `TODO` comment on merge; the issue
   URL pins the commit it was filed at, so it looks live even after the code
   moved. Most are stale.
-- If John is rebuilding in parallel, avoid concurrent `make` in `~/Source/aros-project/aros-build`
+- If John is rebuilding in parallel, avoid concurrent `make` in `~/Source/aros-project/Build/pomaros-hosted`
   (shared mmake DB) unless told it's fine; the single hosted instance is shared
   too (reboot to run-verify only when free).
 - When the touched file DIFFERS between graft and origin/master: implement and
   verify on the graft tree, then re-apply hunk by hunk to the PR branch with
   upstream anchors, and prove equivalence by diffing the added lines of both
   patches (`git diff | grep '^+'` on each side must match).
-- SYS: is the live host dir `~/Source/aros-project/aros-build/bin/darwin-aarch64/AROS/` -- files
+- SYS: is the live host dir `~/Source/aros-project/Build/pomaros-hosted/bin/darwin-aarch64/AROS/` -- files
   written there (test binaries, scripts) are visible to the RUNNING instance
   immediately, while in-memory handlers/modules stay old until reboot. Useful
   to repro a bug on the old module with a fresh test binary.

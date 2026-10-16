@@ -18,12 +18,12 @@ this page is the code-side map. Maturity is shown in three tiers:
 
 | Subdir | What it is | Build / docs |
 |---|---|---|
-| `cocoametal/` | The live Cocoa/Metal window that is the AROS display, plus the **Macaros** first-class Mac app (menu/About/icon/Settings) and the control FIFO | `make cocoametal-dylib` · [display](../docs/features/cocoa-metal-display/design.md) · [app shell](../docs/features/host-app-shell/design.md) |
+| `cocoametal/` | The live Cocoa/Metal window that is the AROS display, plus the **PomAROS** first-class Mac app (menu/About/icon/Settings) and the control FIFO | `make cocoametal-dylib` · [display](../docs/features/cocoa-metal-display/design.md) · [app shell](../docs/features/host-app-shell/design.md) |
 | `clipboard/` | Two-way `NSPasteboard` ↔ `clipboard.device` bridge | `make pasteboard-dylib` · [clipboard-bridge](../docs/features/clipboard-bridge/README.md) |
 | `coreaudio/` | CoreAudio-backed AHI sub-driver shim (SPSC ring, RT render callback) | `make coreaudio-dylib` · [coreaudio-audio](../docs/features/coreaudio-audio/README.md) |
 | `bsdsocket/` | `bsdsocket.library` → native BSD sockets pump (TCP + WaitSelect + DNS) | `make bsdsock-dylib` · [bsdsocket-net](../docs/features/bsdsocket-net/README.md) |
 | `hostvolume/` | A real Mac folder mounted as an AROS volume (`MacRO:` / `MacRW:`) | `make hosted-hostvolume` · [host-volume](../docs/features/host-volume/README.md) |
-| `hostshell/` | The Macaros settings/shell host pieces that fold into the cocoametal app | [host-app-shell](../docs/features/host-app-shell/design.md) |
+| `hostshell/` | The PomAROS settings/shell host pieces that fold into the cocoametal app | [host-app-shell](../docs/features/host-app-shell/design.md) |
 | `jit68k/` | The 68k→AArch64 JIT and the `run68k` CLI. **Adopts Emu68 (MPL-2.0)** — see below | `make run68k` · [run68k.md](jit68k/run68k.md) · [68k-jit](../docs/features/68k-jit/design.md) |
 | `ffmpeg/` | Native `libav*` cross-built for aarch64 AROS + the FFView image/video viewer | [ffmpeg-native](../docs/features/ffmpeg-native/README.md) |
 | `rust/` | Rust on aarch64 AROS — full `std` runs (net/fs/env/args/process/time/thread) | [rust-aros](../docs/features/rust-aros/README.md) |

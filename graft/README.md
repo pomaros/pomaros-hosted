@@ -2,7 +2,7 @@
 
 These are the **starter patches** that turn the
 [initial graft map](../docs/hosted/initial-platform-bringup/GRAFT.md) into real
-code against `aros-upstream`. They are faithful translations of *proven* templates,
+code against `aros-core-pomaros`. They are faithful translations of *proven* templates,
 not speculation:
 
 - `cpu_aarch64.h` is `arch/all-darwin/kernel/cpu_arm.h` re-expressed for AArch64,
@@ -27,7 +27,7 @@ into an AArch64 register dump and a native Guru alert. Current state:
 [CONTINUATION.md](CONTINUATION.md).
 
 The full work (and the upstream-worthy friction) lives on the `aarch64-darwin-graft`
-branch of `aros-upstream` (the [jonx/AROS](https://github.com/jonx/AROS/tree/aarch64-darwin-graft)
+branch of `aros-core-pomaros` (the [jonx/AROS](https://github.com/jonx/AROS/tree/aarch64-darwin-graft)
 fork) and is mapped in **[WORKFLOW.md](WORKFLOW.md)** with
 **[UPSTREAM-NOTES.md](UPSTREAM-NOTES.md)**. The files in *this* directory
 (`cpu_aarch64.h`, `cpucontext-aarch64.h`, `configure-darwin-aarch64.diff`) are the
@@ -44,7 +44,7 @@ keeps uncertain pointer and callback behavior fail-closed.
 
 See **[GETTING-STARTED.md](../GETTING-STARTED.md)** for the newcomer path and
 [docs/features/build/README.md](../docs/features/build/README.md) for the build
-detail. In short: build the OS from `../aros-upstream` with
+detail. In short: build the OS from `../aros-core-pomaros` with
 [build-darwin-aarch64.sh](build-darwin-aarch64.sh), then from this repo:
 
 ```sh
@@ -52,5 +52,5 @@ make cocoametal-dylib pasteboard-dylib coreaudio-dylib bsdsock-dylib
 ./aros-ctl deploy && AROS_CTL_STARTUP_MODE=desktop ./run-window.sh
 ```
 
-A window titled "Macaros" opens on the Workbench desktop; click it and type at the
+A window titled "PomAROS" opens on the Workbench desktop; click it and type at the
 shell. Drive it headlessly with `./aros-ctl run`.

@@ -1,6 +1,6 @@
 # AROS 68k runtime handover — 2026-08-04
 
-Merge base at handover: graft `81aacb6`, aros-upstream `98f8296505`.
+Merge base at handover: graft `81aacb6`, aros-core-pomaros `98f8296505`.
 All gates green (T3EVENT, T3GEN, T3PORT, T3PROC, T3IDCMP, T3LHA, T2GUARD),
 legacy corpus byte-identical. Both trees clean. Nothing pushed.
 
@@ -102,7 +102,7 @@ observed behaviour, so no edit is needed.
 ## Standing constraints
 
 Do not push either repository. Commit per meaningful change in the repo it
-changes. Never a bare `make`; build explicit metatargets in `~/Source/aros-project/aros-build`
+changes. Never a bare `make`; build explicit metatargets in `~/Source/aros-project/Build/pomaros-hosted`
 reusing `~/Source/aros-project/aros-crosstools`. No Claude/AI mention anywhere outward-facing,
 commits included. Anything touching `aros-development-team/AROS` needs explicit
 per-action approval.

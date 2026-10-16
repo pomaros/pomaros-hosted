@@ -2,7 +2,7 @@
 
 > **Historical document.** This records the sequence used to start the project.
 > It is retained as a reference for new architecture and hosted-platform ports;
-> it is not the current Macaros roadmap. See the
+> it is not the current PomAROS roadmap. See the
 > [feature index](../../features/README.md) and
 > [project backlog](../../project/BACKLOG.md) for current work.
 

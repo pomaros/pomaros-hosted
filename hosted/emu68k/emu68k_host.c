@@ -2195,7 +2195,7 @@ int emu68k_reschedule_siblings(struct emu68k_run *r, j4_sandbox *sb,
              * quarantine that context and let its parent and peers continue.
              * Propagating the error through the currently running parent used
              * to tear down every window in the run, turning an RX cleanup bug
-             * into a frozen or terminated Macaros instance.  A fault while the
+             * into a frozen or terminated PomAROS instance.  A fault while the
              * child owns the guest scheduler lock is not containable: state it
              * protected may be half-mutated, so retain the fail-loud path. */
             if (other->forbid_depth)
@@ -3658,7 +3658,7 @@ int emu68k_run_quantum(emu68k_run *r, unsigned long max_roundtrips,
      * drive the remaining process group directly.  Returning DONE here used
      * to make Emu68k_RunSeg unmap the shared arena while TurboCalc, RexxMast
      * and their native Intuition objects were still live; the visible result
-     * was the whole Macaros window disappearing immediately after a successful
+     * was the whole PomAROS window disappearing immediately after a successful
      * ARexx run. */
     if (r->root_finished) {
         r->scheduler_ran = 0;

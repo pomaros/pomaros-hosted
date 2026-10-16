@@ -95,7 +95,7 @@ Start at (1); it needs no change to the renderer's logic, only its output path.
     prefer a struct pointer.** Verified: `fullRange` now honored (benchmark diff
     0), `[GPU] PASS all` host-side.
 - **[GFX1] DONE** — `gpufx.library`, the AROS-native front door
-  (`aros-upstream/arch/all-darwin/libs/gpufx/`, public header
+  (`aros-core-pomaros/arch/all-darwin/libs/gpufx/`, public header
   `compiler/include/libraries/gpufx.h`). Opens `cocoametal.dylib` via
   `hostlib.resource` at library init (under `Disable()` so Metal/dispatch
   threads inherit a blocked SIGALRM mask, same as the cocoa HIDD), resolves

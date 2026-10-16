@@ -1,8 +1,8 @@
-# Host media — physical disks and USB sticks inside Macaros
+# Host media — physical disks and USB sticks inside PomAROS
 
 > Status: **working** · Target: aarch64-darwin hosted · Verified 2026-08-28
 > In the app: Settings ▸ Media. On the command line:
-> [`graft/macaros-media`](../../../graft/macaros-media), also `aros-ctl media`.
+> [`graft/pomaros-media`](../../../graft/pomaros-media), also `aros-ctl media`.
 
 Hosted AROS can mount a real macOS block device: a USB stick, an SD card, an
 attached disk image. The volume shows up as an ordinary AROS device and is
@@ -21,9 +21,9 @@ Settings ▸ Media  (or aros-ctl media grant)
         |  unmounts it on the macOS side, sets the node's permissions
         |  to the access granted, writes the mount description into
         v  the shared folder, records the grant in aros-host.conf
-   <share>/.macaros-media/<NAME>
+   <share>/.pomaros-media/<NAME>
         |
-        v  (MacRW:.macaros-media, polled by C:MediaWatch in AROS)
+        v  (MacRW:.pomaros-media, polled by C:MediaWatch in AROS)
 AROS: Mount <NAME>  ->  exfat-handler / fat-handler
                               |
                         hostdisk.device  (opens /dev/diskN via hostlib)
@@ -32,7 +32,7 @@ AROS: Mount <NAME>  ->  exfat-handler / fat-handler
 ```
 
 The descriptions live in the shared folder rather than in `DEVS:DOSDrivers`
-because a released Macaros.app is signed and sealed: nothing may be written
+because a released PomAROS.app is signed and sealed: nothing may be written
 inside the bundle's own AROS tree. `MediaWatch` mounts what appears there and
 dismounts what is withdrawn, so a stick granted while the desktop is up shows
 up without a reboot, and one taken back disappears within a second.
@@ -83,7 +83,7 @@ plus the grant. A grant is remembered by volume identity (UUID where the medium
 has one, else name/size/filesystem), never by device node, because a
 `/dev/disk` number is reassigned on every replug. Every grant is re-resolved and
 its description re-authored as the display comes up (`cm_media_prepare`, and
-`macaros-media prepare` for the harness), so what AROS mounts always names the
+`pomaros-media prepare` for the harness), so what AROS mounts always names the
 node the medium has right now.
 
 The size in a mount description is the **device's**, never the mounted
@@ -131,7 +131,7 @@ it and watch it go) was verified by hand on 2026-08-28.
 
 ## Upstream state
 
-Carried on the `darwin-hostdisk` branch in `../aros-upstream`: `C:MediaWatch`
+Carried on the `darwin-hostdisk` branch in `../aros-core-pomaros`: `C:MediaWatch`
 is new, and the Darwin side of `hostdisk.device` needed three fixes:
 
 - the darwin build compiled the non-functional template host backend, because

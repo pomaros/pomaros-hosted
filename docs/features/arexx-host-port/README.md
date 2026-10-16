@@ -25,12 +25,12 @@ source, run the `REXX:` public port that dispatches scripts). They ship separate
 
 | Layer | What it is | Repo | On this port |
 |---|---|---|---|
-| **Message / port** | `rexxsyslib.library` — `CreateRexxMsg`/`CreateArgstring`/`FillRexxMsg`; `struct RexxMsg`, `rm_Args[16]`, the `RX*` action codes | **main OS** (`aros-development-team/AROS` = local `aros-upstream`) | **built + deployed** in the boot set |
+| **Message / port** | `rexxsyslib.library` — `CreateRexxMsg`/`CreateArgstring`/`FillRexxMsg`; `struct RexxMsg`, `rm_Args[16]`, the `RX*` action codes | **main OS** (`aros-development-team/AROS` = local `aros-core-pomaros`) | **built + deployed** in the boot set |
 | **Support** | `rexxsupport.library` — extra host functions queried by the interpreter | **main OS** | source present; not deployed |
 | **Front-end commands** | `RX`, `RXLIB` (the `Rexxc` drawer) | **main OS** (`workbench/rexxc/`) | source present; **not deployed** |
 | **Interpreter** | `RexxMast` (the `RexxMaster` server / `REXX:` port) **+ the actual Rexx engine** | **contrib** (`aros-development-team/contrib`, `regina/`) | **absent** — not built, not deployed |
 
-So the main OS repo — and therefore the local `aros-upstream` checkout — ships the
+So the main OS repo — and therefore the local `aros-core-pomaros` checkout — ships the
 **protocol** but not the **interpreter**. That is not an omission in the checkout; the
 interpreter was never in that repo. It is a separate, optional contrib component.
 
@@ -59,14 +59,14 @@ fronted by a thin `RexxMast` that spawns the public-port server. It lives in the
 The coupling is even visible in the **main-repo headers**: the `RexxMsg` action codes
 carry a block commented *"added for AROS and regina only"* — `RXADDRSRC`, `RXSETVAR`,
 `RXGETVAR`
-([compiler/include/rexx/storage.h:66-74](../../../../aros-upstream/compiler/include/rexx/storage.h)).
+([compiler/include/rexx/storage.h:66-74](../../../../aros-core-pomaros/compiler/include/rexx/storage.h)).
 The OS message layer was shaped around Regina as its intended interpreter.
 
 This is also why distros (Icaros, AROS One, the nightlies) *can* run ARexx and forum
 users *do* start `RexxMast`: those builds bundle the contrib Regina+RexxMast. A default
 build of the main repo alone does not — and `RX.c` says so itself, printing *"Could not
 start RexxMast; no Rexx interpreter seems to be installed"* when the spawn fails
-([workbench/rexxc/RX.c](../../../../aros-upstream/workbench/rexxc/RX.c)).
+([workbench/rexxc/RX.c](../../../../aros-core-pomaros/workbench/rexxc/RX.c)).
 
 The boot is wired for the drop-in: the Startup-Sequence runs the interpreter **only if
 present** —
@@ -75,7 +75,7 @@ If EXISTS "C:RexxMast"
     Assign "REXX:" "S:"
     Run <NIL: >NIL: QUIET C:RexxMast
 ```
-([workbench/s/Startup-Sequence:95](../../../../aros-upstream/workbench/s/Startup-Sequence#L95)).
+([workbench/s/Startup-Sequence:95](../../../../aros-core-pomaros/workbench/s/Startup-Sequence#L95)).
 On this port the `If EXISTS` is false, so nothing starts.
 
 ## Why `[B1]` doesn't need any of that
@@ -88,15 +88,15 @@ the deployed message layer — independent of the interpreter:
   implements one directly; no interpreter is involved in *receiving* a command.
 - The **payload** is value-oriented: `struct RexxMsg` carries `rm_Args[0..15]` argument
   **strings** built with `CreateArgstring`
-  ([storage.h:22-37, 45-51](../../../../aros-upstream/compiler/include/rexx/storage.h)) —
+  ([storage.h:22-37, 45-51](../../../../aros-core-pomaros/compiler/include/rexx/storage.h)) —
   data crosses by string value, not by deep pointer graph. That is exactly the shape
   Route B's arena handles best.
 - The **verbs** are the `RX*` action codes (`RXCOMM` = a command line, `RXFUNC` = a
   function call), also in the main-repo header
-  ([storage.h:53-64](../../../../aros-upstream/compiler/include/rexx/storage.h)).
+  ([storage.h:53-64](../../../../aros-core-pomaros/compiler/include/rexx/storage.h)).
 - The construction primitives are the **deployed** `rexxsyslib.library` calls —
   `CreateRexxMsg` / `CreateArgstring` / `FillRexxMsg` / `IsRexxMsg` / `ClearRexxMsg`
-  ([rexxsyslib.conf:19-26](../../../../aros-upstream/workbench/libs/rexxsyslib/rexxsyslib.conf)).
+  ([rexxsyslib.conf:19-26](../../../../aros-core-pomaros/workbench/libs/rexxsyslib/rexxsyslib.conf)).
 
 The interpreter is needed only to **evaluate a script** that *sends* such commands (and
 to run the system `REXX:` port). For a host↔app or app↔app message exchange, the sender
@@ -148,25 +148,25 @@ must stay green without an interpreter. `[BR*]` is a capability add-on.
 
 ## References
 
-Grounded in the upstream tree (`../aros-upstream`) and the AROS GitHub
+Grounded in the upstream tree (`../aros-core-pomaros`) and the AROS GitHub
 repos. Confirmed 2026-06-29.
 
-Main OS repo (local `aros-upstream`) — the message/port layer that **is** here:
+Main OS repo (local `aros-core-pomaros`) — the message/port layer that **is** here:
 
-- [compiler/include/rexx/storage.h](../../../../aros-upstream/compiler/include/rexx/storage.h)
+- [compiler/include/rexx/storage.h](../../../../aros-core-pomaros/compiler/include/rexx/storage.h)
   — `struct RexxMsg` (`rm_Args[16]`, `rm_Action`, line 22-37); `ARG0`/`RXARG`/`MAXRMARG`
   (45-51); `RXCOMM`/`RXFUNC`/… action codes (53-64); the *"added for AROS and regina
   only"* `RXADDRSRC`/`RXSETVAR`/`RXGETVAR` block (66-74) — header-level evidence of the
   Regina coupling.
-- [workbench/libs/rexxsyslib/rexxsyslib.conf:19-26](../../../../aros-upstream/workbench/libs/rexxsyslib/rexxsyslib.conf)
+- [workbench/libs/rexxsyslib/rexxsyslib.conf:19-26](../../../../aros-core-pomaros/workbench/libs/rexxsyslib/rexxsyslib.conf)
   — `CreateArgstring` / `DeleteArgstring` / `CreateRexxMsg` / `ClearRexxMsg` /
   `FillRexxMsg` / `IsRexxMsg` (the deployed construction primitives).
-- [workbench/rexxc/RX.c](../../../../aros-upstream/workbench/rexxc/RX.c) — `SystemTags("RexxMast", …)`
+- [workbench/rexxc/RX.c](../../../../aros-core-pomaros/workbench/rexxc/RX.c) — `SystemTags("RexxMast", …)`
   and the *"no Rexx interpreter seems to be installed"* fallback.
-- [workbench/s/Startup-Sequence:95](../../../../aros-upstream/workbench/s/Startup-Sequence#L95)
+- [workbench/s/Startup-Sequence:95](../../../../aros-core-pomaros/workbench/s/Startup-Sequence#L95)
   — `If EXISTS "C:RexxMast"` → `Assign REXX: S:` → `Run … C:RexxMast` (the optional drop-in).
-- [workbench/libs/rexxsupport/](../../../../aros-upstream/workbench/libs/rexxsupport/) ·
-  [workbench/libs/rexxsyslib/](../../../../aros-upstream/workbench/libs/rexxsyslib/) — the
+- [workbench/libs/rexxsupport/](../../../../aros-core-pomaros/workbench/libs/rexxsupport/) ·
+  [workbench/libs/rexxsyslib/](../../../../aros-core-pomaros/workbench/libs/rexxsyslib/) — the
   two main-repo libraries.
 
 contrib repo — the interpreter that is **not** here (the official port):

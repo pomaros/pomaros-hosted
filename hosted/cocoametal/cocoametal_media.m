@@ -21,7 +21,7 @@
 
 /* filesystem -> the AROS handler and the mount DosType it is described with.
  * The handler reads the real variant off the volume; for the FAT family the
- * DosType is informational. Keep in step with graft/macaros-media. */
+ * DosType is informational. Keep in step with graft/pomaros-media. */
 static NSArray *handler_for(NSString *fs) {
     static NSDictionary *H = nil;
     if (!H) H = @{
@@ -62,9 +62,9 @@ const char *cm_host_share_dir(void) {
 }
 
 static NSString *share_path(void) {
-    const char *env = getenv("MACAROS_MEDIA_DIR");
+    const char *env = getenv("POMAROS_MEDIA_DIR");
     if (env && *env) return @(env);
-    return [host_share() stringByAppendingPathComponent:@".macaros-media"];
+    return [host_share() stringByAppendingPathComponent:@".pomaros-media"];
 }
 
 const char *cm_media_dir(void) {
@@ -147,7 +147,7 @@ static NSString *uuid_string(CFUUIDRef uuid) {
     return out;
 }
 
-/* The key a grant is remembered by. Identical in graft/macaros-media, so a
+/* The key a grant is remembered by. Identical in graft/pomaros-media, so a
  * medium granted from either half is recognised by the other. */
 static NSString *identity_of(NSDictionary *desc) {
     NSString *u = uuid_string((__bridge CFUUIDRef)desc[(__bridge NSString *)kDADiskDescriptionVolumeUUIDKey]);

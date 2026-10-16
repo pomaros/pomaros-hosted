@@ -327,7 +327,7 @@ NSString *cm__app_name(void) {
     NSBundle *b = [NSBundle mainBundle];
     NSString *n = [b objectForInfoDictionaryKey:@"CFBundleDisplayName"];
     if (!n.length) n = [b objectForInfoDictionaryKey:@"CFBundleName"];
-    return n.length ? n : @"Macaros";
+    return n.length ? n : @"PomAROS";
 }
 
 void cm_try_window(CMContext *cx, const char *title) {

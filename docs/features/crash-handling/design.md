@@ -1,7 +1,7 @@
 # Crash handling — a bounded guru with a symbolized backtrace
 
 > Status: **built** · Target: aarch64-darwin hosted · 2026-06-27
-> Lives in the OS tree, not this repo: `../aros-upstream/arch/all-unix/kernel/`
+> Lives in the OS tree, not this repo: `../aros-core-pomaros/arch/all-unix/kernel/`
 > (`kernel.c`, `kernel_intern.h`). Rebuild + boot recipe: see the memory note
 > *Hosted AROS rebuild & boot* (`make kernel-kernel`, headless econsole boot).
 

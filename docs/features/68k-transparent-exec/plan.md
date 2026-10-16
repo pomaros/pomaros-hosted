@@ -474,7 +474,7 @@ pointer; anything else refuses by name. `Object *` and `APTR` are one
 identity class in `object_canon` (BOOPSI Object is opaque by definition).
 
 **Verification is blocked by harness contention** (two sessions sharing
-one Macaros instance: the corpus `pkill -f Macaros` on start kills the
+one PomAROS instance: the corpus `pkill -f PomAROS` on start kills the
 other side's instance, and shutdown via the shared `/tmp/aros-cm.ctl`
 kills ours — "power request: shutdown" seconds after boot is that
 collision, not a code bug). Before the collisions took over, two runs got
@@ -670,7 +670,7 @@ rather than mirror their bytes).
 blocking list, regenerate, build ONCE, run its fixtures ONCE. Do not
 chase gaps one run at a time.
 
-Operational note: each Macaros boot commits ~1.3 GB; with the disk nearly
+Operational note: each PomAROS boot commits ~1.3 GB; with the disk nearly
 full this inflated swap until the machine hit ENOSPC twice (wedged
 100 %-CPU instances from bug 3 made it worse). Check free space before
 corpus batches.
@@ -1156,10 +1156,10 @@ Depends: T2 (routing + requester exist).
   the host-volume view; fire-and-forget with launch-failure surfaced back.
 - **`[T5b]` `"J-UAE Execute"` port daemon.** Our listener implements the
   message protocol upstream's Workbench hook already speaks
-  ([uae_integration.c](../../../../aros-upstream/workbench/libs/workbench/uae_integration.c)),
+  ([uae_integration.c](../../../../aros-core-pomaros/workbench/libs/workbench/uae_integration.c)),
   so Wanderer's dormant path lights up with zero workbench.library changes.
   The hook forwards **every** detected 68k executable before the normal
-  launch path ([openworkbenchobjecta.c:87](../../../../aros-upstream/workbench/libs/workbench/openworkbenchobjecta.c)),
+  launch path ([openworkbenchobjecta.c:87](../../../../aros-core-pomaros/workbench/libs/workbench/openworkbenchobjecta.c)),
   so the daemon runs the **full `AUTO|JIT|FULL` router**: JIT-routed programs
   are relaunched through the normal path, only FULL-routed ones go to `T5a`.
   A dumb forwarder would force every Workbench 68k program to FULL. (If the

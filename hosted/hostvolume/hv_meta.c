@@ -1,7 +1,7 @@
 /* hv_meta.c — the .ameta per-directory metadata file (R-SIDECAR), host side.
  *
  * Implemented from aros-next docs/features/file-metadata/ameta.md, the format
- * Macaros host volumes, AFS+ tools and Pkg share. ameta.c parses and writes
+ * PomAROS host volumes, AFS+ tools and Pkg share. ameta.c parses and writes
  * the format; this file finds the directory's .ameta, reads it, and replaces
  * it atomically. Independent work: no third-party implementation source was
  * read or consulted.

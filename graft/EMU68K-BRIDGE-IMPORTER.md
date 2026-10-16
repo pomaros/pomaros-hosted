@@ -350,7 +350,7 @@ For this workspace the concrete commands after policy promotion are:
 ```sh
 make struct-layouts
 python3 graft/gen-emu68k-bridge --emit \
-  ../aros-upstream/arch/all-darwin/libs/emu68k/
+  ../aros-core-pomaros/arch/all-darwin/libs/emu68k/
 TARGETS="hostlibs-emu68k" ./graft/rebuild-aros.sh
 make hosted-emu68k-t3gen
 make hosted-emu68k-t3lha
@@ -445,7 +445,7 @@ family-wide stale-token rejection. `GTMN_FrontPen` is now high-confidence `u32`
 evidence derived from the public record field type used by the implementation.
 
 This is not yet a certification claim. The complete combined T3GEN boot exposed
-a delayed hosted `Macaros` crash after GUI fixtures: trace instrumentation proved
+a delayed hosted `PomAROS` crash after GUI fixtures: trace instrumentation proved
 the final 68k call, per-run object cleanup, host-run free, and DOS-base release
 all returned, while the macOS reports fault later in native stdio/file flushing.
 The non-GUI T3LHA regression passes. The hosted crash must be resolved (or the

@@ -1,8 +1,8 @@
-# Macaros build and verification entry points.
+# PomAROS build and verification entry points.
 #
 # The `image`/`run`/`shot`/`dbg`/`test` targets preserve the original standalone
 # QEMU AArch64 bring-up as a platform-porting reference. Its source now lives in
-# docs/hosted/initial-platform-bringup/qemu-virt/boot. Current hosted Macaros
+# docs/hosted/initial-platform-bringup/qemu-virt/boot. Current hosted PomAROS
 # targets follow below.
 #
 #   make run                 build + boot + verify the default marker ([M1])
@@ -40,7 +40,7 @@ INPUT   ?= ping\nticks\nquit\n
 
 # The AROS OS source tree (kernel, modules, libraries) lives OUTSIDE this repo;
 # this one is the host/graft layer. Override if your checkout is elsewhere.
-AROS_SRC ?= $(HOME)/Source/aros-project/aros-upstream
+AROS_SRC ?= $(abspath ../aros-core-pomaros)
 M68K_AROS_BUILD ?= $(HOME)/Source/aros-project/aros-m68k-build
 M68K_AROS_GCC ?= $(M68K_AROS_BUILD)/bin/darwin-aarch64/tools/crosstools/m68k-aros-gcc
 ELF2HUNK ?= $(M68K_AROS_BUILD)/bin/darwin-aarch64/tools/elf2hunk
@@ -169,7 +169,7 @@ cocoametal-dylib: | build
 # be 0), checks cm_abi_version()==CM_ABI_VERSION, then drives open->upload->present
 # ->readback(asserts the §6 oracle: 4 quadrants + marker exact)->pump->set_effect/
 # target_size->close through the resolved function pointers. Green = the seam wires.
-cocoametal-abi: cocoametal-dylib
+cocoametal-abi: cocoametal-dylib coreaudio-dylib
 	clang -arch arm64 -O2 -Wall -Wextra \
 		-Ihosted/cocoametal hosted/cocoametal/abi_test.c -o build/cocoametal-abi
 	BIN=build/cocoametal-abi ./harness/run-hosted.sh '[ABI] PASS'
@@ -2431,18 +2431,32 @@ dtb: | build
 
 # Product-release entry points. These consume the already prepared hosted AROS
 # tree; see RELEASE.md for provenance, smoke, signing, and notarization gates.
-.PHONY: macaros-compatibility macaros-release macaros-release-check macaros-dmg
-macaros-compatibility:
-	./graft/macaros-compatibility.sh
+.PHONY: pomaros-compatibility pomaros-release pomaros-release-check pomaros-dmg
+pomaros-compatibility:
+	./graft/pomaros-compatibility.sh
 
-macaros-release:
+pomaros-release:
 	./graft/make-aros-release.sh
 
-macaros-release-check:
+pomaros-release-check:
 	./graft/make-aros-release.sh --check
 
-macaros-dmg:
+pomaros-dmg:
 	./graft/make-aros-release.sh --dmg
 
 clean:
 	rm -rf run build
+
+# Configure/rebuild the hosted OS, rebuild the host bridge, then assemble the
+# development app. The app references the stable external OS output tree.
+.PHONY: pomaros-hosted pomaros-hosted-check
+pomaros-hosted:
+	./graft/build-darwin-aarch64.sh
+	./graft/rebuild-aros.sh
+	$(MAKE) cocoametal-dylib pasteboard-dylib coreaudio-dylib bsdsock-dylib emu68k-dylib
+	AROS_HOST_CONF=/dev/null AROS_HOST_VOLUME="MacRW:$(CURDIR)/build/Shared;WRITE" ./graft/aros-ctl deploy
+	./graft/make-aros-app.sh
+
+pomaros-hosted-check:
+	$(MAKE) hosted-abi cocoametal-abi pasteboard-abi coreaudio-abi bsdsock-abi cocoametal-shell cocoametal-prefs hosted-hostvolume hosted-jit68k-hardened
+	./graft/make-aros-app.sh --check

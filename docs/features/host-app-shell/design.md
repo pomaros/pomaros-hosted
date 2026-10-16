@@ -1,6 +1,6 @@
 # Host app shell — making the AROS window a first-class Mac app
 
-> Status: built - the Macaros first-class Mac app (menu bar, About, icon, schema-driven Settings) ships; packaged by graft/make-aros-app.sh, Settings built into the cocoametal dylib. · Target: aarch64-darwin hosted · Drafted 2026-06-26
+> Status: built - the PomAROS first-class Mac app (menu bar, About, icon, schema-driven Settings) ships; packaged by graft/make-aros-app.sh, Settings built into the cocoametal dylib. · Target: aarch64-darwin hosted · Drafted 2026-06-26
 > Scope: the **macOS application frontend** around the existing Cocoa/Metal window —
 > *not* the AmigaDOS Shell. Implementation spec: [spec.md](spec.md).
 > Builds directly on [../cocoa-metal-display/](../cocoa-metal-display/design.md) and is
@@ -246,7 +246,7 @@ is what spike [G1] settles before anything else is built.**
   it, the launcher exports that generated identity, and the custom About window
   reads it at runtime. The About source must never contain a release number.
 - **Custom icon — the macaron.** A purple (cassis) macaron on a violet squircle,
-  delivered two ways so every launch path shows it: `hosted/cocoametal/Macaros.icns` in
+  delivered two ways so every launch path shows it: `hosted/cocoametal/PomAROS.icns` in
   `Contents/Resources` (referenced by `CFBundleIconFile`) for the `.app`, and the same art
   embedded as base64 in `hosted/cocoametal/macaron_icon.h`, decoded by `cmsh_make_icon()`
   and set via `NSApp.applicationIconImage` so a bare-binary / headless run (the test path)
@@ -257,7 +257,7 @@ is what spike [G1] settles before anything else is built.**
     transparent on all four sides; **corner radius** 185.4px (= 0.225 × 824), continuous
     (squircle) corners. Our current icns uses a circular-arc approximation of that radius;
     indistinguishable at Dock sizes.
-  - **Regenerate** all three assets from the raw art (`Macaros-source.png`,
+  - **Regenerate** all three assets from the raw art (`PomAROS-source.png`,
     kept out of the repo; pass any source image as `$1`) with
     `hosted/cocoametal/make-macaron-icon.sh` (then `make cocoametal-dylib`). The script is
     the canonical pipeline — white-background flood-fill, the 824-tile Apple mask, the icns,
@@ -295,7 +295,7 @@ don't apply (HIG).
                     Filter ▸ (Nearest · Linear) · Scanlines (toggle) ·
                     Retina / HiDPI (toggle) · Show/Hide Toolbar
  Window             Minimize (⌘M) · Zoom · Bring All to Front
- Help               Report a Compatibility Problem… · Show Reports · AROS Website · Open Macaros Issue Tracker
+ Help               Report a Compatibility Problem… · Show Reports · AROS Website · Open PomAROS Issue Tracker
 ```
 
 Grounding: **Machine** = UTM's "Virtual Machine" menu + the Power submenu verbatim shape

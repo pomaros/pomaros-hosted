@@ -2,7 +2,7 @@
 
 > Status: design (not started) · Target: aarch64-darwin hosted · Drafted 2026-06-29
 > Builds on the **built** [crash-handling](../crash-handling/design.md) bounded-guru
-> work (`../aros-upstream/arch/all-unix/kernel/kernel.c` `core_TrapHandler`). Source of
+> work (`../aros-core-pomaros/arch/all-unix/kernel/kernel.c` `core_TrapHandler`). Source of
 > the question: the classic AROS "MP/SVM/RT/SMP" passage — *"alert if something dubious
 > is happening … tell you in great detail what was happening when the machine crashed …
 > allow you to save your work and then crash … check what has been saved."*
@@ -28,7 +28,7 @@ puts each task in its **own address space**; AmigaOS/AROS is built on
 **shared-memory-by-reference**, and the source says so outright:
 
 - **Messages are raw pointers into shared memory.** `PutMsg()` does **not** copy — the
-  comment in [putmsg.c](../../../../aros-upstream/rom/exec/putmsg.c) states messages
+  comment in [putmsg.c](../../../../aros-core-pomaros/rom/exec/putmsg.c) states messages
   "must lie in shared memory." Every `IORequest`, every Intuition IDCMP message, every
   `ReplyMessage` hands a pointer across a "task boundary."
 - **Library calls are a bare `JSR` through a vector table** — no syscall transition, no
@@ -46,14 +46,14 @@ The hosted Darwin/aarch64 port already has the primitives. We are not starting f
 
 | Capability | Status today | File |
 |---|---|---|
-| Page protection | **Real** — `KrnSetProtection` → host `mprotect()` (+ i-cache invalidate) | [setprotection.c:15-44](../../../../aros-upstream/arch/all-unix/kernel/setprotection.c) |
-| Page allocation | `KrnAllocPages` → `mmap` (always R/W, flip later) | [allocpages.c](../../../../aros-upstream/arch/all-unix/kernel/allocpages.c) |
-| Fault catch | SIGSEGV/SIGBUS → handler w/ fault-addr decode, symbolized backtrace, guru-loop breaker | [kernel.c:111-266](../../../../aros-upstream/arch/all-unix/kernel/kernel.c) · see [crash-handling](../crash-handling/design.md) |
-| Corruption detect | MungWall walls (`0xDB`) + per-alloc **owner task + caller** record | [mungwall.c](../../../../aros-upstream/rom/exec/mungwall.c), [mungwall.h](../../../../aros-upstream/rom/exec/mungwall.h) |
-| Per-task mem tracking | `tc_MemEntry` list freed on death | [remtask.c:163](../../../../aros-upstream/rom/exec/remtask.c) |
-| RT slot | `iet_RT` field exists — **zero references**, dormant | [etask.h:47](../../../../aros-upstream/rom/exec/etask.h) |
-| Managed-heap hook | `MEMF_MANAGED` (bit 15) + `MemHeaderExt` alloc/free callbacks | [allocate.c:86](../../../../aros-upstream/rom/exec/allocate.c), `memheaderext.h` |
-| Unused VM flags | `MEMF_VIRTUAL` (bit 3), `MEMF_EXECUTABLE` (bit 4) defined, idle | [include/exec/memory.h](../../../../aros-upstream/compiler/include/exec/memory.h) |
+| Page protection | **Real** — `KrnSetProtection` → host `mprotect()` (+ i-cache invalidate) | [setprotection.c:15-44](../../../../aros-core-pomaros/arch/all-unix/kernel/setprotection.c) |
+| Page allocation | `KrnAllocPages` → `mmap` (always R/W, flip later) | [allocpages.c](../../../../aros-core-pomaros/arch/all-unix/kernel/allocpages.c) |
+| Fault catch | SIGSEGV/SIGBUS → handler w/ fault-addr decode, symbolized backtrace, guru-loop breaker | [kernel.c:111-266](../../../../aros-core-pomaros/arch/all-unix/kernel/kernel.c) · see [crash-handling](../crash-handling/design.md) |
+| Corruption detect | MungWall walls (`0xDB`) + per-alloc **owner task + caller** record | [mungwall.c](../../../../aros-core-pomaros/rom/exec/mungwall.c), [mungwall.h](../../../../aros-core-pomaros/rom/exec/mungwall.h) |
+| Per-task mem tracking | `tc_MemEntry` list freed on death | [remtask.c:163](../../../../aros-core-pomaros/rom/exec/remtask.c) |
+| RT slot | `iet_RT` field exists — **zero references**, dormant | [etask.h:47](../../../../aros-core-pomaros/rom/exec/etask.h) |
+| Managed-heap hook | `MEMF_MANAGED` (bit 15) + `MemHeaderExt` alloc/free callbacks | [allocate.c:86](../../../../aros-core-pomaros/rom/exec/allocate.c), `memheaderext.h` |
+| Unused VM flags | `MEMF_VIRTUAL` (bit 3), `MEMF_EXECUTABLE` (bit 4) defined, idle | [include/exec/memory.h](../../../../aros-core-pomaros/compiler/include/exec/memory.h) |
 | W^X exec memory | proven `MAP_JIT` + `pthread_jit_write_protect_np` + `sys_icache_invalidate` | [hosted/jit68k/jit_region.c](../../../hosted/jit68k/jit_region.c) |
 | Host-side AROS RAM | the bring-up harness `mmap`s its own RAM + per-task stacks | [hosted/mem.c:208](../../../hosted/mem.c), [hosted/exec.c:127](../../../hosted/exec.c) |
 
@@ -61,14 +61,14 @@ Two facts about the model shape everything below:
 
 1. **One host thread, one address space.** All AROS tasks are multiplexed inside a single
    host pthread by signals — a context switch is literally overwriting `ucontext->uc_mcontext`
-   in a SIGALRM/SIGUSR1 handler ([kernel_cpu.c:76-162](../../../../aros-upstream/arch/all-unix/kernel/kernel_cpu.c)),
+   in a SIGALRM/SIGUSR1 handler ([kernel_cpu.c:76-162](../../../../aros-core-pomaros/arch/all-unix/kernel/kernel_cpu.c)),
    and a Darwin guard *drops* any signal that lands on another host thread
-   ([kernel.c:272-285](../../../../aros-upstream/arch/all-unix/kernel/kernel.c)). So
+   ([kernel.c:272-285](../../../../aros-core-pomaros/arch/all-unix/kernel/kernel.c)). So
    intra-AROS protection is region-granular and global, never per-task — until/unless the
    scheduler is re-architected.
 2. **`Forbid()`/`Disable()` are the entire Amiga lock model** and they *mean* "single CPU"
-   ([forbid.c:81-93](../../../../aros-upstream/rom/exec/forbid.c),
-   [disable.c:78-93](../../../../aros-upstream/rom/exec/disable.c)). That is the wall SMP
+   ([forbid.c:81-93](../../../../aros-core-pomaros/rom/exec/forbid.c),
+   [disable.c:78-93](../../../../aros-core-pomaros/rom/exec/disable.c)). That is the wall SMP
    hits.
 
 ## The fork in the road — three routes
@@ -227,13 +227,13 @@ made concrete, and it is where the SMP question actually has to be answered.
 
 1. **Transitive closure — "no private pointers in shared objects."** Anything in the arena must
    reference only arena-resident (or translated) memory. A shared `Message`'s `mn_ReplyPort`
-   ([putmsg.c](../../../../aros-upstream/rom/exec/putmsg.c)), an `AppMessage`'s `WBArg.wa_Lock`
+   ([putmsg.c](../../../../aros-core-pomaros/rom/exec/putmsg.c)), an `AppMessage`'s `WBArg.wa_Lock`
    (a BPTR into a handler's world), an `IORequest`'s buffers — each drags its reachable graph in.
    So the arena is for **flat / value payloads**; deep pointer graphs are kept private (don't
    cross) or marshalled at the edge. (Disk is the tractable corner: route file I/O to one shared
    handler / the host FS, and a `Lock` becomes a handle into that service, not a raw shared BPTR.)
 2. **The arena is an SMP domain — this is the wall.** `Forbid()`/`Disable()`
-   ([forbid.c:81-93](../../../../aros-upstream/rom/exec/forbid.c)) stop only *this instance's*
+   ([forbid.c:81-93](../../../../aros-core-pomaros/rom/exec/forbid.c)) stop only *this instance's*
    scheduler; they do **not** exclude another process. Every mutable arena structure therefore
    needs a **real cross-process lock** (process-shared `pthread_mutex` / futex / Mach semaphore in
    the arena). That is exactly the SMP problem — and the `mp_SpinLock` / `EXECSMP` scaffolding
@@ -310,15 +310,15 @@ IPC, not the rendering path.
 ## Resource tracking `[RT*]` — best ROI, lowest risk
 
 The passage's "very basic RT has been added" undersells *and* oversells reality: per-task
-**memory** is already auto-freed (`tc_MemEntry`, [remtask.c:163](../../../../aros-upstream/rom/exec/remtask.c)),
+**memory** is already auto-freed (`tc_MemEntry`, [remtask.c:163](../../../../aros-core-pomaros/rom/exec/remtask.c)),
 but *everything else* — open libraries, `Lock`s, semaphores, signals, IORequests, ports —
 leaks on abnormal death. Plan:
 
-- Light up the dormant `iet_RT` slot ([etask.h:47](../../../../aros-upstream/rom/exec/etask.h),
+- Light up the dormant `iet_RT` slot ([etask.h:47](../../../../aros-core-pomaros/rom/exec/etask.h),
   currently zero references): a `ResourceNode { type, ptr, cleanupFn }` list.
 - Wrap the acquiring calls (`OpenLibrary`, `Lock`, `AllocSignal`, `CreateMsgPort`,
   `ObtainSemaphore`…) to append a node when the caller has opted in; walk and invoke
-  cleanups in reverse inside [Exec_CleanupETask:207-307](../../../../aros-upstream/rom/exec/exec_util.c).
+  cleanups in reverse inside [Exec_CleanupETask:207-307](../../../../aros-core-pomaros/rom/exec/exec_util.c).
 - **Make it opt-in per task** with explicit `RT_Disown()/RT_Adopt()`. This is the real reason
   RT was never finished — it is a *policy* problem, not a mechanism one: resources are
   routinely handed between tasks via messages, so you cannot blindly free on exit. Opt-in +
@@ -331,7 +331,7 @@ Note the synergy with Route C: under multi-instance, the **host** does cross-app
 
 Literal demand-paged swap is low value here: **macOS already pages the whole AROS process**,
 so the host gives AROS swap for free. What is worth adding is *over-commit past the fixed RAM
-region*: a `MEMF_MANAGED` `MemHeaderExt` backend ([allocate.c:86](../../../../aros-upstream/rom/exec/allocate.c))
+region*: a `MEMF_MANAGED` `MemHeaderExt` backend ([allocate.c:86](../../../../aros-core-pomaros/rom/exec/allocate.c))
 whose `mhe_Alloc` grows host pages on demand (`mmap`) and `madvise(MADV_FREE)`s cold ones,
 with `MEMF_VIRTUAL` (bit 3, defined and idle) routing allocations to it. A true AROS-managed
 pager (mark a region `PROT_NONE`, fault it in from a backing file inside `core_TrapHandler`,
@@ -401,7 +401,7 @@ depends on POC-C's launcher and is the first concrete step of Route B; specced u
 
 ## Provenance
 
-Independent work. The analysis is grounded only in this project's `aros-upstream` checkout
+Independent work. The analysis is grounded only in this project's `aros-core-pomaros` checkout
 (every contract cited points at a real file:line), this repo's `hosted/` spikes, public OS
 design knowledge, and published Apple/POSIX VM APIs. No third-party MP/RT/VM implementation
 source was read or consulted; any resemblance is coincidental. Governed by

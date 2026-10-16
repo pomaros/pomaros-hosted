@@ -1,0 +1,25 @@
+#!/bin/sh
+# Verify that a product build consumes the reviewed shared source revision.
+set -eu
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+. "$ROOT/CORE.lock"
+SRC="${AROS_SRC:-$ROOT/../aros-core-pomaros}"
+actual="$(git -C "$SRC" rev-parse HEAD)"
+if [ "$actual" != "$CORE_REVISION" ]; then
+    echo "Core revision mismatch: expected $CORE_REVISION, found $actual" >&2
+    exit 1
+fi
+if [ -n "$(git -C "$SRC" status --porcelain --untracked-files=no)" ]; then
+    echo "Shared core has tracked changes; use a reviewed clean revision" >&2
+    exit 1
+fi
+BUILD_DIR="${AROS_BUILD:-${BUILD:-$ROOT/../Build/pomaros-hosted}}"
+if [ -f "$BUILD_DIR/Makefile" ]; then
+    configured_source="$(LC_ALL=C sed -n 's/^SRCDIR[[:space:]]*:=[[:space:]]*//p' "$BUILD_DIR/Makefile" | head -1)"
+    expected_source="$(cd "$SRC" && pwd -P)"
+    if [ "$configured_source" != "$expected_source" ]; then
+        echo "Build tree uses another source: $configured_source (expected $expected_source)" >&2
+        exit 1
+    fi
+fi
+printf 'Core %s (%s; x18=%s)\n' "$CORE_REVISION" "$CORE_TARGET" "$CORE_X18_POLICY"

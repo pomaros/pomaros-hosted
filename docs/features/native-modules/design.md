@@ -42,9 +42,9 @@ policy" / "MAP_JIT/W^X allocation layer" as the deferred item LoadSeg needs.
 
 **Yes — far more than the JIT doc's "deferred wall" framing implies. This must be
 stated honestly:** a substantial native-LoadSeg W^X path is *already implemented in this
-project's `aros-upstream` checkout* (the work-tree, not stock AROS), and the design
+project's `aros-core-pomaros` checkout* (the work-tree, not stock AROS), and the design
 below is largely about *verifying* and *reconciling* it, not building it from nothing.
-Concretely, all `../aros-upstream` and attributed to this project's
+Concretely, all `../aros-core-pomaros` and attributed to this project's
 commits `71f75760` / the all-unix kernel additions:
 
 - **The native ELF loader already requests executable memory.**
@@ -517,7 +517,7 @@ Honest debt — and most of the *mechanism* is already in-tree, so the risk is c
 
 ## References
 
-Every cited path is under `../aros-upstream` unless noted.
+Every cited path is under `../aros-core-pomaros` unless noted.
 
 - `rom/dos/internalloadseg.c` — loader dispatch by magic (`0x7f454c46` ELF /
   `0x000003f3` AOS), `:85-115`.

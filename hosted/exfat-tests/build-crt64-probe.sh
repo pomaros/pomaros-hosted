@@ -3,7 +3,7 @@
 set -eu
 
 HERE=$(cd "$(dirname "$0")" && pwd)
-BUILD=${AROS_BUILD:-$HOME/Source/aros-project/aros-build}
+BUILD=${AROS_BUILD:-$HOME/Source/aros-project/Build/pomaros-hosted}
 [ -d "$BUILD/AROS/Developer/include" ] || BUILD="$BUILD/bin/darwin-aarch64"
 TOOLS=${AROS_CROSSTOOLS:-$HOME/Source/aros-project/aros-crosstools}
 CLANG="$TOOLS/bin/clang"

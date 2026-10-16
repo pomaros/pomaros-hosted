@@ -1,6 +1,6 @@
 # Initial platform bring-up archive
 
-This directory contains the work that established Macaros. It is no longer the
+This directory contains the work that established PomAROS. It is no longer the
 day-to-day implementation plan; current work is indexed in
 [`docs/features`](../../features/README.md).
 
@@ -25,4 +25,4 @@ make shot
 ```
 
 These targets are architecture evidence and a porting scaffold. They are not a
-bare-metal Apple Silicon roadmap; Macaros remains hosted under macOS.
+bare-metal Apple Silicon roadmap; PomAROS remains hosted under macOS.

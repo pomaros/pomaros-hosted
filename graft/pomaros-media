@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""macaros-media - the host side decides which physical media AROS can see.
+"""pomaros-media - the host side decides which physical media AROS can see.
 
 Hosted AROS reaches a real disk through hostdisk.device, which opens a host
 device node by name. Nothing in that path decides *which* node is reasonable to
@@ -172,7 +172,7 @@ def dos_name(rec, taken):
 def media_dir(args):
     """Where the mount descriptions live: a directory both sides can reach.
 
-    AROS sees it as MacRW:.macaros-media, so a signed app never has to write
+    AROS sees it as MacRW:.pomaros-media, so a signed app never has to write
     inside its own sealed bundle. MediaWatch mounts what appears here.
     """
     return args.media_dir
@@ -183,7 +183,7 @@ def write_mountlist(aros, name, rec, mode):
     block = int(rec.get("DeviceBlockSize") or 512)
     sectors = device_size(rec) // block
     if sectors < 1:
-        raise SystemExit("macaros-media: %s reports no usable size" % name)
+        raise SystemExit("pomaros-media: %s reports no usable size" % name)
     target = os.path.join(aros, name)
     os.makedirs(aros, exist_ok=True)
     with open(target, "w") as mountlist:
@@ -268,23 +268,23 @@ def cmd_list(args):
 def cmd_grant(args):
     rec = info(args.device)
     if not rec:
-        print("macaros-media: no such device: %s" % args.device, file=sys.stderr)
+        print("pomaros-media: no such device: %s" % args.device, file=sys.stderr)
         return 1
-    if rec.get("Internal") and not os.environ.get("MACAROS_MEDIA_FORCE"):
-        print("macaros-media: %s is an internal disk, refusing" % args.device,
+    if rec.get("Internal") and not os.environ.get("POMAROS_MEDIA_FORCE"):
+        print("pomaros-media: %s is an internal disk, refusing" % args.device,
               file=sys.stderr)
         return 1
     fs = fs_of(rec)
     if fs not in HANDLERS:
-        print("macaros-media: AROS has no handler for filesystem '%s'" % fs,
+        print("pomaros-media: AROS has no handler for filesystem '%s'" % fs,
               file=sys.stderr)
         return 1
     if args.rw and not rec.get("WritableMedia", True):
-        print("macaros-media: %s is write-protected by the host" % args.device,
+        print("pomaros-media: %s is write-protected by the host" % args.device,
               file=sys.stderr)
         return 1
     if not unmount(rec):
-        print("macaros-media: macOS would not release %s (files still open?)"
+        print("pomaros-media: macOS would not release %s (files still open?)"
               % args.device, file=sys.stderr)
         return 1
 
@@ -295,7 +295,7 @@ def cmd_grant(args):
     mode = "rw" if args.rw else "ro"
     write_mountlist(args.media_dir, name, rec, mode)
     if not host_readonly(rec, mode == "ro"):
-        print("macaros-media: note: could not set node permissions on %s"
+        print("pomaros-media: note: could not set node permissions on %s"
               % rec["DeviceIdentifier"], file=sys.stderr)
     grants.append({"name": name, "mode": mode, "fs": fs, "id": key})
     write_conf(args.conf, grants, other)
@@ -318,7 +318,7 @@ def cmd_revoke(args):
         else:
             keep.append(grant)
     if not drop:
-        print("macaros-media: nothing granted for %s" % args.device,
+        print("pomaros-media: nothing granted for %s" % args.device,
               file=sys.stderr)
         return 1
     for grant in drop:
@@ -359,7 +359,7 @@ def cmd_prepare(args):
         if not rec:
             continue
         if not unmount(rec):
-            print("macaros-media: %s is busy on the host, skipping"
+            print("pomaros-media: %s is busy on the host, skipping"
                   % rec["DeviceIdentifier"], file=sys.stderr)
             continue
         host_readonly(rec, grant["mode"] == "ro")
@@ -370,9 +370,9 @@ def cmd_prepare(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--media-dir", default=os.environ.get("MACAROS_MEDIA_DIR", ""),
+    parser.add_argument("--media-dir", default=os.environ.get("POMAROS_MEDIA_DIR", ""),
                         help="where the mount descriptions are written "
-                             "(default: the host share's .macaros-media)")
+                             "(default: the host share's .pomaros-media)")
     parser.add_argument("--conf", default=os.environ.get("AROS_HOST_CONF", DEFAULT_CONF),
                         help="host settings file holding the grants")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -389,7 +389,7 @@ def main():
     sub.add_parser("prepare").set_defaults(func=cmd_prepare)
     args = parser.parse_args()
     if not args.media_dir:
-        args.media_dir = os.path.join(share_from_env(), ".macaros-media")
+        args.media_dir = os.path.join(share_from_env(), ".pomaros-media")
     return args.func(args)
 
 

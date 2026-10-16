@@ -93,8 +93,8 @@ static NSString *cmsh_release_value(const char *environmentName, NSString *bundl
 }
 
 static NSString *cmsh_version_label(void) {
-    NSString *version = cmsh_release_value("MACAROS_VERSION", @"CFBundleShortVersionString");
-    NSString *build = cmsh_release_value("MACAROS_BUILD_NUMBER", @"CFBundleVersion");
+    NSString *version = cmsh_release_value("POMAROS_VERSION", @"CFBundleShortVersionString");
+    NSString *build = cmsh_release_value("POMAROS_BUILD_NUMBER", @"CFBundleVersion");
     if (!version) version = @"development";
     if (build)
         return [NSString stringWithFormat:@"Version %@ (build %@)  ·  hosted darwin-aarch64", version, build];
@@ -108,7 +108,7 @@ static void cmsh_show_about(void) {
         initWithContentRect:NSMakeRect(0, 0, 380, 440)
                   styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskFullSizeContentView)
                     backing:NSBackingStoreBuffered defer:NO];
-    win.title = @"About Macaros";
+    win.title = @"About PomAROS";
     win.titleVisibility = NSWindowTitleHidden;
     win.titlebarAppearsTransparent = YES;
     win.movableByWindowBackground = YES;
@@ -126,7 +126,7 @@ static void cmsh_show_about(void) {
     [iv.widthAnchor  constraintEqualToConstant:124].active = YES;
     [iv.heightAnchor constraintEqualToConstant:124].active = YES;
 
-    NSTextField *name   = cmsh_about_label(@"Macaros", 28, [NSColor labelColor], NSFontWeightBold);
+    NSTextField *name   = cmsh_about_label(@"PomAROS", 28, [NSColor labelColor], NSFontWeightBold);
     NSTextField *tag    = cmsh_about_label(@"a macaron: AROS on a Mac", 13, violet, NSFontWeightMedium);
     NSTextField *ver    = cmsh_about_label(cmsh_version_label(), 11, [NSColor secondaryLabelColor], NSFontWeightRegular);
 
@@ -135,7 +135,7 @@ static void cmsh_show_about(void) {
     [sep.widthAnchor constraintEqualToConstant:300].active = YES;
 
     NSTextField *blurb = cmsh_about_label(
-        @"Macaros runs AROS, the open-source AmigaOS reimplementation, natively in a "
+        @"PomAROS runs AROS, the open-source AmigaOS reimplementation, natively in a "
         @"Cocoa/Metal window. It bridges keyboard, mouse, display, clipboard and host folders.",
         11, [NSColor secondaryLabelColor], NSFontWeightRegular);
     blurb.preferredMaxLayoutWidth = 300;
@@ -270,7 +270,7 @@ static BOOL cmsh_prepare_report_dir(NSString **pathOut) {
         [name insertString:@"MAC" atIndex:0];
 
     NSString *spec = [NSString stringWithFormat:@"%@:%@;WRITE", name, op.URL.path];
-    NSString *path = [@(cm_host_share_dir()) stringByAppendingPathComponent:@".macaros-volumes"];
+    NSString *path = [@(cm_host_share_dir()) stringByAppendingPathComponent:@".pomaros-volumes"];
     NSString *current = [NSString stringWithContentsOfFile:path
                                                   encoding:NSUTF8StringEncoding error:NULL] ?: @"";
     if ([[current componentsSeparatedByString:@"\n"] containsObject:spec]) return;
@@ -452,7 +452,7 @@ static NSEventModifierFlags cmsh_release_mods(void) {
 }
 - (void)issueTrackerAction:(id)s {
     [[NSWorkspace sharedWorkspace]
-        openURL:[NSURL URLWithString:@"https://github.com/jonx/Macaros/issues"]];
+        openURL:[NSURL URLWithString:@"https://github.com/pomaros/pomaros-hosted/issues"]];
 }
 - (void)showReportsAction:(id)s {
     NSString *path = nil;
@@ -460,7 +460,7 @@ static NSEventModifierFlags cmsh_release_mods(void) {
         [[NSWorkspace sharedWorkspace] openURL:[NSURL fileURLWithPath:path isDirectory:YES]];
     else {
         NSAlert *alert = [NSAlert new];
-        alert.messageText = @"Macaros could not open the Reports folder";
+        alert.messageText = @"PomAROS could not open the Reports folder";
         alert.informativeText = @"Check that ~/Library/Application Support/AROS is writable.";
         [alert runModal];
     }
@@ -470,9 +470,9 @@ static NSEventModifierFlags cmsh_release_mods(void) {
     cmsh_prepare_report_dir(&path);
     NSAlert *alert = [NSAlert new];
     alert.messageText = @"Report a Compatibility Problem";
-    alert.informativeText = @"Macaros keeps bounded diagnostic files locally. Nothing is uploaded automatically. Review the Reports folder before attaching relevant files to a Macaros issue.";
+    alert.informativeText = @"PomAROS keeps bounded diagnostic files locally. Nothing is uploaded automatically. Review the Reports folder before attaching relevant files to a PomAROS issue.";
     [alert addButtonWithTitle:@"Show Reports"];
-    [alert addButtonWithTitle:@"Open Macaros Issue Tracker"];
+    [alert addButtonWithTitle:@"Open PomAROS Issue Tracker"];
     [alert addButtonWithTitle:@"Cancel"];
     NSModalResponse response = [alert runModal];
     if (response == NSAlertFirstButtonReturn && path)
@@ -501,8 +501,8 @@ static NSMenu *cmsh_submenu(NSMenu *bar, NSString *title) {
 static void cmsh_build_menu(CMShellController *c) {
     NSMenu *bar = [[NSMenu alloc] initWithTitle:@"MainMenu"];
 
-    NSMenu *app = cmsh_submenu(bar, @"Macaros");
-    cmsh_add(app, @"About Macaros", @selector(aboutAction:), c, @"", 0);
+    NSMenu *app = cmsh_submenu(bar, @"PomAROS");
+    cmsh_add(app, @"About PomAROS", @selector(aboutAction:), c, @"", 0);
     [app addItem:[NSMenuItem separatorItem]];
     cmsh_add(app, @"Settings…", @selector(settingsAction:), c, @",", NSEventModifierFlagCommand);
     [app addItem:[NSMenuItem separatorItem]];
@@ -510,12 +510,12 @@ static void cmsh_build_menu(CMShellController *c) {
     NSMenu *servicesMenu = [[NSMenu alloc] initWithTitle:@"Services"];
     services.submenu = servicesMenu; [app addItem:services]; [NSApp setServicesMenu:servicesMenu];
     [app addItem:[NSMenuItem separatorItem]];
-    cmsh_add(app, @"Hide Macaros", @selector(hide:), nil, @"h", NSEventModifierFlagCommand);
+    cmsh_add(app, @"Hide PomAROS", @selector(hide:), nil, @"h", NSEventModifierFlagCommand);
     cmsh_add(app, @"Hide Others", @selector(hideOtherApplications:), nil, @"h",
              NSEventModifierFlagCommand | NSEventModifierFlagOption);
     cmsh_add(app, @"Show All", @selector(unhideAllApplications:), nil, @"", 0);
     [app addItem:[NSMenuItem separatorItem]];
-    cmsh_add(app, @"Quit Macaros", @selector(terminate:), nil, @"q", NSEventModifierFlagCommand);
+    cmsh_add(app, @"Quit PomAROS", @selector(terminate:), nil, @"q", NSEventModifierFlagCommand);
 
     NSMenu *file = cmsh_submenu(bar, @"File");
     cmsh_add(file, @"Take Screenshot", @selector(shotAction:), c, @"3",
@@ -601,7 +601,7 @@ static void cmsh_build_menu(CMShellController *c) {
     cmsh_add(help, @"Show Reports", @selector(showReportsAction:), c, @"", 0);
     [help addItem:[NSMenuItem separatorItem]];
     cmsh_add(help, @"AROS Website", @selector(websiteAction:), c, @"", 0);
-    cmsh_add(help, @"Open Macaros Issue Tracker", @selector(issueTrackerAction:), c, @"", 0);
+    cmsh_add(help, @"Open PomAROS Issue Tracker", @selector(issueTrackerAction:), c, @"", 0);
     [NSApp setHelpMenu:help];
 
     [NSApp setMainMenu:bar];

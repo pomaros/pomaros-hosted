@@ -73,7 +73,7 @@ that crossed over does not immediately bounce back as a new copy and ping-pong.
 
 **The payload is real Amiga IFF.** A clip written to AROS is a proper
 `FORM … FTXT … CHRS` chunk — exactly what every Amiga clipboard-aware app expects —
-built/parsed with `iffparse.library`. (Verified: a Mac clip of `MACAROS_CLIP_4242`
+built/parsed with `iffparse.library`. (Verified: a Mac clip of `POMAROS_CLIP_4242`
 lands in AROS as `464f524d…4654585443485253…` = `FORM…FTXT…CHRS` + the 18 bytes.)
 
 ## Text — accents and the charset boundary
@@ -92,7 +92,7 @@ sketches how `ILBM`/PNG would layer on later.)
 
 ## Where the code lives
 
-**Host side (this repo — `Macaros`):**
+**Host side (this repo — `PomAROS`):**
 
 - [hosted/clipboard/pasteboard.m](../../../hosted/clipboard/pasteboard.m) +
   `pasteboard.h` — the `NSPasteboard` shim: `host_pb_get_text` / `host_pb_set_text`
@@ -104,7 +104,7 @@ sketches how `ILBM`/PNG would layer on later.)
 - Deployed to `~/lib` by [graft/run-window.sh](../../../graft/run-window.sh) and
   [graft/aros-ctl](../../../graft/aros-ctl), beside `cocoametal.dylib`.
 
-**AROS side (`aros-upstream`, branch `aarch64-darwin-graft`):**
+**AROS side (`aros-core-pomaros`, branch `aarch64-darwin-graft`):**
 
 - `arch/all-darwin/hidd/cocoa/cocoa_clipboard.c` — the sync **process**
   (`CreateNewProcTags`, because it touches `clipboard.device`, which file-backs
@@ -122,7 +122,7 @@ is why it must sit in `~/lib` with `DYLD_FALLBACK_LIBRARY_PATH` pointing there.
 
 ## How it's wired into the boot
 
-The packaged Macaros app sets up the AROS side so console copy/paste works:
+The packaged PomAROS app sets up the AROS side so console copy/paste works:
 
 ```
 MakeDir RAM:Clipboards
@@ -243,7 +243,7 @@ shim, the bridge, or the clipboard write.
 
 > **The Amiga key:** on a Mac keyboard **either ⌘** (left or right) maps to
 > Right-Amiga, so ⌘C/⌘V *inside the AROS window* act as the Amiga clipboard keys
-> Right-Amiga+C/V — not macOS copy/paste. The Macaros **Edit menu** Copy/Paste
+> Right-Amiga+C/V — not macOS copy/paste. The PomAROS **Edit menu** Copy/Paste
 > items synthesize those same Right-Amiga+C/V chords into AROS.
 
 ### Requires up-to-date console binaries
@@ -272,7 +272,7 @@ Picking Copy/Paste with the mouse still works, because those menu items inject t
 chord straight into `CDInputHandler`, which intuition never sees.
 
 The cost is that the Amiga menu no longer advertises the shortcut. On this port that
-costs nothing: the Macaros **Edit** menu already shows ⌘C/⌘V.
+costs nothing: the PomAROS **Edit** menu already shows ⌘C/⌘V.
 
 Separately, `con-handler` must recompute its window signal mask **inside** its event
 loop. An `AUTO` console (the boot console is `CON:////AROS/AUTO/CLOSE/SMART/BOOT`)

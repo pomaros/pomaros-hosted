@@ -6,18 +6,13 @@ for the darwin-aarch64 hosted target — and, more importantly, the traps that m
 people "redo the whole thing again." Read both: build produces the modules,
 deploy stages and runs them.
 
-> The OS source is a **separate** checkout at `../aros-upstream` (branch
-> `aarch64-darwin-graft`). You build from there, commit there, and push to the
-> jonx fork (remote `fork`). This repo (`Macaros`) is only the host/graft
-> layer. A fresh checkout must include the **submodules** (translation
-> catalogs — without them generated headers are missing and `kernel-dos`
-> fails on undeclared `MSG_STRING_*` identifiers):
+> The shared OS source is a separate checkout at `../aros-core-pomaros`.
+> `CORE.lock` records its reviewed source revision. This repository contains
+> the hosted product and host bridge, not a second copy of the kernel.
+> Initialize the source's translation/catalogue submodules before building:
 >
 > ```sh
-> git clone --recurse-submodules -b aarch64-darwin-graft \
->     https://github.com/jonx/AROS.git aros-upstream
-> # or, in an existing checkout:
-> git submodule update --init --recursive
+> git -C ../aros-core-pomaros submodule update --init --recursive
 > ```
 
 ---
@@ -29,28 +24,28 @@ reusing the preserved toolchain (this is also the recovery tool after the macOS
 `/tmp` cleaner or a disk-full purge eats a tree):
 
 ```sh
-graft/rebuild-aros.sh            # boot module set + desktop userland -> ~/Source/aros-project/aros-build
+graft/rebuild-aros.sh            # boot module set + desktop userland -> ~/Source/aros-project/Build/pomaros-hosted
 # TARGETS="kernel-dos kernel-intuition" graft/rebuild-aros.sh   # a subset
 ```
 
 It builds each metatarget in its own `make` call (avoids the mmake stale-DB
-failure), logs per target under `~/Source/aros-project/aros-build/rebuild-logs/`, continues past
+failure), logs per target under `~/Source/aros-project/Build/pomaros-hosted/rebuild-logs/`, continues past
 individual failures with a summary, writes the `AROS.boot` signature, and sets
 up the `objcopy` shim + PATH. It never runs a bare `make` and never rebuilds
-LLVM. If `~/Source/aros-project/aros-build` isn't configured yet, it prints the one-time configure
+LLVM. If `~/Source/aros-project/Build/pomaros-hosted` isn't configured yet, it prints the one-time configure
 line to run first.
 
 <details><summary>What that automates (the manual recipe)</summary>
 
 ```sh
 # 1. Stable locations (NOT a session scratchpad, NOT /tmp) + reuse the toolchain
-BUILD=~/Source/aros-project/aros-build ; XT=~/Source/aros-project/aros-crosstools
+BUILD=~/Source/aros-project/Build/pomaros-hosted ; XT=~/Source/aros-project/aros-crosstools
 ln -sf "$XT/bin/llvm-objcopy" "$XT/bin/objcopy"        # macOS lacks objcopy; stable shim
 export PATH="$XT/bin:/opt/homebrew/bin:$PATH"
 
 # 2. Configure ONCE — REUSE the toolchain (skip the ~1-2h LLVM build), no X11
 cd "$BUILD"    # (rm -rf "$BUILD" first only for a truly clean reconfigure)
-../aros-upstream/configure \
+../../aros-core-pomaros/configure \
     --target=darwin-aarch64 --with-toolchain=llvm \
     --with-aros-toolchain=yes --with-aros-toolchain-install="$XT" \
     --without-x --with-resolution=1366x768x8
@@ -89,10 +84,10 @@ guru. *This is the "I keep having to redo it" loop.*
 `Libs/` down to 3 libraries, `C:` empty, kickstart reduced to `exec.library` +
 `kernel.resource`). The same fate awaits `/tmp/aros-crosstools`.
 
-Use a home location: **`~/Source/aros-project/aros-build`** for the build and **`~/Source/aros-project/aros-crosstools`**
+Use a home location: **`~/Source/aros-project/Build/pomaros-hosted`** for the build and **`~/Source/aros-project/aros-crosstools`**
 for the preserved toolchain (both are the defaults of
 `graft/build-darwin-aarch64.sh`, and `run-window.sh`/`aros-ctl` search
-`~/Source/aros-project/aros-build` first; `/tmp/arosbuild` remains a legacy fallback).
+`~/Source/aros-project/Build/pomaros-hosted` first; `/tmp/arosbuild` remains a legacy fallback).
 
 ## 2. The cross-toolchain — do NOT rebuild it (~1–2 h)
 
@@ -186,7 +181,7 @@ The boot set (47 modules, from the kickstart `AROSBootstrap.conf` + the list
 Resolve any target you're unsure of:
 
 ```sh
-grep -rhoE 'mmake=[a-z0-9-]+' ../aros-upstream/rom/dos/mmakefile.src
+grep -rhoE 'mmake=[a-z0-9-]+' ../aros-core-pomaros/rom/dos/mmakefile.src
 ```
 
 > `kernel` (the aggregate) is **narrow** on hosted — it builds only the
@@ -343,7 +338,7 @@ build of the editor staticlib) and `$D/libzed_aros_app.a`, the superseded shim.
 | Symptom | Cause | Fix |
 |---|---|---|
 | `make: No rule to make target 'kernel-dos'` | `Makefile`/`mmake.config` gone (scratchpad GC) | rebuild in a stable dir; re-run `configure` |
-| `The configure script must be executed before running 'make'` on EVERY target | a git branch switch in the source tree touched `configure`'s **mtime** (content unchanged), so the Makefile guard thinks the config is stale | `cd ~/Source/aros-project/aros-build && ./config.status && touch config.status` (`rebuild-aros.sh` now does this automatically); a real `configure` content change still needs a real reconfigure |
+| `The configure script must be executed before running 'make'` on EVERY target | a git branch switch in the source tree touched `configure`'s **mtime** (content unchanged), so the Makefile guard thinks the config is stale | `cd ~/Source/aros-project/Build/pomaros-hosted && ./config.status && touch config.status` (`rebuild-aros.sh` now does this automatically); a real `configure` content change still needs a real reconfigure |
 | `can't open dos.library v36` then `dosboot` guru | ABI skew: modules built across genmodule/startup/struct changes | one coordinated rebuild of the whole boot set |
 | `fatal error: 'stdarg.h' file not found` | stripped toolchain resource headers | restore from Homebrew clang (§2) |
 | `ld.lld: duplicate symbol __aros_libreq_SysBase` | `KOBJ_LDFLAGS` not reaching the kobj link | fixed in `make.cfg.in`/`make.tmpl` (§4) |
@@ -353,20 +348,17 @@ build of the editor staticlib) and `$D/libzed_aros_app.a`, the superseded shim.
 | Builds clean but the boot faults with no diagnostic | clang‑22 `va_start` header compiled by the clang‑20 binary | restore clang‑20.1.0 freestanding headers (§2) |
 | `[MMAKE] Nothing known about project kernel-kernel` | mmake rebuilt itself mid-run; stale metatarget DB | one target per `make` call (§3) |
 | `make <target>` "succeeds" instantly but installs nothing | **typo'd metatarget: mmake exits 0 on an unknown target** (`[MMAKE][0] Nothing known about target X` is not an error). Cost a full debug cycle: `kernel-clipboard`/`workbench-libs-stdc`/`workbench-libs-cybergraphics` were silent no-ops (real names `workbench-devs-clipboard`, `compiler-stdc`, `workbench-libs-cgfx`) | grep the make output for `Nothing known about target` after adding any new target name; resolve names via `grep -rhoE 'mmake=[a-z0-9-]+' <srcdir>/mmakefile.src` |
-| `kernel-dos` fails: `use of undeclared identifier 'MSG_STRING_REQUESTTITLE'` (etc.) | **submodules not initialized** — `rom/dos/catalogs` is empty so `strings.h` is never generated and clang picks up the C `strings.h` instead | `git submodule update --init --recursive` in `../aros-upstream` |
+| `kernel-dos` fails: `use of undeclared identifier 'MSG_STRING_REQUESTTITLE'` (etc.) | **submodules not initialized** — `rom/dos/catalogs` is empty so `strings.h` is never generated and clang picks up the C `strings.h` instead | `git submodule update --init --recursive` in `../aros-core-pomaros` |
 | Wanderer requester `Could not open … "muimaster.library"` (deps all on disk) | one of Wanderer's hard deps is truly absent — commonly `cybergraphics.library` (target is `workbench-libs-cgfx`, NOT `-cybergraphics`) or `stdcio.library` (`compiler-stdcio`; without it every C: command is also silently mute) | `version <lib>.library` from the boot shell bisects it: "object not found" = missing lib |
 | `Display driver(s) failed… Entering emergency shell` | `icon.library` missing (no monitors load) **or** no `AROS.boot` signature | build the userland libs (§3b); stage `AROS.boot` (deploy doc) |
 | `Please insert volume "THEMES"` requester | AROSDefault theme not staged | `run-window.sh` stages it now; see deploy doc |
 | `ObtainSemaphore called in supervisor mode!!!` (intermittent) | VBlank `SIGALRM` delivered to a foreign host thread | SIGALRM guard in `core_IRQ` (§4) |
 | Random guest wedges/corruption under input load (e.g. window resize freezes the app; no `[KRN]` trap) | **stale pre-`-ffixed-x18` objects**: a `make.cfg` flag change does NOT invalidate `.o` files, so modules built before the flag keep allocating x18, which macOS zeroes on any signal/kernel entry | `find gen -name '*.o' -not -path '*tools*' -delete`, rebuild the full metatarget set; verify with `graft/deploy-check` (x18 section; clean modules have ≤4 x18 refs). Saving x18 in the context can't help — the host has already clobbered it before our handler runs (`hosted/x18probe`) |
 
-## 7. After changing AROS source — commit and push to the fork
+## 7. Shared core changes
 
-The build fixes live in `../aros-upstream` on branch `aarch64-darwin-graft`.
-Commit them there and push to the jonx fork (the off-machine backup and where
-we publish from):
-
-```sh
-cd ../aros-upstream
-git push fork aarch64-darwin-graft
-```
+Make OS changes in `../aros-core-pomaros`, coordinate with its owner, and record
+the tested revision in `CORE.lock`. Keep the Darwin-specific x18 reservation
+out of the native ABI. Product-repository pushes do not authorize publishing
+private native source or posting upstream; follow the upstream approval gate in
+[CLAUDE.md](../../../CLAUDE.md).

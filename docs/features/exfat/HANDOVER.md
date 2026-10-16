@@ -2,7 +2,7 @@
 
 ## Current state
 
-The `exfat-handler` branch in `../aros-upstream` now contains a writable,
+The `exfat-handler` branch in `../aros-core-pomaros` now contains a writable,
 portable `FATX` handler. It reads FAT-chained and `NoFatChain` streams, creates,
 grows, truncates, renames and deletes files/directories, updates protection and
 dates, relabels volumes, and formats blank 512- through 4096-byte-sector media.
@@ -84,7 +84,7 @@ lossy above the local character set (N4).
 - `92b32ac` CRT large-file proof.
 - `36de905` fdsk 64-bit transport gate.
 
-### aros-upstream
+### aros-core-pomaros
 
 - `1ee3aa9806` `fdsk.device` NSD 64-bit backing-image I/O.
 - `881c00d9f7` hosted handler successful-seek reply fix.
@@ -181,7 +181,7 @@ The upstream head also contains later exFAT handler work (`6a588892ab`,
 ## Useful commands
 
 ```sh
-cd /Users/jkn/Source/aros-project/Macaros
+cd /Users/jkn/Source/aros-project/pomaros-hosted
 ./graft/exfat-acceptance-smoke
 
 # Or run individual gates:
@@ -192,7 +192,7 @@ make -C /Users/jkn/Source/aros-project/aros-m68k-build kernel-dos64-linklib
 make -C /Users/jkn/Source/aros-project/aros-m68k-build/rom/filesys/exfat \
   -f mmakefile \
   TOP=/Users/jkn/Source/aros-project/aros-m68k-build \
-  SRCDIR=/Users/jkn/Source/aros-project/aros-upstream CURDIR=rom/filesys/exfat \
+  SRCDIR=/Users/jkn/Source/aros-project/aros-core-pomaros CURDIR=rom/filesys/exfat \
   TARGET=kernel-fs-exfat AROS_TARGET_ARCH=amiga AROS_TARGET_CPU=m68k \
   AROS_HOST_ARCH=darwin AROS_HOST_CPU=aarch64 kernel-fs-exfat
 ./graft/exfat-fixture-smoke
@@ -241,7 +241,7 @@ On 2026-08-04 that verified `Unit14` was written back to the original 512 MiB
 
 ```sh
 diskutil unmount disk9s1
-sudo dd if=$HOME/Source/aros-project/aros-build/bin/darwin-aarch64/AROS/DiskImages/Unit14 \
+sudo dd if=$HOME/Source/aros-project/Build/pomaros-hosted/bin/darwin-aarch64/AROS/DiskImages/Unit14 \
   of=/dev/rdisk9s1 bs=8m
 sync
 diskutil mount disk9s1
@@ -318,7 +318,7 @@ string as the escape character, so status banners made of asterisks
 swallow their own closing quote; the demo script uses `=` banners.
 
 For the native Raspberry Pi 4B run, the Pi source is
-`/Users/jkn/Source/aros-project/aros-upstream-raspi`, the build is
+`/Users/jkn/Source/aros-project/aros-core-pomaros-raspi`, the build is
 `/Users/jkn/aros-build-850`, and the deployment harness is
 `/Users/jkn/Source/aros-project/aros-raspi`. The build contains the AArch64 probe and the
 updated board package. Insert the Pi SD card and run on macOS:

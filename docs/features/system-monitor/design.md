@@ -37,7 +37,7 @@ the host-call boundary the same way every other hosted feature already does.
 **The monitor exists; the three pages and a working data source do not.**
 
 What SysMon shows today, grounded in the source
-(`../aros-upstream/workbench/system/SysMon/`):
+(`../aros-core-pomaros/workbench/system/SysMon/`):
 
 - **Three tabs**, built from `smdata->tabs[]` = `{Tasks, CPU, System, NULL}`
   (`main.c:94–97`), with `SYSMON_TABCOUNT 3` (`sysmon_intern.h:24`). The tab
@@ -374,7 +374,7 @@ discipline).
 
 ## References
 
-AROS upstream (`../aros-upstream`):
+AROS upstream (`../aros-core-pomaros`):
 - SysMon app: `workbench/system/SysMon/` — `main.c` (tabs `:94–97`,
   `RegisterGroup` `:168`, page children `:169–267`, active-page switch `:422–437`,
   modules array `:387`, timer re-arm `:408,441`), `sysmon_intern.h` (`SYSMON_TABCOUNT`

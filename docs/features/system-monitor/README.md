@@ -49,4 +49,4 @@ secondary, not the gate.
   C ABI dylib pattern), [BSD sockets](../bsdsocket-net/README.md) (host networking,
   where the interface counters live), [control harness](../control-harness/README.md)
   (the screenshot used for GUI verification).
-- Source extended: `workbench/system/SysMon/` (in `aros-upstream`).
+- Source extended: `workbench/system/SysMon/` (in `aros-core-pomaros`).

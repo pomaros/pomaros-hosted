@@ -20,7 +20,7 @@
     { "ident": "input.keymap", "tier": "Machine", "tab": "Input",
       "label": "Keyboard layout", "control": "popup",
       "store": "conf", "key": "keymap", "default": "pc105_f",
-      "apply": "guestFile", "applyFile": ".macaros-keymap",
+      "apply": "guestFile", "applyFile": ".pomaros-keymap",
       "choices": [ { "label": "US", "value": "pc104_usa" },
                    { "label": "French", "value": "pc105_f" },
                    { "label": "Belgian", "value": "pc105_b" },

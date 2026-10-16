@@ -29,8 +29,8 @@ This needs only *this* repo and Homebrew's LLVM. It builds `run68k`, a
 
 ```sh
 brew install llvm lld
-git clone https://github.com/jonx/Macaros.git    # this repo
-cd Macaros
+git clone https://github.com/pomaros/pomaros-hosted.git    # this repo
+cd pomaros-hosted
 make run68k                                            # -> build/run68k
 build/run68k hosted/jit68k/apps68k/bin/mandel.exe      # prints a Mandelbrot, exits 0
 ```
@@ -51,23 +51,44 @@ Hosted AROS is built from **two repositories that must sit side by side**:
 
 ```
 some-parent-dir/
-├── Macaros/     ← THIS repo — the host / graft layer (scripts, host shims, docs)
-└── aros-upstream/    ← the AROS OS source (kernel, libraries, Workbench)
+├── pomaros-hosted/     ← THIS repo — the host / graft layer (scripts, host shims, docs)
+└── aros-core-pomaros/    ← the AROS OS source (kernel, libraries, Workbench)
 ```
 
-`Macaros` is the Mac-side glue. `aros-upstream` is a fork of AROS carrying
-the `aarch64-darwin-graft` branch (the native AArch64 backend + the Darwin host
-port). Clone both as siblings:
+`pomaros-hosted` is the Mac-side glue. `aros-core-pomaros` contains the shared
+AROS sources and the Darwin hosted adaptation. Obtain the source at the exact
+revision recorded in `CORE.lock`; repository access is required while the
+shared source remains private.
 
 ```sh
-cd some-parent-dir
-git clone https://github.com/jonx/Macaros.git Macaros
-git clone -b aarch64-darwin-graft https://github.com/jonx/AROS.git aros-upstream
+cd pomaros-hosted
+. ./CORE.lock
+git clone --branch "$CORE_BRANCH" "$CORE_URL" ../aros-core-pomaros
+git -C ../aros-core-pomaros checkout --detach "$CORE_REVISION"
+git -C ../aros-core-pomaros submodule update --init --recursive
+./graft/check-core
 ```
 
-The scripts assume `../aros-upstream` relative to this repo. If you put it
-elsewhere, pass the path explicitly where the docs mention `AROS_SRC` / the
-`configure` path.
+The scripts default to `../aros-core-pomaros`, `../Build/pomaros-hosted`, and
+`../aros-crosstools`. They select Homebrew GNU make and a sibling `build-venv`
+when available. Install the build prerequisites once:
+
+```sh
+brew install make llvm lld cmake zstd gawk automake autoconf bison flex netpbm libpng gnu-sed
+python3 -m venv ../build-venv
+../build-venv/bin/python -m pip install mako pyyaml
+```
+
+The OS build must use the patched AROS compiler below.
+Existing user files and settings stay in `~/AROS/Shared` and
+`~/Library/Application Support/AROS`; rebranding does not move or remove them.
+
+After prerequisites and the preserved toolchain are available, run
+`make pomaros-hosted`. It configures once, rebuilds the hosted OS with the
+existing module scripts, builds the host bridges, and creates `build/PomAROS.app`.
+Use `make pomaros-hosted-check` for bridge and packaging checks. This development
+app uses the external stable OS tree; self-contained release images use
+`graft/make-aros-release.sh` after the release checks.
 
 ---
 
@@ -95,59 +116,37 @@ Building the toolchain from source is a **one-time ~1–2 hour** step. After tha
 the `crosstools` directory is relocatable — copy it aside and reuse it, and you
 never pay that cost again (see step 4).
 
-Host prerequisites for that first LLVM build:
-
-```sh
-brew install llvm cmake zstd autoconf automake gawk bison flex netpbm libpng gnu-sed
-python3 -m pip install mako --break-system-packages
-```
-
----
-
 ## 4. Build hosted AROS
 
-The full recipe, the traps, and a symptom→cause table live in
-**[docs/features/build/README.md](docs/features/build/README.md)** — read it once.
-The essentials:
+Read [docs/features/build/README.md](docs/features/build/README.md) for the
+module list and failure diagnosis. For an existing preserved AROS compiler:
 
 ```sh
-# macOS has no objcopy: expose llvm-objcopy under that name, and put Homebrew on PATH
-mkdir -p /tmp/graft-tools
-ln -sf /opt/homebrew/opt/llvm/bin/llvm-objcopy /tmp/graft-tools/objcopy
-export PATH="/tmp/graft-tools:/opt/homebrew/bin:$PATH"
+make pomaros-hosted
+```
 
-# Configure in a STABLE build dir (never a temp that gets cleaned mid-build).
-# Point it at your aros-upstream checkout with an ABSOLUTE path (the build dir is
-# under /tmp, so a relative ../aros-upstream would not resolve).
-AROS_SRC=$(cd ../aros-upstream && pwd)     # run this from the Macaros repo
-BUILD=/tmp/arosbuild
-rm -rf "$BUILD" && mkdir -p "$BUILD" && cd "$BUILD"
+The script configures the isolated stable `../Build/pomaros-hosted` directory
+once and then invokes the existing module rebuild recipe. It reuses
+`../aros-crosstools` and never deletes a configured tree. Override `AROS_SRC`,
+`BUILD`/`AROS_BUILD`, or `XT`/`AROS_CROSSTOOLS` when using another layout; the aliases are accepted by both build scripts.
+
+If there is no preserved compiler, build it once in a separate stable tree:
+
+```sh
+AROS_SRC=$(cd ../aros-core-pomaros && pwd)
+. ../build-venv/bin/activate
+BUILD=$(pwd)/../Build/pomaros-toolchain
+mkdir -p "$BUILD"
+cd "$BUILD"
+export PATH="/opt/homebrew/opt/make/libexec/gnubin:/opt/homebrew/bin:$PATH"
 "$AROS_SRC/configure" --target=darwin-aarch64 --with-toolchain=llvm --without-x
-#   first run: compiles clang 20.1.0 (~1–2 h). Reuse it next time (below).
-
-# Build the boot module set with EXPLICIT metatargets — never a bare `make`.
-# (A bare make tries to rebuild LLVM and breaks on darwin-incomplete modules.)
-make kernel-exec kernel-kernel kernel-dos kernel-dosboot kernel-utility \
-     kernel-intuition kernel-graphics kernel-layers kernel-keymap \
-     kernel-console kernel-input kernel-keyboard kernel-clipboard \
-     kernel-hidd kernel-hidd-cocoa kernel-bootstrap-hosted \
-     workbench-libs-stdc workbench-libs-cybergraphics
+make crosstools-toolchain
+cp -a bin/darwin-aarch64/tools/crosstools ../../aros-crosstools
 ```
 
-**Reuse the toolchain on later builds** so you skip the 1–2 h LLVM step:
-
-```sh
-cp -a /tmp/arosbuild/bin/darwin-aarch64/tools/crosstools /tmp/aros-crosstools
-# then configure with:
-#   --with-toolchain=llvm --with-aros-toolchain=yes \
-#   --with-aros-toolchain-install=/tmp/aros-crosstools
-# configure must print: "checking whether to build crosstools... no"
-```
-
-The four rules that save you days (from the build doc): build in a **stable
-directory**, **reuse the toolchain**, **never a bare `make`**, build **module
-metatargets** not the aggregates. The 47-module boot set boots to a CLI; the full
-Wanderer **desktop** needs additional userland — see the build doc §3b.
+Return to `pomaros-hosted`, activate the `build-venv` created above, and run the
+product build. The first toolchain build is deliberately separate from routine
+product rebuilds so a missing compiler cannot silently trigger hours of work.
 
 ---
 
@@ -157,7 +156,7 @@ The Mac-side host capabilities (display, clipboard, audio, sockets) are dylibs
 built from *this* repo:
 
 ```sh
-cd path/to/Macaros
+cd path/to/pomaros-hosted
 make cocoametal-dylib pasteboard-dylib coreaudio-dylib bsdsock-dylib   # -> build/*.dylib
 ```
 
@@ -169,13 +168,13 @@ Then deploy and boot a live Cocoa/Metal window:
 AROS_CTL_STARTUP_MODE=desktop ./graft/run-window.sh  # boot AROS to the Workbench desktop
 ```
 
-A window titled "AROS" opens. Click it for keyboard focus and type at the shell.
+A window titled "PomAROS" opens. Click it for keyboard focus and type at the shell.
 `run-window.sh` with no env var boots to a CLI; `desktop` mode boots Wanderer.
 
 Package it as a double-clickable app:
 
 ```sh
-./graft/make-aros-app.sh                              # -> build/Macaros.app
+./graft/make-aros-app.sh                              # -> build/PomAROS.app
 ```
 
 Or drive it **headlessly** (no window-server session, no Screen-Recording

@@ -90,7 +90,7 @@ Invoke as `aros-ctl <cmd> [args]`.
 | `run` | Boot AROS windowed in the background with the control FIFO; log to `$LOG`, pid to `$PIDF`. Stages a persistent desktop/session (see [design.md](design.md) → "What `run` sets up"). If an instance for the same boot tree is already alive, it refuses instead of replacing it. |
 | `status` | Report whether the app is running, which pid source was used, whether the control FIFO/log exist, and whether crash markers are already present. Exit 0 = running/clean, 1 = stopped, 2 = running but stale control/log or crash markers. |
 | `stop` | Ask the guest to power down (`CM_OPT_POWER`), then TERM/KILL the pidfile pid and any process bound to **this boot tree**, remove the FIFO + pidfile, and report how many instances it stopped. |
-| `kill` | Force teardown. Skips the graceful power-down and is **not** scoped to the current boot tree: it signals every hosted-AROS process by name (`Macaros`/`AROSBootstrap`), reports each pid, and clears the FIFO + pidfile. Use it when a crashed app left an instance wedged and `run` will not open a fresh window. Machine-wide, so prefer `stop` if you run parallel isolated instances. |
+| `kill` | Force teardown. Skips the graceful power-down and is **not** scoped to the current boot tree: it signals every hosted-AROS process by name (`PomAROS`/`AROSBootstrap`), reports each pid, and clears the FIFO + pidfile. Use it when a crashed app left an instance wedged and `run` will not open a fresh window. Machine-wide, so prefer `stop` if you run parallel isolated instances. |
 | `wait [SECS]` | `sleep` (default 1) — let AROS run/render between actions. |
 
 `run` is deliberately non-destructive. To replace a session, use `stop` or
@@ -100,7 +100,7 @@ The latter is useful for automated development loops; it is never implicit.
 When `AROS_CTL_STARTUP_FILE` is supplied, the file is treated as a payload by
 default: `aros-ctl` boots the persistent desktop first, copies the file into the
 guest `S:` volume, and executes it there. The payload finishing does not end the
-Macaros session. Isolated harnesses that intentionally own the entire guest
+PomAROS session. Isolated harnesses that intentionally own the entire guest
 lifecycle must opt into the old replacement semantics with
 `AROS_CTL_STARTUP_FILE_MODE=replace`.
 
@@ -162,7 +162,7 @@ repo root, so in-repo artifacts are found wherever the checkout lives):
 | `AROS_CTL_BOOTD` | *auto-discovered* | the AROS `boot/darwin` dir (`AROSBootstrap` + `.conf`) |
 
 `BOOTD` is a build output that lives outside the repo, so `run` discovers it
-(`$AROS_CTL_BOOTD` → `${BUILD:-~/Source/aros-project/aros-build}/… → legacy /tmp/arosbuild/…` → in-repo `build/AROS/boot/darwin`
+(`$AROS_CTL_BOOTD` → `${BUILD:-~/Source/aros-project/Build/pomaros-hosted}/… → legacy /tmp/arosbuild/…` → in-repo `build/AROS/boot/darwin`
 → newest scratchpad build). If none is found, `run` prints how to set it or build one.
 
 ## Usage recipes
@@ -251,7 +251,7 @@ same build works from Terminal.
 
 ## Where the code lives
 
-**Host side (this repo — `Macaros`):**
+**Host side (this repo — `PomAROS`):**
 
 - [graft/aros-ctl](../../../graft/aros-ctl) — the CLI: subcommands → FIFO lines, the
   `char2vk` table, the `run`/`stop` lifecycle and boot staging, PPM→PNG.
@@ -263,7 +263,7 @@ same build works from Terminal.
 - [hosted/cocoametal/cocoametal.h](../../../hosted/cocoametal/cocoametal.h) — the
   `CMEvent` / `CM_EV_*` / `CM_MOD_*` ABI the injected events ride.
 
-**AROS side (`aros-upstream`, branch `aarch64-darwin-graft`):**
+**AROS side (`aros-core-pomaros`, branch `aarch64-darwin-graft`):**
 
 - `arch/all-darwin/hidd/cocoa/cocoa_input.c` — polls `cm_pump_events` each VBlank,
   maps each macOS virtual keycode through `cocoa_keymap[]` to an Amiga `RAWKEY` (+

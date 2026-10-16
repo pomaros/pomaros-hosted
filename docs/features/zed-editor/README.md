@@ -71,7 +71,7 @@ What this means in practice:
 - **The GPUI backend we wrote (`gpui_aros`) is Apache-2.0** and stays clean to
   publish, exactly like the Feraille work. Nothing about the platform port is
   encumbered.
-- **A GPL Zed-crate binary can still ship in the Macaros release — by
+- **A GPL Zed-crate binary can still ship in the PomAROS release — by
   aggregation, not linking.** GPL's mere-aggregation clause allows a standalone
   GPL binary (e.g. `AEdit-zed`) on the same DMG as the permissive binaries;
   what's disallowed is linking GPL crates *into* one of the permissive/
@@ -82,7 +82,7 @@ What this means in practice:
   release" — that overstated it; aggregation is fine, linking-in is not.)
 - **The gpui-component path avoids the GPL entirely.** An Apache-2.0 editor on
   an Apache-2.0 platform — no ports diff, no GPL notice, folds straight into
-  Macaros. This is what `~/Source/aros-project/aros-editor` is, and it stays the default.
+  PomAROS. This is what `~/Source/aros-project/aros-editor` is, and it stays the default.
 - **Provenance rules still apply** ([CLEANROOM.md](../CLEANROOM.md)): whichever
   path, our own AROS glue carries no third-party product names and no AI
   attribution. The upstream licenses of the vendored crates are theirs and stay
@@ -123,7 +123,7 @@ distributable) with **one snag: three GPL-3.0-or-later crates in the graph —
   substance but the metadata field is unset — worth pinning down before a formal
   release, not a blocker.
 
-Takeaway for shipping Macaros: the Apache path is distributable, but do the
+Takeaway for shipping PomAROS: the Apache path is distributable, but do the
 `sum_tree` severance (and a `cargo-deny`/`cargo-about` pass) before treating any
 gpui-based binary as formally GPL-free.
 
@@ -179,7 +179,7 @@ host language server. Staging:
   bsdsocket park, and named an async-layer OS fix as the critical path. **That
   was wrong** — a test-harness artifact. The `PollFd` park
   (`bsdsocket_util.c`) polls every ~20 ms (`Delay(1)`) with a level-triggered
-  kqueue pump (`Macaros/hosted/bsdsocket/bsdsock_pump.c`) that raises the
+  kqueue pump (`PomAROS/hosted/bsdsocket/bsdsock_pump.c`) that raises the
   task signal on readiness, so recv wakes promptly. The real cause of the hangs
   was the **host bridge**: it served one connection at a time and blocked, so
   repeated test boots left half-closed connections and orphaned `rust-analyzer`
@@ -448,8 +448,8 @@ Consequences for the editor:
   new OS work; the port work is a TCP arm in the transport (Zed's `lsp.rs` is
   `Stdio::piped` today). This is independent of, and cheaper than, mounting
   `PIPE:`.
-- **Design decision: embed the language server in the Macaros host.** Rather
-  than asking the user to launch `rust-analyzer` by hand, the Macaros host app
+- **Design decision: embed the language server in the PomAROS host.** Rather
+  than asking the user to launch `rust-analyzer` by hand, the PomAROS host app
   (which already runs AROS as a macOS process) optionally spawns the language
   server as a native **host** child process and exposes it on a loopback TCP
   port; the AROS editor connects over the bsdsocket bridge. This puts all the
@@ -583,7 +583,7 @@ acceptance test, phrased AROS-idiom-neutral. Core editing needs none of them.
 
 `fork`/`select`/`poll`/`mmap`/`dlopen` will not be implemented POSIX-style; use
 AROS idioms. Mapping: spawn via `SystemTagList SYS_Asynch` / `CreateNewProc` +
-the `PIPE:` handler that already exists in `aros-upstream`
+the `PIPE:` handler that already exists in `aros-core-pomaros`
 (`workbench/fs/pipe`) but is unmounted on the hosted boot; readiness via exec
 signals (`SetSocketSignals`/`WaitSelect` in the bsdsocket API) behind a vendored
 `polling`-crate AROS backend; wasm via wasmtime's Pulley interpreter (no

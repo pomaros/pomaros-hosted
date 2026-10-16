@@ -30,8 +30,8 @@ keyword** (see below) — and that keyword is ours, never handed to AROS's `Moun
 ## Quick start
 
 ```sh
-~/Source/aros-project/Macaros/graft/run-window.sh            # shares ~/AROS/Shared
-~/Source/aros-project/Macaros/graft/run-window.sh ~/Work     # share a different folder
+~/Source/aros-project/pomaros-hosted/graft/run-window.sh            # shares ~/AROS/Shared
+~/Source/aros-project/pomaros-hosted/graft/run-window.sh ~/Work     # share a different folder
 ```
 
 This boots AROS in a Mac window and maps the folder as **two** volumes:
@@ -189,7 +189,7 @@ metadata sidecar are all layered on top of that, inside the handler.
 
 ## Where the code lives
 
-In the AROS source tree (`aros-upstream`, branch `aarch64-darwin-graft`):
+In the AROS source tree (`aros-core-pomaros`, branch `aarch64-darwin-graft`):
 
 - `arch/all-hosted/filesys/emul_handler/` — portable core: packet dispatch,
   `new_volume` (device-string + `;WRITE` parse), the launcher (`mount_hostvol`),

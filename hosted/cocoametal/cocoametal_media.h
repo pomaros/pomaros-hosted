@@ -6,7 +6,7 @@
  * writes an AROS mount description into the shared directory, and records the
  * grant in aros-host.conf by the medium's identity, so a replug still resolves.
  *
- * The same two artifacts are written by graft/macaros-media (the command-line
+ * The same two artifacts are written by graft/pomaros-media (the command-line
  * half), and MediaWatch inside AROS mounts what appears. See
  * docs/features/host-media/README.md.
  */

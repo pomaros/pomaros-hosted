@@ -3,7 +3,7 @@
 > Written 2026-07-02 after a file-by-file correctness review of the std pal
 > (`rust-aros/library/std/src/sys/**/aros.rs`, 13 files) and the C glue here
 > (`hosted/rust/aros_*_glue.c`), every finding verified against the AROS headers
-> in `../aros-upstream`. Status doc: [STD-PORT.md](STD-PORT.md). The Rust-on-68k
+> in `../aros-core-pomaros`. Status doc: [STD-PORT.md](STD-PORT.md). The Rust-on-68k
 > track lives in [../jit68k/rust68k/](../jit68k/rust68k/README.md).
 
 ## 0. 2026-07-07 pal additions (verified live)
@@ -76,7 +76,7 @@ Ordered by suggested priority.
    unknown command**, so `Command::output("NoSuchCmd")` looks like a clean
    success (`code=Some(0)`); a shell backend should surface rc >= 10 there
    (AmigaOS semantics) or fail the line. OS-side: the Shell's unknown-command
-   error path in `../aros-upstream` (not a pal bug — SystemTagList returned 0,
+   error path in `../aros-core-pomaros` (not a pal bug — SystemTagList returned 0,
    not -1). Until fixed, callers cannot distinguish "ran fine" from "no such
    command".
 

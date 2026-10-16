@@ -1,6 +1,6 @@
 # 68k JIT console demo
 
-Run this from `/Users/jkn/Source/aros-project/Macaros`. It demonstrates an unchanged
+Run this from `/Users/jkn/Source/aros-project/pomaros-hosted`. It demonstrates an unchanged
 68k LhA archive/list/extract cycle, then starts `AMIGAPeek` to show the safe
 report for a legacy program that dynamically reaches Amiga hardware.
 
@@ -14,7 +14,7 @@ Prerequisites:
 ## Prepare and launch
 
 ```sh
-cd /Users/jkn/Source/aros-project/Macaros
+cd /Users/jkn/Source/aros-project/pomaros-hosted
 
 DEMO="$HOME/AROS/Shared/68k-demo"
 mkdir -p "$DEMO/unpack"

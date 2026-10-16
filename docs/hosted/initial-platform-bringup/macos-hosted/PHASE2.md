@@ -1,7 +1,7 @@
 # Phase 2 — Hosted on macOS
 
 > **Historical document.** These completed spikes established the hosted model
-> that Macaros now uses. They remain runnable regression examples and a template
+> that PomAROS now uses. They remain runnable regression examples and a template
 > for a new hosted platform; current subsystem documentation lives in the
 > [feature index](../../../features/README.md).
 

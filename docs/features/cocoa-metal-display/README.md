@@ -41,7 +41,7 @@ mode ladder does **not** move the boot default; the first ladder entry is only
 the default monitor *sync*. It matters because a resolution change needs the
 desktop idle, so the boot default is the one that has to be right.
 
-This is the display half of **Macaros**; the first-class Mac app around it (menu
+This is the display half of **PomAROS**; the first-class Mac app around it (menu
 bar, About, icon, Settings) is the [host app shell](../host-app-shell/README.md).
 
 ## Docs

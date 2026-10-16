@@ -39,7 +39,7 @@ No CoreAudio/AudioToolbox backend exists, in this repo or upstream. Evidence:
   touch audio. `grep -rniE 'coreaudio|audiotoolbox|audiounit|audioqueue|AHIsub|ahi'`
   over `.` returns nothing.
 - Upstream: `grep -rIn -i 'coreaudio|audiotoolbox|audiounit|audioqueue|auhal'` over
-  `../aros-upstream` returns **only** unrelated USB-audio-class hits
+  `../aros-core-pomaros` returns **only** unrelated USB-audio-class hits
   — `struct NepAudioUnit` in `rom/usb/classes/audio/usbaudio.h` (a USB descriptor
   type, nothing to do with Apple's AudioUnit). So AROS has never had a macOS audio
   backend.
@@ -459,7 +459,7 @@ rate, right channels, no dropouts".
 
 ## References
 
-AROS upstream (`../aros-upstream`):
+AROS upstream (`../aros-core-pomaros`):
 - AHI sub-driver interface: `workbench/devs/AHI/Include/SFD/ahi_sub_lib.sfd`,
   `workbench/devs/AHI/Include/C/libraries/ahi_sub.h` (`struct AHIAudioCtrlDrv`,
   `AHISF_*`, `ahiac_MixerFunc`/`PlayerFunc`/`BuffSamples`/`BuffSize`/`MixFreq`).

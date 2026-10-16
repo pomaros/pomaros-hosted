@@ -46,7 +46,7 @@ The port spans three source trees. The actual Rust port is small and lives in a
 |---|---|---|
 | **1. The `std` port** | `../rust-aros` | A git clone of the Rust std source. The whole port is **9 files / ~194 lines** here = the eventual rust-lang/rust PR. **Not pushed.** |
 | **2. Host glue** (this repo) | `hosted/rust/` | The test crate + link recipe that build/run the port on AROS. |
-| **3. The AROS OS** | `../aros-upstream` (`aarch64-darwin-graft`) | `exec`/`kernel`/`posixc` — provides `malloc`/`write`/… that `std` links against. |
+| **3. The AROS OS** | `../aros-core-pomaros` (`aarch64-darwin-graft`) | `exec`/`kernel`/`posixc` — provides `malloc`/`write`/… that `std` links against. |
 
 **The connection:** the toolchain's `rust-src` is a **symlink** to tree 1, so
 `-Zbuild-std` compiles `std` (including our `aros` pal) straight from the clone:
@@ -58,7 +58,7 @@ The port spans three source trees. The actual Rust port is small and lives in a
 
 1. **The genuinely-hard low-level layer is the AROS OS itself** — the aarch64
    context switch, MMU, exception model, and the `posixc` C runtime. That is in
-   `aros-upstream` and is **already built**. Rust `std` does not re-implement any of
+   `aros-core-pomaros` and is **already built**. Rust `std` does not re-implement any of
    it; it just calls `posixc`.
 2. **Rust's platform layer (the "pal") is thin per-feature glue on top.** `std`
    factors into ~23 `sys/<feature>` modules, and ships a complete `unsupported`
@@ -188,7 +188,7 @@ run `cargo clean` first — cargo caches the std build and won't re-run `build.r
   - the **trap backtrace** (free, always on) names the faulting `module function+offset`;
   - **MUNGWALL** (`AROS_HOST_ARGS=mungwall ./graft/aros-ctl run`) guards every
     `AllocMem`/pool alloc — the right tool for a suspected allocator/`std` memory bug;
-  - **host lldb** (`lldb -p "$(cat /tmp/aros-cm.pid)"`) — `Macaros` is a darwin
+  - **host lldb** (`lldb -p "$(cat /tmp/aros-cm.pid)"`) — `PomAROS` is a darwin
     process, so lldb catches the fault address before AROS's guru;
   - **`hosted/x18probe`** — the host-ABI probe that proved the `x18` clobber; rerun it
     to re-check the platform on a new macOS.
@@ -261,7 +261,7 @@ Remaining pal pieces / disclosed tier-3 gaps (the full list is in
    `SystemTagList` is line-oriented. `output()`/`status()`/env/cwd done.
 2. **`std::net`** `set_nonblocking`/timeouts (library park model + `fd_set` ABI risk),
    IPv6 (`AF_INET6` numbering). `try_clone` needs `bsdsocket.library` deployed to
-   verify live (only headers are in `~/Source/aros-project/aros-build`; build it with
+   verify live (only headers are in `~/Source/aros-project/Build/pomaros-hosted`; build it with
    `make workbench-libs-bsdsocket` and copy into `.../AROS/Libs/`, then the RS3e UDP
    `try_clone` check passes — self-contained, no host server).
 3. **`fs`** `File::set_times`/`set_times_nofollow` (no `futimes`/`lutimes`),

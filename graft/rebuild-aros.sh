@@ -6,9 +6,9 @@
 # (the expensive part is preserved at $AROS_CROSSTOOLS).
 #
 # Stable locations (canonical, out of /tmp so the periodic cleaner can't eat them):
-#   AROS_BUILD        ~/Source/aros-project/aros-build          the AROS build tree / SDK / boot image
+#   AROS_BUILD        ~/Source/aros-project/Build/pomaros-hosted          the AROS build tree / SDK / boot image
 #   AROS_CROSSTOOLS   ~/Source/aros-project/aros-crosstools     the patched clang/lld + compiler-rt
-#   AROS_SRC          ~/Source/aros-project/aros-upstream (branch: crash-containment)
+#   AROS_SRC          ~/Source/aros-project/aros-core-pomaros (branch: pomaros-common)
 #
 #   graft/rebuild-aros.sh                 # build the whole boot+desktop set
 #   TARGETS="kernel-dos kernel-intuition" graft/rebuild-aros.sh   # subset
@@ -19,9 +19,11 @@
 # and builds LLVM from source).
 set -uo pipefail
 
-AROS_SRC="${AROS_SRC:-$HOME/Source/aros-project/aros-upstream}"
-AROS_BUILD="${AROS_BUILD:-$HOME/Source/aros-project/aros-build}"
-AROS_CROSSTOOLS="${AROS_CROSSTOOLS:-$HOME/Source/aros-project/aros-crosstools}"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+AROS_SRC="${AROS_SRC:-$ROOT/../aros-core-pomaros}"
+AROS_BUILD="${AROS_BUILD:-${BUILD:-$ROOT/../Build/pomaros-hosted}}"
+AROS_CROSSTOOLS="${AROS_CROSSTOOLS:-${XT:-$ROOT/../aros-crosstools}}"
+AROS_SRC="$AROS_SRC" "$ROOT/graft/check-core" || exit $?
 LOGDIR="${LOGDIR:-$AROS_BUILD/rebuild-logs}"
 mkdir -p "$LOGDIR"
 
@@ -29,12 +31,18 @@ mkdir -p "$LOGDIR"
 # `objcopy` name exists on PATH (symlinked next to llvm-objcopy, a stable dir).
 [ -e "$AROS_CROSSTOOLS/bin/objcopy" ] || \
     ln -sf "$AROS_CROSSTOOLS/bin/llvm-objcopy" "$AROS_CROSSTOOLS/bin/objcopy"
-export PATH="$AROS_CROSSTOOLS/bin:/opt/homebrew/bin:$PATH"
+AROS_BUILD_VENV="${AROS_BUILD_VENV:-$ROOT/../build-venv}"
+export PATH="$AROS_CROSSTOOLS/bin:$AROS_BUILD_VENV/bin:/opt/homebrew/opt/make/libexec/gnubin:/opt/homebrew/bin:$PATH"
 
 [ -x "$AROS_CROSSTOOLS/bin/clang" ] || { echo "FATAL: no crosstools at $AROS_CROSSTOOLS" >&2; exit 2; }
 [ -f "$AROS_BUILD/Makefile" ] || { echo "FATAL: $AROS_BUILD is not a configured build tree (no Makefile). Configure it first:" >&2
     echo "  cd $AROS_BUILD && $AROS_SRC/configure --target=darwin-aarch64 --with-toolchain=llvm --with-aros-toolchain=yes --with-aros-toolchain-install=$AROS_CROSSTOOLS --without-x --with-resolution=1366x768x8" >&2
     exit 3; }
+
+if ! grep -Eq -- '^[^#]*-ffixed-x18' "$AROS_BUILD/config/make.cfg"; then
+    echo "FATAL: hosted configuration must reserve x18 (-ffixed-x18)" >&2
+    exit 4
+fi
 
 # A git branch switch in $AROS_SRC touches configure's mtime without changing
 # it; the top Makefile then rejects every make with "The configure script must

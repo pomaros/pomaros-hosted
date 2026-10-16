@@ -1,6 +1,6 @@
 # AROS AArch64 — Architecture and Decision Log
 
-This is the chronological record of the work that led to Macaros. It preserves
+This is the chronological record of the work that led to PomAROS. It preserves
 design rationale and debugging evidence; current instructions live in the
 [feature index](../features/README.md) and root
 [getting-started guide](../../GETTING-STARTED.md).
@@ -107,7 +107,7 @@ bring-up there's no stack trace — markers are the agent's ground-truth "did it
 get further than last time," and one-per-milestone lets it localize a regression.
 
 ### Grounded: the state of AArch64 in AROS upstream (and what we mirror)
-Checked the AROS tree (`../aros-upstream`, shallow clone) before
+Checked the AROS tree (`../aros-core-pomaros`, shallow clone) before
 writing native code. Findings: `arch/aarch64-all` is **header-only scaffolding**
 (8 files / 452 lines) configured as a *hosted-Linux* flavour
 (`aros_flavour="emulation"`, `aarch64-linux-gnueabihf-`) that was never finished —
@@ -699,7 +699,7 @@ pump + drain are exactly what the poll needs).
   conf, per-task SocketBase, hostlib wiring under Disable(), the data-path LVOs with
   the timer-poll park, sockopt/misc, stubs) compiles + links end-to-end against the
   darwin-aarch64 crosstools → a 34KB `AROS/Libs/bsdsocket.library`. Committed on
-  `aarch64-darwin-graft` in ../aros-upstream. Build-bugs found+fixed along the way:
+  `aarch64-darwin-graft` in ../aros-core-pomaros. Build-bugs found+fixed along the way:
   `HostLibBase` field-vs-`#define` clash (→ field `hostlib`), missing
   `<sys/errno.h>`/`TICKS_PER_SEC`, two `*/`-in-comment terminations, and the
   AmiTCP-vs-libc `fd_set` collision (forward-declared in the stubbed WaitSelect).
@@ -759,11 +759,11 @@ pump + drain are exactly what the poll needs).
 
 ## 2026-06-28 — [LED+THEME] PLAN: Amiga status-bar LEDs + a Dark/Light/System theme
 
-Host-layer feature for the Macaros window: turn the footer into a proper **status
+Host-layer feature for the PomAROS window: turn the footer into a proper **status
 bar** with Amiga-style **Power + Activity LEDs**, and add a **theme switch
 (Dark / Light / System)** so the whole app — title bar, menus, Settings, and the
 footer — reads as one coherent appearance. Worked under /slow-ai (gates first).
-All host-side in `hosted/cocoametal/`; **no `../aros-upstream` change, ABI stays 2.**
+All host-side in `hosted/cocoametal/`; **no `../aros-core-pomaros` change, ABI stays 2.**
 
 ### Decisions (answered by John before code)
 - **Second LED = Power + Activity, host-only.** Power is real (running + the
@@ -951,13 +951,13 @@ Decisions / findings that landed during the build:
    method (bench-run's custom Startup-Sequence cold-start-halts on `/tmp/arosbuild`).
 2. **The big one: merge `origin/master` into the graft + full rebuild + boot-verify.**
 
-**Merge facts:** graft `../aros-upstream` branch `aarch64-darwin-graft` HEAD `a3253c3d`;
+**Merge facts:** graft `../aros-core-pomaros` branch `aarch64-darwin-graft` HEAD `a3253c3d`;
 `origin/master` `58b02588` (28-commit delta, mostly `stdc`/`posixc` conformance by
 kalamatee + WiFi/raspi/AROSTCP by bsek); merge-base `5c78c7d5`. The known `__vcformat`
 conflict is GONE (I reverted `__vcformat.c` to original-gated, so kalamatee's `fb49cfa4`
 should merge clean). Watch for other conflicts in `stdc`/`posixc`/`config/make.tmpl`.
-Reference worktree (detached at master) at `../aros-upstream-master`; remove with
-`git -C ../aros-upstream worktree remove ../aros-upstream-master`.
+Reference worktree (detached at master) at `../aros-core-pomaros-master`; remove with
+`git -C ../aros-core-pomaros worktree remove ../aros-core-pomaros-master`.
 
 **Build a module (or full):**
 ```sh
@@ -981,7 +981,7 @@ Boots crash intermittently (known app bug): retry a couple of times. NOT my code
 (`hosted/ffmpeg/`, libavutil 60.26.102; proof `run/darwin-aarch64/proofs/ff0-on-aros-20260630.png`);
 `-D_GNU_SOURCE` replaced the compat shim; toolchain/tree-discovery fixed; `stdcio.library`
 built+installed into `/tmp/arosbuild`; `__vcformat` link-layer fix committed (`a3253c3d`,
-printf `%f` verified). `hosted/ffmpeg/*` changes in the Macaros repo are UNCOMMITTED
+printf `%f` verified). `hosted/ffmpeg/*` changes in the PomAROS repo are UNCOMMITTED
 (on disk, safe) — commit when ready.
 
 **Caveat to close in the rebuild:** the `__vcformat`/LDFLAGS fix was verified on one

@@ -79,7 +79,7 @@ int main(void) {
         [[NSFileManager defaultManager] removeItemAtPath:work error:NULL];
         [[NSFileManager defaultManager] createDirectoryAtPath:work
                                  withIntermediateDirectories:YES attributes:nil error:NULL];
-        setenv("MACAROS_MEDIA_DIR", [share stringByAppendingPathComponent:@".macaros-media"].UTF8String, 1);
+        setenv("POMAROS_MEDIA_DIR", [share stringByAppendingPathComponent:@".pomaros-media"].UTF8String, 1);
         setenv("AROS_HOST_CONF", conf.UTF8String, 1);
         [@"memory 1280\n" writeToFile:conf atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 

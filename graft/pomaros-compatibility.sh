@@ -1,6 +1,6 @@
 #!/bin/sh
-# Macaros end-user compatibility check. This file is copied into release DMGs as
-# "Check Macaros Compatibility.command", so keep it dependency-free and usable
+# PomAROS end-user compatibility check. This file is copied into release DMGs as
+# "Check PomAROS Compatibility.command", so keep it dependency-free and usable
 # by double-clicking in Finder.
 set -u
 
@@ -38,7 +38,7 @@ human_kib() {
 
 case "${1:-}" in
     -h|--help)
-        printf 'Usage: %s\n\nChecks whether this Mac can run the Macaros Apple Silicon release.\n' "$(basename "$0")"
+        printf 'Usage: %s\n\nChecks whether this Mac can run the PomAROS Apple Silicon release.\n' "$(basename "$0")"
         exit 0
         ;;
     "") ;;
@@ -46,15 +46,15 @@ case "${1:-}" in
 esac
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-APP="$SCRIPT_DIR/Macaros.app"
+APP="$SCRIPT_DIR/PomAROS.app"
 
-printf 'Macaros compatibility check\n'
+printf 'PomAROS compatibility check\n'
 printf '===========================\n'
 
 if [ "$(uname -s 2>/dev/null || printf unknown)" = "Darwin" ]; then
     pass "macOS detected"
 else
-    fail "Macaros requires macOS"
+    fail "PomAROS requires macOS"
 fi
 
 hardware_arm64=$(/usr/sbin/sysctl -n hw.optional.arm64 2>/dev/null || printf 0)
@@ -77,7 +77,7 @@ memory_gib=$((memory_bytes / 1073741824))
 if [ "$memory_gib" -ge "$RECOMMENDED_MEMORY_GIB" ]; then
     pass "${memory_gib} GiB memory (8 GiB or more recommended)"
 elif [ "$memory_gib" -ge "$MIN_MEMORY_GIB" ]; then
-    warn "${memory_gib} GiB memory; Macaros should run, but 8 GiB or more is recommended"
+    warn "${memory_gib} GiB memory; PomAROS should run, but 8 GiB or more is recommended"
 else
     fail "at least ${MIN_MEMORY_GIB} GiB memory is required (found ${memory_gib} GiB)"
 fi
@@ -91,17 +91,17 @@ fi
 if /bin/launchctl print "gui/$(id -u)" >/dev/null 2>&1; then
     pass "graphical login session available"
 else
-    warn "no graphical login session detected; Macaros needs one to show its desktop"
+    warn "no graphical login session detected; PomAROS needs one to show its desktop"
 fi
 
 if [ -d "$APP" ]; then
-    pass "Macaros.app is present beside this checker"
+    pass "PomAROS.app is present beside this checker"
 
-    inner_binary="$APP/Contents/Resources/AROS/boot/darwin/Macaros"
+    inner_binary="$APP/Contents/Resources/AROS/boot/darwin/PomAROS"
     if [ -f "$inner_binary" ] && /usr/bin/file "$inner_binary" 2>/dev/null | /usr/bin/grep -q 'arm64'; then
-        pass "bundled Macaros runtime is arm64"
+        pass "bundled PomAROS runtime is arm64"
     else
-        fail "the bundled arm64 Macaros runtime is missing or invalid"
+        fail "the bundled arm64 PomAROS runtime is missing or invalid"
     fi
 
     emu68k_engine="$APP/Contents/Frameworks/libemu68k.dylib"
@@ -139,22 +139,22 @@ if [ -d "$APP" ]; then
         warn "application signature is absent or invalid; use the notarized release image"
     fi
 else
-    warn "Macaros.app is not beside this checker, so package integrity and install size were not checked"
+    warn "PomAROS.app is not beside this checker, so package integrity and install size were not checked"
 fi
 
 state_parent="$HOME/Library/Application Support"
 if [ -d "$state_parent" ] && [ -w "$state_parent" ]; then
     pass "user application-data folder is writable"
 elif [ -d "$HOME/Library" ] && [ -w "$HOME/Library" ]; then
-    pass "user Library is writable (Macaros will create its application-data folder)"
+    pass "user Library is writable (PomAROS will create its application-data folder)"
 else
-    fail "Macaros cannot write its per-user state under ~/Library/Application Support"
+    fail "PomAROS cannot write its per-user state under ~/Library/Application Support"
 fi
 
 printf '\n'
 if [ "$failures" -eq 0 ]; then
     if [ "$warnings" -eq 0 ]; then
-        printf 'RESULT: COMPATIBLE — this Mac meets the Macaros requirements.\n'
+        printf 'RESULT: COMPATIBLE — this Mac meets the PomAROS requirements.\n'
     else
         printf 'RESULT: COMPATIBLE WITH %d WARNING(S) — review the messages above.\n' "$warnings"
     fi

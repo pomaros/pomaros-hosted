@@ -5,7 +5,7 @@
 # (Darwin platform register), spec startfiles/libs suppressed and this tree's
 # startup.o + lib group supplied explicitly.
 #
-#   AROS_BUILD       SDK tree root or its bin/darwin-aarch64 dir (default ~/Source/aros-project/aros-build)
+#   AROS_BUILD       SDK tree root or its bin/darwin-aarch64 dir (default ~/Source/aros-project/Build/pomaros-hosted)
 #   AROS_CROSSTOOLS  patched clang/lld (default ~/Source/aros-project/aros-crosstools)
 #
 # Output: hosted/exwalk/TimerTest (copy into the boot image's C: to deploy).
@@ -13,7 +13,7 @@ set -eu
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 
-T="${AROS_BUILD:-$HOME/Source/aros-project/aros-build}"
+T="${AROS_BUILD:-$HOME/Source/aros-project/Build/pomaros-hosted}"
 [ -d "$T/AROS/Developer/include" ] || T="$T/bin/darwin-aarch64"
 [ -d "$T/AROS/Developer/include" ] || {
     echo "build.sh: no AROS SDK at \$AROS_BUILD (need AROS/Developer/include)" >&2

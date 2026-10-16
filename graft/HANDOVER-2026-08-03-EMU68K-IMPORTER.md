@@ -29,9 +29,9 @@ GadTools review queue alone.
 ## Repositories and local rules
 
 - Integration/tooling repository:
-  `/Users/jkn/Source/aros-project/Macaros`, branch `main`
+  `/Users/jkn/Source/aros-project/pomaros-hosted`, branch `main`
 - AROS source repository:
-  `/Users/jkn/Source/aros-project/aros-upstream`, branch
+  `/Users/jkn/Source/aros-project/aros-core-pomaros`, branch
   `aarch64-darwin-graft`
 - Stable build tree: `/Users/jkn/Source/aros-project/aros-build`
 - Candidate legacy corpus: `/tmp/aros-68k-candidates/corpus`
@@ -195,7 +195,7 @@ still stops at GadTools LVO 8.
 
 ### Symptom
 
-GUI fixtures can complete all 68k bridge calls and cleanup, then `Macaros`
+GUI fixtures can complete all 68k bridge calls and cleanup, then `PomAROS`
 faults during native graphics work. Temporary bridge tracing previously proved
 that the final 68k call returned, per-run bridge state was cleaned, the host run
 was freed, the DOS base was closed, and the handler returned. The fault is
@@ -204,10 +204,10 @@ therefore not evidence that `LayoutMenusA` is absent.
 The crash is reproducible in macOS reports under:
 
 ```text
-~/Library/Logs/DiagnosticReports/Macaros-2026-08-03-*.ips
+~/Library/Logs/DiagnosticReports/PomAROS-2026-08-03-*.ips
 ```
 
-The useful report is `Macaros-2026-08-03-074848.ips`. Its AROS PCs are stable
+The useful report is `PomAROS-2026-08-03-074848.ips`. Its AROS PCs are stable
 relative to the end of the first hosted RAM block:
 
 ```text
@@ -238,7 +238,7 @@ the allocation boundary before release.
 
 ### Uncommitted diagnostic patch
 
-`/Users/jkn/Source/aros-project/aros-upstream/rom/hidds/gfx/gfx_bitmapclass.c` currently has
+`/Users/jkn/Source/aros-project/aros-core-pomaros/rom/hidds/gfx/gfx_bitmapclass.c` currently has
 an uncommitted diagnostic modification. It allocates 256-byte prefix/suffix
 guards around the shared pixel buffer and checks them after:
 
@@ -291,7 +291,7 @@ Expected dirty state at handover:
 
 ```text
 aros-aarch64:  M graft/68k-corpus
-aros-upstream: M rom/hidds/gfx/gfx_bitmapclass.c
+aros-core-pomaros: M rom/hidds/gfx/gfx_bitmapclass.c
 ```
 
 This handover document itself becomes an additional uncommitted file until it

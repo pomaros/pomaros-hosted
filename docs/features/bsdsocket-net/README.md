@@ -30,7 +30,7 @@ Screenshots of each verdict are regenerated locally by the smoke run
 ## Quick start
 
 ```sh
-cd ~/Source/aros-project/Macaros
+cd ~/Source/aros-project/pomaros-hosted
 make bsdsock-dylib                          # build the host pump shim
 ./graft/aros-ctl deploy                     # deploy it to ~/lib for HostLib_Open
 graft/bsdsock-livetest.sh                   # host unit tests + the live nettest
@@ -106,7 +106,7 @@ See [design.md → "What proves the internet works"](design.md) for the full mat
 
 ## Where the code lives
 
-**Host side (this repo — `Macaros`):**
+**Host side (this repo — `PomAROS`):**
 
 - [hosted/bsdsocket/](../../../hosted/bsdsocket/) — `bsdsock_pump.c` (the kqueue
   readiness pump + the `ps_create_cb` wake seam), `bsdsock_shim.c` (non-blocking
@@ -117,7 +117,7 @@ See [design.md → "What proves the internet works"](design.md) for the full mat
 - [hosted/bsdsocket/n5b/](../../../hosted/bsdsocket/n5b/) — the AROS test clients
   (`socktest.c`, `nettest.c`) and the host `echo_server.c`, kept for reproducibility.
 
-**AROS side (`aros-upstream`, branch `aarch64-darwin-graft`):** the new module
+**AROS side (`aros-core-pomaros`, branch `aarch64-darwin-graft`):** the new module
 `arch/all-unix/bsdsocket/` — a host-passthrough `bsdsocket.library`:
 
 - `bsdsocket.conf` — the genmodule LVO functionlist (AmiTCP offsets, copied verbatim).

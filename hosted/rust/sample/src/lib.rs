@@ -1,4 +1,4 @@
-//! RustHello -- a friendly `std` demo bundled with Macaros.
+//! RustHello -- a friendly `std` demo bundled with PomAROS.
 //!
 //! Real Rust `std` running on AROS, hosted on Apple Silicon. C owns AROS startup
 //! (`hello_main.c`) and calls `rust_hello_main`; everything below goes through the
@@ -10,7 +10,7 @@ use std::io::Write;
 pub extern "C" fn rust_hello_main() -> i32 {
     println!("+-----------------------------------------------+");
     println!("|  Hello from Rust std -- running on AROS!       |");
-    println!("|  arm64 / Apple Silicon, hosted by Macaros      |");
+    println!("|  arm64 / Apple Silicon, hosted by PomAROS      |");
     println!("+-----------------------------------------------+");
     println!("Each line below is a live standard-library feature:");
     println!();
@@ -44,7 +44,7 @@ pub extern "C" fn rust_hello_main() -> i32 {
     let note = "MacRW:rust-was-here.txt";
     match std::fs::File::create(note) {
         Ok(mut f) => {
-            let _ = writeln!(f, "Rust std wrote this on AROS. Hi from Macaros! ({} args seen)", args.len());
+            let _ = writeln!(f, "Rust std wrote this on AROS. Hi from PomAROS! ({} args seen)", args.len());
             println!("  fs        : wrote {note} on the Mac share");
         }
         Err(e) => println!("  fs        : could not write {note} ({e})"),
@@ -56,6 +56,6 @@ pub extern "C" fn rust_hello_main() -> i32 {
     println!("  threads   : 3 threads returned {results:?}");
 
     println!();
-    println!("Rust std on AROS: it just works. Enjoy Macaros! :)");
+    println!("Rust std on AROS: it just works. Enjoy PomAROS! :)");
     0
 }

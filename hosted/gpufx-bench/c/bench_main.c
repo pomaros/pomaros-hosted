@@ -3,7 +3,7 @@
  * C owns AROS startup (hands argc/argv to the rust-aros std) and binds the
  * cocoametal 3D shim's GPU compute entry points through <aros/hostbind.h>,
  * exactly the "Shape (b)" pattern in hosted/hostbind. The benchmark runs
- * inside the Macaros host process, so cocoametal.dylib is already loaded and
+ * inside the PomAROS host process, so cocoametal.dylib is already loaded and
  * cm_open has already adopted the display's Metal device+queue as the shared
  * GPU context (cm__gpu_adopt) -- the benchmark measures that same context the
  * window uses, no second device.

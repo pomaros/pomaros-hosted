@@ -485,7 +485,7 @@ bounded follow-on, not claimed here.
 
 ## References
 
-AROS upstream (`../aros-upstream`):
+AROS upstream (`../aros-core-pomaros`):
 - `arch/all-mingw32/bsdsocket/` — the host-passthrough template (Windows): `bsdsocket.conf` (LVO functionlist + regs), `bsdsocket_init.c` (hostlib interface build), `bsdsocket_open.c` + `bsdsocket_intern.h` (per-task `TaskBase`/`SocketBase`), `socket.c` (non-blocking create, `Forbid`/errno), `host_socket.c` (ResolverThread/IRQ — the part darwin replaces), `waitselect.c`/`recv.c`/`connect.c` (the `#warning TODO` stubs).
 - `workbench/network/stacks/AROSTCP/bsdsocket/` — the native AmiTCP stack (not used): `api/amiga_api.h` (`struct SocketBase`), `api/amiga_api.c` (per-task open), `autodoc/auto_socket.c` (WaitSelect/select semantics).
 - `workbench/network/common/include/` — the public contract: `defines/bsdsocket.h` (LVO map), `clib/bsdsocket_protos.h` (signatures), `proto/bsdsocket.h`, `libraries/bsdsocket.h` + `bsdsocket/socketbasetags.h` (`SBTC_*` tags), `sys/socket.h`/`netinet/in.h` (`sockaddr`/`sockaddr_in`), `sys/net_types.h` (`fd_set`/`FD_SETSIZE=64`), `sys/errno.h` (AmiTCP errno values).

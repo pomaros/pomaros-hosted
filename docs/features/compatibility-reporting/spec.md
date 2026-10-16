@@ -1,4 +1,4 @@
-# Implementation spec — Macaros compatibility reporting
+# Implementation spec — PomAROS compatibility reporting
 
 > Status: **slice 1 partially built; reporter UI remains** · Target: hosted AROS on macOS, with the 68k
 > execution service as the first producer · Drafted 2026-08-05 · Companion surfaces:
@@ -9,14 +9,14 @@
 ## Provenance and terminology
 
 This is original project design derived from the repository's existing diagnostics,
-Macaros capture UI, and public macOS facilities. No third-party reporting-client source
+PomAROS capture UI, and public macOS facilities. No third-party reporting-client source
 was consulted. Requirements tagged `[OURS]` bind existing project behavior;
 `[PUB]` denotes ordinary documented macOS/POSIX facilities.
 
 - **Report**: one local directory and its exported archive, describing one problem.
-- **Producer**: the 68k runtime, AROS diagnostics, or Macaros component that emits
+- **Producer**: the 68k runtime, AROS diagnostics, or PomAROS component that emits
   evidence.
-- **Reporter**: the Macaros review/redaction/submission UI.
+- **Reporter**: the PomAROS review/redaction/submission UI.
 - **Technical attachment**: logs, traces, build identities, hashes, stacks, and task
   dumps.
 - **Sensitive attachment**: screenshot, full log, program binary, guest-memory/core
@@ -26,9 +26,9 @@ was consulted. Requirements tagged `[OURS]` bind existing project behavior;
 ## Outcome
 
 A user who encounters a crash, capability gap, hang, or visible misbehavior can open one
-Macaros sheet, describe what happened, optionally add a safely redacted screenshot,
+PomAROS sheet, describe what happened, optionally add a safely redacted screenshot,
 inspect the exact contents, and deliberately save, share, or send a self-contained
-report. A failure that Macaros detects offers the same sheet without requiring the user
+report. A failure that PomAROS detects offers the same sheet without requiring the user
 to find a log file.
 
 The system is useful to a developer without assuming source code is available. It
@@ -60,7 +60,7 @@ the exact 68k execution.
 - Guest-drawn consent UI or guest-owned TLS/account logic.
 - A full image editor, OCR service, or cloud-based redaction.
 - Treating a screenshot as sufficient proof of a semantic fix.
-- Destructive diagnostics: collecting a report must never terminate Macaros or AROS.
+- Destructive diagnostics: collecting a report must never terminate PomAROS or AROS.
 
 ## Ownership and architecture
 
@@ -77,7 +77,7 @@ The diagnostic producer and reporter are separate by design:
                                              |
  AROS native diagnostics --------------------+
                                              |
- Macaros framebuffer + product identity -----+
+ PomAROS framebuffer + product identity -----+
                                              v
                                   review/redaction sheet
                                              |
@@ -86,12 +86,12 @@ The diagnostic producer and reporter are separate by design:
                        Save archive      macOS Share     explicit HTTPS Send
 ```
 
-The runtime owns facts about 68k execution. Macaros owns user interaction, the
+The runtime owns facts about 68k execution. PomAROS owns user interaction, the
 framebuffer, filesystem presentation, redaction, and network transfer. This preserves a
 working reporting surface when the guest process is gone or AROS input is wedged.
 
 The first implementation uses a filesystem spool rather than callbacks from an AROS or
-JIT thread into AppKit. Producers write atomically; Macaros observes completed records
+JIT thread into AppKit. Producers write atomically; PomAROS observes completed records
 on its own queue and presents UI only on the main thread.
 
 ## R-LOCATION — one writable report root `[OURS]`
@@ -121,14 +121,14 @@ Reports/
   active/                 incomplete per-run structured records
   ready/                  completed local reports, one directory per report ID
   exported/               archives the user explicitly saved
-  session/                bounded Macaros/AROS host logs
+  session/                bounded PomAROS/AROS host logs
 ```
 
 Directories are mode `0700`, files are `0600`, and report creation uses write-temp plus
 atomic rename. A corrupt or partial record is retained as `.incomplete` and never
 submitted without being identified as such.
 
-Default retention is the newest 20 ready reports with a 500 MiB total ceiling. Macaros
+Default retention is the newest 20 ready reports with a 500 MiB total ceiling. PomAROS
 removes only the oldest unpinned report after a newer report is complete. Reports the
 user exported, pinned, or has open in the review sheet are never automatically removed.
 Settings exposes retention count/size and **Delete All Local Reports...** with
@@ -146,7 +146,7 @@ Every record carries:
 - schema version and monotonically increasing sequence number;
 - UTC timestamp and monotonic offset from run start;
 - program display name and SHA-256 of the program bytes;
-- Macaros, AROS, emu68k/JIT, bridge-policy, and generated-layout build identities;
+- PomAROS, AROS, emu68k/JIT, bridge-policy, and generated-layout build identities;
 - execution backend/route and guest arena bounds;
 - event name plus event-specific bounded data.
 
@@ -184,7 +184,7 @@ running 68k program but never guesses that it caused the problem.
 ## R-LOCAL — local collection is automatic; submission is not
 
 On a classified failure, producers finish the local technical record without asking the
-guest to continue. Macaros shows a non-modal notice such as:
+guest to continue. PomAROS shows a non-modal notice such as:
 
 > PhotoDemo stopped because `asl.library/AslRequest` does not yet support
 > `ASLFR_Screen`. Review Report... · Dismiss
@@ -193,7 +193,7 @@ Dismissal leaves the bounded local report available under **Help -> Show Reports
 does not send anything and does not repeatedly prompt for the same run.
 
 For a visible problem that did not fail loudly, the user invokes **Report a
-Compatibility Problem...**. Macaros snapshots the current diagnostic rings and opens a
+Compatibility Problem...**. PomAROS snapshots the current diagnostic rings and opens a
 manual report without stopping or sampling the process destructively.
 
 No diagnostic command used by this feature may send SIGKILL, request shutdown, alter
@@ -239,11 +239,11 @@ reports a connection failure without losing or silently retrying the package.
 
 ## R-SCREENSHOT — capture without accidental disclosure `[OURS]`
 
-Macaros captures its owned framebuffer through the existing offscreen readback, not
+PomAROS captures its owned framebuffer through the existing offscreen readback, not
 ScreenCaptureKit. No screen-recording permission is required and no other Mac window can
 appear in the image.
 
-For an automatic failure, Macaros may retain one uncompressed framebuffer copy in memory
+For an automatic failure, PomAROS may retain one uncompressed framebuffer copy in memory
 so the failure state is not replaced by a blank screen. It must not persist that original
 capture. The buffer is replaced on the next failure, zeroed/released when the report is
 dismissed or completed, and never included merely because it exists.
@@ -269,7 +269,7 @@ defaults to neutral black and may offer another fully opaque neutral color.
 
 Editing coordinates are stored in source-image pixels, independent of preview scale and
 Retina backing scale. Crop is applied first; rectangles are clipped to the crop. On
-confirmation Macaros renders a new, opaque bitmap, composites the solid rectangles into
+confirmation PomAROS renders a new, opaque bitmap, composites the solid rectangles into
 its pixels, encodes a fresh PNG with no metadata or auxiliary chunks, and presents that
 exact flattened PNG in the final report preview.
 
@@ -296,7 +296,7 @@ standard accessible names for the canvas, crop, and redaction controls.
 The canonical export is:
 
 ```text
-macaros-report-<UTC>-<short-id>.zip
+pomaros-report-<UTC>-<short-id>.zip
   manifest.json
   summary.txt
   reproduction.txt
@@ -366,7 +366,7 @@ offered, is a separate user action with a preview.
 
 Failed uploads leave the reviewed archive local and offer Retry, Save, or Cancel. A
 retry is allowed only for that exact already-consented archive; changing any attachment
-invalidates consent and returns to review. No background retry occurs after Macaros
+invalidates consent and returns to review. No background retry occurs after PomAROS
 relaunch without another explicit Send.
 
 The endpoint is supplied by signed application configuration, not by report contents or
@@ -393,7 +393,7 @@ are normally more faithful for JIT/bridge reproduction.
 
 ## R-UX — menus and settings
 
-Macaros Help becomes:
+PomAROS Help becomes:
 
 - **Report a Compatibility Problem...**
 - **Show Reports**
@@ -417,12 +417,12 @@ core, full-log, and movie consent can never be made sticky.
 ## R-FAILURE — reporter failure must be safe
 
 - If report storage is full/unwritable, keep the newest bounded technical record in an
-  in-memory ring and show Save As; do not crash the guest or Macaros.
+  in-memory ring and show Save As; do not crash the guest or PomAROS.
 - If screenshot capture fails, the report remains sendable without it and states why.
 - If redaction/encoding fails, screenshot inclusion turns off; the original is not used
   as fallback.
 - If manifest validation fails, Send is disabled and the report remains local.
-- If Macaros exits during packaging, only `.incomplete` staging remains; it is never
+- If PomAROS exits during packaging, only `.incomplete` staging remains; it is never
   offered for automatic upload.
 - If a producer faults while reporting a fault, the existing re-entry latch prevents
   recursion and emits a minimal record.
@@ -434,7 +434,7 @@ core, full-log, and movie consent can never be made sticky.
 1. **Local contract.** Add `AROS_REPORT_DIR`, stable run IDs, structured terminal
    records, bounded session-log rotation, and atomic `ready/` reports. Route existing
    crash bundles there.
-2. **Macaros report browser.** Show Reports, manual Report action, safe manifest preview,
+2. **PomAROS report browser.** Show Reports, manual Report action, safe manifest preview,
    reproduction fields, and Save archive. No network.
 3. **Screenshot privacy.** In-memory capture, crop/opaque rectangles, fresh flattened
    PNG, metadata stripping, and archive-exclusion proofs.
@@ -454,7 +454,7 @@ All tests use a temporary report root and a fake transport. No test sends real d
 - A clean 68k exit creates a bounded run record but no intrusive failure notice.
 - A named capability gap produces one ready report with program/library/LVO/reason and
   no fabricated result.
-- A contained engine fault incorporates the crash bundle and leaves Macaros reusable.
+- A contained engine fault incorporates the crash bundle and leaves PomAROS reusable.
 - Atomic rename means the reporter never opens a half-written ready report.
 - Retention honors count, size, pinning, open sheets, and exports.
 - Home and host-volume roots are absent from sanitized fixtures.
@@ -489,7 +489,7 @@ All tests use a temporary report root and a fake transport. No test sends real d
   even though no capability gap exists.
 - A hung guest task produces a task dump and host sample without signals that stop the
   instance.
-- A stopped 68k program can still be reported because Macaros owns the UI and capture.
+- A stopped 68k program can still be reported because PomAROS owns the UI and capture.
 - Two identical signatures group as duplicates while keeping distinct local report IDs.
 
 ## Acceptance criteria
@@ -499,7 +499,7 @@ The feature is complete when:
 1. Every classified 68k failure leaves a bounded, inspectable local artifact under the
    stable Reports directory.
 2. A user can manually report incorrect behavior that did not trigger a failure.
-3. Macaros remains able to review/save a report when the guest program has terminated.
+3. PomAROS remains able to review/save a report when the guest program has terminated.
 4. Nothing leaves the Mac without an attachment list, final confirmation, and explicit
    Send/Share action.
 5. Screenshot inclusion is off by default and its flattened redaction is proven to

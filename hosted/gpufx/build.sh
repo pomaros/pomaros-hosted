@@ -7,7 +7,7 @@
 #   hosted/gpufx/build.sh            # build + deploy C:GpuFxTest
 set -eu
 DIR="$(cd "$(dirname "$0")" && pwd)"
-T="${AROS_BUILD:-$HOME/Source/aros-project/aros-build}"
+T="${AROS_BUILD:-$HOME/Source/aros-project/Build/pomaros-hosted}"
 [ -d "$T/AROS/Developer/include" ] || T="$T/bin/darwin-aarch64"
 [ -d "$T/AROS/Developer/include" ] || {
     echo "build.sh: no AROS SDK at \$AROS_BUILD (need AROS/Developer/include)" >&2

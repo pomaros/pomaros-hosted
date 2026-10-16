@@ -10,23 +10,19 @@ while [ -h "$SELF" ]; do
 done
 HERE="$(cd "$(dirname "$SELF")" && pwd)"
 ROOT="$(cd "$HERE/.." && pwd)"
+HOST_LIB_DIR="${AROS_HOST_LIB_DIR:-$ROOT/build/host-libs}"
 : "${AROS_HOST_CONF:=$HOME/Library/Application Support/AROS/aros-host.conf}"
-: "${AROS_APP:=$ROOT/build/Macaros.app}"
+: "${AROS_APP:=$ROOT/build/PomAROS.app}"
 
 find_bootd() {
     if [ -n "${AROS_CTL_BOOTD:-}" ]; then printf '%s\n' "$AROS_CTL_BOOTD"; return; fi
-    best=""; bt=0
     for d in \
-        "${BUILD:-$HOME/Source/aros-project/aros-build}/bin/darwin-aarch64/AROS/boot/darwin" \
-        $HOME/Source/aros-project/aros-build/bin/darwin-aarch64/AROS/boot/darwin \
-        "$ROOT/build/AROS/boot/darwin" \
-        /private/tmp/*/*/*/scratchpad/arosbuild/bin/darwin-aarch64/AROS/boot/darwin \
-        /tmp/*/bin/darwin-aarch64/AROS/boot/darwin ; do
+        "${BUILD:-${AROS_BUILD:-$ROOT/../Build/pomaros-hosted}}/bin/darwin-aarch64/AROS/boot/darwin" \
+        "$ROOT/build/AROS/boot/darwin"; do
         [ -x "$d/AROSBootstrap" ] || continue
-        t="$(stat -f %m "$d/AROSBootstrap" 2>/dev/null || echo 0)"
-        if [ "$t" -ge "$bt" ]; then bt="$t"; best="$d"; fi
+        printf '%s\n' "$d"
+        return
     done
-    printf '%s\n' "$best"
 }
 
 hash12() {
@@ -62,11 +58,11 @@ AROS="$(cd "$BOOTD/../.." && pwd)"
 echo "boot dir: $BOOTD"
 echo
 echo "host dylibs:"
-compare "cocoametal.dylib" "$ROOT/build/cocoametal.dylib" "$HOME/lib/cocoametal.dylib" || true
-compare "libpasteboard.dylib" "$ROOT/build/libpasteboard.dylib" "$HOME/lib/libpasteboard.dylib" || true
-compare "libcoreaudio.dylib" "$ROOT/build/libcoreaudio.dylib" "$HOME/lib/libcoreaudio.dylib" || true
-compare "libbsdsockhost.dylib" "$ROOT/build/libbsdsockhost.dylib" "$HOME/lib/libbsdsockhost.dylib" || true
-compare "settings.json" "$ROOT/hosted/cocoametal/settings.json" "$HOME/lib/settings.json" || true
+compare "cocoametal.dylib" "$ROOT/build/cocoametal.dylib" "$HOST_LIB_DIR/cocoametal.dylib" || true
+compare "libpasteboard.dylib" "$ROOT/build/libpasteboard.dylib" "$HOST_LIB_DIR/libpasteboard.dylib" || true
+compare "libcoreaudio.dylib" "$ROOT/build/libcoreaudio.dylib" "$HOST_LIB_DIR/libcoreaudio.dylib" || true
+compare "libbsdsockhost.dylib" "$ROOT/build/libbsdsockhost.dylib" "$HOST_LIB_DIR/libbsdsockhost.dylib" || true
+compare "settings.json" "$ROOT/hosted/cocoametal/settings.json" "$HOST_LIB_DIR/settings.json" || true
 
 echo
 echo "host config:"
@@ -91,8 +87,8 @@ echo
 echo "app bundle:"
 if [ -d "$AROS_APP" ]; then
     APPC="$AROS_APP/Contents"
-    line "Macaros.app" "$APPC/Info.plist"
-    line "app launcher" "$APPC/MacOS/Macaros"
+    line "PomAROS.app" "$APPC/Info.plist"
+    line "app launcher" "$APPC/MacOS/PomAROS"
     compare "app bootstrap" "$BOOTD/AROSBootstrap" "$APPC/MacOS/AROSBootstrap" || true
     compare "app conf" "$BOOTD/AROSBootstrap.conf" "$APPC/MacOS/AROSBootstrap.conf" || true
     compare "app cocoametal" "$ROOT/build/cocoametal.dylib" "$APPC/Frameworks/cocoametal.dylib" || true

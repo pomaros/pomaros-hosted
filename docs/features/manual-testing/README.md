@@ -7,14 +7,14 @@ the **interactive** companion: boot the real Workbench window and click around i
 it yourself. Use it to sanity-check a feature the way a user would, or to poke at
 something a smoke does not cover.
 
-> Everything here boots the tree in `~/Source/aros-project/aros-build`, so build/deploy first
+> Everything here boots the tree in `~/Source/aros-project/Build/pomaros-hosted`, so build/deploy first
 > ([build](../build/README.md), then `graft/aros-ctl deploy`). Media and test
 > files go in `~/AROS/Shared` — that is `MacRW:` inside AROS.
 
 ## Boot the interactive desktop
 
 ```sh
-cd ~/Source/aros-project/Macaros
+cd ~/Source/aros-project/pomaros-hosted
 AROS_CTL_STARTUP_MODE=desktop graft/run-window.sh
 ```
 
@@ -51,7 +51,7 @@ plain ssh. `Ctrl-C` in the terminal shuts everything down.
   drag-and-drop target.
 - **Feraille needs > 256 MB RAM.** The binary is ~200 MB, so the default 256 MB
   hosted RAM cannot LoadSeg it (silent fail, no window). Set **1280** MB via the
-  Macaros app **Settings…** window, or edit
+  PomAROS app **Settings…** window, or edit
   `~/Library/Application Support/AROS/aros-host.conf` to `memory 1280`, then boot.
   The conf value wins over the `AROS_HOST_MEMORY` env. First load takes ~90 s.
 - **Launch Feraille from an interactive Shell, not the Startup-Sequence.** A

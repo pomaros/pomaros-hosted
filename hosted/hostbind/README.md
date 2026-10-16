@@ -4,7 +4,7 @@ A worked, compile-checked template for adding a new host bridge on hosted AROS u
 the `<aros/hostbind.h>` helper. Copy `hostbind_sample.c` and keep the shape you need.
 
 - **Design + rationale:** [docs/features/host-bridge](../../docs/features/host-bridge/README.md)
-- **The helper itself:** `compiler/include/aros/hostbind.h` in `../aros-upstream`
+- **The helper itself:** `compiler/include/aros/hostbind.h` in `../aros-core-pomaros`
 
 ## The two shapes
 

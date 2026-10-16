@@ -33,7 +33,7 @@ heavily stubbed). The job is bring-up + fill-in for darwin-aarch64, not greenfie
 ### The three layers (grounded)
 
 1. **`serial.device` — the portable shell** (reused verbatim).
-   `../aros-upstream/workbench/devs/serial/` (`serial_init.c`,
+   `../aros-core-pomaros/workbench/devs/serial/` (`serial_init.c`,
    `serial_support.c`, `serial_interrupthandlers.c`, `serial_intern.h`, `serial.conf`).
    It speaks the classic exec **IORequest** interface (`AROS_LH1 beginio`/`abortio`,
    `serial_init.c:307,871`), owns the per-unit input ring buffer, the read/write queues
@@ -54,7 +54,7 @@ heavily stubbed). The job is bring-up + fill-in for darwin-aarch64, not greenfie
    `CLID_Hidd_Serial`. The parallel equivalent is `workbench/hidds/parallel/`.
 
 3. **the hosted/unix serial backend — ALREADY EXISTS** (the file to finish).
-   `../aros-upstream/arch/all-unix/hidd/serial/` —
+   `../aros-core-pomaros/arch/all-unix/hidd/serial/` —
    `SerialClass.c` (the `NewUnit`/`DisposeUnit` factory, complete) and
    `SerialUnitClass.c` (the per-unit class). `SerialUnitClass.c` **opens a host
    character device over libc** and routes bytes through it:
@@ -435,7 +435,7 @@ bytes it saw), exactly as bsdsocket's echo server is for sockets.
 
 ## References
 
-AROS upstream (`../aros-upstream`):
+AROS upstream (`../aros-core-pomaros`):
 - Device shell: `workbench/devs/serial/` (`serial_init.c` beginio/abortio :307/:871,
   Open/HIDD wire :77/:91/:170, SETPARAMS→HIDD :712–818; `serial_interrupthandlers.c`
   `RBF_InterruptHandler` :22; `serial_intern.h`, `serial.conf`),

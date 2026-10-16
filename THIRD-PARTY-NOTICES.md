@@ -1,6 +1,6 @@
 # Third-party notices
 
-Macaros combines independently licensed open-source projects. The exact source
+PomAROS combines independently licensed open-source projects. The exact source
 revisions and hashes of the principal binaries are recorded in the
 `BUILD-MANIFEST.txt` embedded in each release. Full licence texts and generated
 dependency reports are shipped beside this file in `Licenses/`.
@@ -34,7 +34,7 @@ generated target-specific Rust dependency report
 - AROS port and corresponding source: <https://github.com/jonx/zed-aros>
 
 The corresponding source for the exact binary revision must be publicly
-available before a Macaros release is published.
+available before a PomAROS release is published.
 
 ## Ferail
 
@@ -48,7 +48,7 @@ includes `FERAIL-LICENSE-MIT`, `FERAIL-LICENSE-APACHE`, Ferail's maintained
 
 ## Emu68
 
-Macaros's legacy 68k execution layer uses selected, unmodified files from Emu68
+PomAROS's legacy 68k execution layer uses selected, unmodified files from Emu68
 under the Mozilla Public License 2.0. Those files are isolated under
 `hosted/jit68k/emu68/`; the surrounding JIT engine, loader, bridges, and
 independent interpreter were developed separately.
@@ -59,11 +59,11 @@ independent interpreter were developed separately.
 - File-level provenance and boundary: `EMU68-NOTICE`
 
 The MPL-covered source files, including any file-level modifications, are
-available in the Macaros source repository.
+available in the PomAROS source repository.
 
 ## FFmpeg
 
-Macaros includes statically linked FFmpeg 8.1.2 libraries for media decoding.
+PomAROS includes statically linked FFmpeg 8.1.2 libraries for media decoding.
 They were configured without GPL, non-free, or version-3 components
 (`CONFIG_GPL=0`, `CONFIG_NONFREE=0`, `CONFIG_VERSION3=0`) and are distributed
 under LGPL version 2.1 or later together with applicable permissive component
@@ -74,12 +74,12 @@ notices.
 - LGPL text: `FFMPEG-COPYING.LGPLv2.1`
 
 The release build uses static libraries. Relinkable object/source materials and
-the exact build scripts must remain available with the corresponding Macaros
+the exact build scripts must remain available with the corresponding PomAROS
 source release so recipients can exercise the LGPL's relinking rights.
 
 ## Apple system frameworks
 
-Macaros links to system-provided macOS frameworks such as AppKit, Metal,
+PomAROS links to system-provided macOS frameworks such as AppKit, Metal,
 CoreAudio, CoreGraphics, and Foundation. These frameworks are supplied by the
 user's copy of macOS and are not redistributed in the disk image.
 

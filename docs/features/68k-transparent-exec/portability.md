@@ -33,9 +33,9 @@ separate, substantially larger project.
 
 | Component | Current location | Portability assessment |
 |---|---|---|
-| Public launch contract | [`compiler/include/libraries/emu68k.h`](../../../../aros-upstream/compiler/include/libraries/emu68k.h) | Generic AROS API |
-| Hunk-image retention and launch routing | [`rom/dos/emu68k_route.c`](../../../../aros-upstream/rom/dos/emu68k_route.c), `runcommand.c`, `createnewproc.c`, and `internalloadseg*` | Mostly generic AROS; should remain in the AROS fork |
-| `emu68k.library`, native calls and marshalling | [`arch/all-darwin/libs/emu68k/`](../../../../aros-upstream/arch/all-darwin/libs/emu68k/) | Predominantly portable C, but placed under Darwin and bound to `libemu68k.dylib` through `hostlib.resource` |
+| Public launch contract | [`compiler/include/libraries/emu68k.h`](../../../../aros-core-pomaros/compiler/include/libraries/emu68k.h) | Generic AROS API |
+| Hunk-image retention and launch routing | [`rom/dos/emu68k_route.c`](../../../../aros-core-pomaros/rom/dos/emu68k_route.c), `runcommand.c`, `createnewproc.c`, and `internalloadseg*` | Mostly generic AROS; should remain in the AROS fork |
+| `emu68k.library`, native calls and marshalling | [`arch/all-darwin/libs/emu68k/`](../../../../aros-core-pomaros/arch/all-darwin/libs/emu68k/) | Predominantly portable C, but placed under Darwin and bound to `libemu68k.dylib` through `hostlib.resource` |
 | Host runtime, guest address space, contexts and guest libraries | [`hosted/emu68k/`](../../../hosted/emu68k/) | Mostly reusable logic with POSIX, macOS and current-engine assumptions mixed in |
 | JIT dispatcher, hunk loader and diagnostics | [`hosted/jit68k/`](../../../hosted/jit68k/) | Loader and dispatcher concepts are reusable; generated-code paths are AArch64-specific |
 | Adopted Emu68 sources | [`hosted/jit68k/emu68/`](../../../hosted/jit68k/emu68/) | MPL-2.0 boundary; its decoders and register model are coupled to the AArch64 emitter |
@@ -43,8 +43,8 @@ separate, substantially larger project.
 | Bridge generator and reviewed policy | [`graft/gen-emu68k-bridge`](../../../graft/gen-emu68k-bridge), [`graft/emu68k-bridge-policy.json`](../../../graft/emu68k-bridge-policy.json) | Portable, except that generated output paths currently assume `arch/all-darwin` |
 | Structure-layout generator | [`graft/gen-struct-layouts`](../../../graft/gen-struct-layouts) | Reusable; must generate and verify layouts for every target ABI |
 | Engine and bridge fixtures | [`hosted/jit68k/apps68k/`](../../../hosted/jit68k/apps68k/), [`hosted/emu68k/nativelib/`](../../../hosted/emu68k/nativelib/) | Portable validation assets |
-| Real-program corpus and reports | `graft/68k-corpus`, `graft/68k-legacy-suite`, Bridge Lab | Portable in purpose; launch and collection adapters are currently Macaros-oriented |
-| Macaros packaging | [`graft/make-aros-release.sh`](../../../graft/make-aros-release.sh) | Correctly macOS-specific; packages both `emu68k.library` and `libemu68k.dylib` |
+| Real-program corpus and reports | `graft/68k-corpus`, `graft/68k-legacy-suite`, Bridge Lab | Portable in purpose; launch and collection adapters are currently PomAROS-oriented |
+| PomAROS packaging | [`graft/make-aros-release.sh`](../../../graft/make-aros-release.sh) | Correctly macOS-specific; packages both `emu68k.library` and `libemu68k.dylib` |
 
 The current implementation is well beyond the original design-only state. The
 seven waterline libraries have 738 public vectors classified, guest-side tail
@@ -203,7 +203,7 @@ Supporting a second CPU and operating system is the point at which a dedicated
   conformance suite and third-party notices;
 - **AROS fork:** public launch API, DOS execution hook, `emu68k.library` shell
   and build integration; and
-- **Macaros:** Apple-specific packaging, signing, user-facing configuration,
+- **PomAROS:** Apple-specific packaging, signing, user-facing configuration,
   reporting integration and release tests.
 
 The split should preserve reproducible version pairing between the engine,

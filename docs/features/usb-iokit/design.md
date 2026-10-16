@@ -79,7 +79,7 @@ device — **exists in the tree today**. The work is not "invent an HCD"; it is:
    that the device transfer paths need hardware/permissions (attended).
 
 **What is absent.** `grep -rilE 'iokit|IOUSBHost|IOServiceMatching|kIOUSB'` over both
-`../aros-upstream` and `.` returns nothing:
+`../aros-core-pomaros` and `.` returns nothing:
 there is **no IOKit/IOUSBHost code anywhere**, and `libusb` is referenced only by the
 four `vusbhc` files. There is no darwin-aarch64 USB host shim in this repo (no
 `hosted/usb*`, no `build/libusbhost.dylib`). So `vusbhc`'s libusb dependency is currently
@@ -454,7 +454,7 @@ smokes a user runs with hardware. Do **not** block the loop on anything past [UB
 
 ## References
 
-AROS upstream (`../aros-upstream`):
+AROS upstream (`../aros-core-pomaros`):
 - HCD contract: `compiler/include/devices/usbhardware.h` (`struct IOUsbHWReq` :80,
   fields :27–62, `UHCMD_*` :116, `UHA_*`/`UHCF_*` capability tags :187/:207,
   `UHIOERR_*` :131), `compiler/include/devices/usb.h` (`UsbStdDevDesc` :118 with

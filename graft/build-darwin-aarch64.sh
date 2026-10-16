@@ -13,64 +13,39 @@
 #
 # Usage:
 #   graft/build-darwin-aarch64.sh                 # configure + build the boot set
-#   AROS_SRC=../aros-upstream graft/build-darwin-aarch64.sh
-#   PRESERVE_TOOLCHAIN=1 graft/build-darwin-aarch64.sh   # copy crosstools aside after first build
+#   AROS_SRC=../aros-core-pomaros graft/build-darwin-aarch64.sh
 set -euo pipefail
 
-# --- Paths (override via env) ------------------------------------------------
-# NOTE: /tmp is NOT stable across multi-day gaps — the macOS periodic cleaner
-# removes /tmp files untouched for ~3 days (it gutted $HOME/Source/aros-project/aros-build on
-# 2026-07-04). Both the build dir and the preserved crosstools live in $HOME.
-AROS_SRC="${AROS_SRC:-../aros-upstream}"   # checkout on branch aarch64-darwin-graft
-BUILD="${BUILD:-$HOME/Source/aros-project/aros-build}"         # STABLE build dir (rule 1)
-XT="${XT:-$HOME/Source/aros-project/aros-crosstools}"          # preserved, reusable crosstools (rule 2)
+# Paths are relative to the checkout, independent of the caller's directory.
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+AROS_SRC="${AROS_SRC:-$ROOT/../aros-core-pomaros}"
+BUILD="${BUILD:-${AROS_BUILD:-$ROOT/../Build/pomaros-hosted}}"
+XT="${XT:-${AROS_CROSSTOOLS:-$ROOT/../aros-crosstools}}"
 LLVM="${LLVM:-/opt/homebrew/opt/llvm/bin}"
-SHIM="${SHIM:-/tmp/graft-tools}"           # objcopy shim dir
+SHIM="${SHIM:-$BUILD/host-tools}"
+AROS_SRC="$(cd "$AROS_SRC" && pwd)"
+AROS_SRC="$AROS_SRC" "$ROOT/graft/check-core"
+mkdir -p "$BUILD"
+BUILD="$(cd "$BUILD" && pwd)"
 
-AROS_SRC="$(cd "$AROS_SRC" && pwd)"        # absolutise (configure is picky about relative)
-
-# --- 1) Host prerequisites ---------------------------------------------------
-# One-time; harmless to re-run. `mako` is the genmodule template engine.
-brew install llvm cmake zstd gawk automake autoconf bison flex netpbm libpng gnu-sed >/dev/null || true
-python3 -m pip install mako --break-system-packages -q || true
-
-# macOS has no objcopy; AROS needs one. Expose llvm-objcopy under that name.
-mkdir -p "$SHIM"; ln -sf "$LLVM/llvm-objcopy" "$SHIM/objcopy"
-export PATH="$SHIM:/opt/homebrew/bin:$PATH"
-
-# --- 2) Configure ------------------------------------------------------------
-# If a preserved toolchain exists, REUSE it (skips the ~1-2h LLVM build).
-# Otherwise configure builds the AROS-patched clang 20.1.0 from source the first
-# time. --without-x: the display is Cocoa, not X11.
-# Migrate a legacy /tmp crosstools copy into $HOME before the cleaner eats it.
-if [ ! -x "$XT/bin/clang" ] && [ -x $HOME/Source/aros-project/aros-crosstools/bin/clang ]; then
-    echo "### migrating legacy crosstools $HOME/Source/aros-project/aros-crosstools -> $XT"
-    cp -a $HOME/Source/aros-project/aros-crosstools "$XT"
+# Toolchain construction is an explicit first-time operation; normal rebuilds
+# reuse the preserved compiler and never remove the configured build tree.
+if [ ! -x "$XT/bin/clang" ]; then
+    echo "Missing AROS cross-toolchain: $XT (see GETTING-STARTED.md)" >&2
+    exit 2
 fi
-
-REUSE_ARGS=()
-if [ -x "$XT/bin/clang" ]; then
-    echo "### reusing preserved crosstools at $XT (no LLVM rebuild)"
-    REUSE_ARGS=(--with-aros-toolchain=yes --with-aros-toolchain-install="$XT")
-else
-    echo "### no preserved crosstools at $XT — the first build compiles clang 20.1.0 (~1-2h, one time)"
+mkdir -p "$SHIM"
+ln -sf "$LLVM/llvm-objcopy" "$SHIM/objcopy"
+AROS_BUILD_VENV="${AROS_BUILD_VENV:-$ROOT/../build-venv}"
+export PATH="$SHIM:$XT/bin:$AROS_BUILD_VENV/bin:/opt/homebrew/opt/make/libexec/gnubin:/opt/homebrew/bin:$PATH"
+cd "$BUILD"
+if [ ! -f Makefile ]; then
+    "$AROS_SRC/configure" --target=darwin-aarch64 --with-toolchain=llvm \
+        --without-x --with-aros-toolchain=yes --with-aros-toolchain-install="$XT"
 fi
-
-rm -rf "$BUILD"; mkdir -p "$BUILD"; cd "$BUILD"
-# NOTE the AROS target order is <arch>-<cpu> => darwin-aarch64 (NOT aarch64-darwin).
-"$AROS_SRC/configure" \
-    --target=darwin-aarch64 \
-    --with-toolchain=llvm \
-    --without-x \
-    "${REUSE_ARGS[@]}"
-
-# Preserve the freshly-built toolchain for next time (rule 2).
-if [ "${PRESERVE_TOOLCHAIN:-0}" = 1 ] && [ ! -x "$XT/bin/clang" ]; then
-    TOOLS="$BUILD/bin/darwin-aarch64/tools/crosstools"
-    if [ -x "$TOOLS/bin/clang" ]; then
-        echo "### preserving crosstools -> $XT"
-        cp -a "$TOOLS" "$XT"
-    fi
+if ! grep -Eq -- '^[^#]*-ffixed-x18' config/make.cfg; then
+    echo "Hosted build requires -ffixed-x18 in config/make.cfg; refusing mixed ABI" >&2
+    exit 3
 fi
 
 # --- 3) Build the boot module set (rules 3 + 4) ------------------------------

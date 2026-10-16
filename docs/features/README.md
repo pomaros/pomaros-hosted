@@ -2,7 +2,7 @@
 
 Grounded design/plan docs for things that would be **genuinely useful and don't exist
 yet** for the `aarch64-darwin` hosted port. Each was checked against the upstream tree
-(`../aros-upstream`) *and* the web before writing — every AROS contract
+(`../aros-core-pomaros`) *and* the web before writing — every AROS contract
 cited points at a real file, every external project at a real repo, and anything that
 couldn't be confirmed is marked **UNVERIFIED**.
 
@@ -20,7 +20,7 @@ one-look summary. Verified against the code, not just the docs.)
 
 **🟢 Integrated — built and working** (Makefile target and/or shipped dylib, verified in use):
 [cocoa-metal-display](cocoa-metal-display/design.md) ·
-[host-app-shell (Macaros)](host-app-shell/design.md) ·
+[host-app-shell (PomAROS)](host-app-shell/design.md) ·
 [clipboard-bridge](clipboard-bridge/README.md) ·
 [control-harness](control-harness/README.md) ·
 [host-volume](host-volume/README.md) ·
@@ -89,7 +89,7 @@ one-look summary. Verified against the code, not just the docs.)
 | bridge-lab | Turns a 68k run into runtime-contract evidence, as structured output an agent acts on | [README](bridge-lab/README.md) |
 | debug-tools | bring-up diagnostics (`TestLib`, `lddemon` trace) + how to debug a crash/memory bug (trap backtrace, MUNGWALL, host lldb) | [README](debug-tools/README.md) |
 | crash-handling | A bounded guru with a symbolized backtrace | [README](crash-handling/README.md) |
-| compatibility-reporting | Macaros review, redaction, packaging, and explicit submission of compatibility diagnostics | [README](compatibility-reporting/README.md) |
+| compatibility-reporting | PomAROS review, redaction, packaging, and explicit submission of compatibility diagnostics | [README](compatibility-reporting/README.md) |
 
 **Features & ports:**
 

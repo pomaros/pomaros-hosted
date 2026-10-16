@@ -17,7 +17,7 @@ program compiled natively for this Mac — last section).
 ## What it is
 
 AROS ships micro-benchmarks under
-`../aros-upstream/developer/debug/test/benchmarks/` in four groups
+`../aros-core-pomaros/developer/debug/test/benchmarks/` in four groups
 (`exec`, `clib`, `boopsi`, `graphics`). `exec` and `clib` are headless (they
 `printf` to stdout) and so run unattended; `graphics` needs the display and
 `boopsi` needs BOOPSI. We build and run the headless groups.
@@ -32,7 +32,7 @@ Implemented pieces:
 - mmake targets (built from the AROS build dir): `test-benchmarks-exec-quick`,
   `test-benchmarks-clib-quick`
 - the `printf` float fix in
-  `../aros-upstream/compiler/crt/stdc/__vcformat.c`
+  `../aros-core-pomaros/compiler/crt/stdc/__vcformat.c`
   (see [Float printf fix](#float-printf-fix) and `graft/UPSTREAM-NOTES.md` item 34)
 
 ## Build

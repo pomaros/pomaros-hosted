@@ -5,7 +5,7 @@
 
 ## Implementation status (2026-06-26)
 
-All requirements are grafted into the live AROS `emul-handler` (`aros-upstream`,
+All requirements are grafted into the live AROS `emul-handler` (`aros-core-pomaros`,
 branch `aarch64-darwin-graft`) and verified two-sided on hosted AROS:
 
 | Req | What | Status | Verified by |

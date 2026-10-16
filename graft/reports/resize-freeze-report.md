@@ -1,7 +1,7 @@
 # Report: the window-resize freeze on hosted AROS (aarch64-darwin)
 
 Date: 2026-07-02.
-Branches: `crash-containment` in `../aros-upstream` (guest fixes),
+Branches: `crash-containment` in `../aros-core-pomaros` (guest fixes),
 `graft/aros-ctl-diag-keymap-boot` here (tooling).
 
 ## 1. Summary

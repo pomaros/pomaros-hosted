@@ -39,7 +39,7 @@ for entry in $APPS; do
     if [ ! -f "$sf" ]; then
         echo "$name: SKIP (no $startup)" >> "$report"; continue
     fi
-    pkill -f "Macaros -c" 2>/dev/null; sleep 1
+    pkill -f "PomAROS -c" 2>/dev/null; sleep 1
     [ -n "$marker" ] && rm -f "$HOME/AROS/Shared/$marker"
 
     AROS_CTL_RESTART=1 AROS_CTL_STARTUP_FILE="$sf" \
@@ -52,7 +52,7 @@ for entry in $APPS; do
     "$ROOT/graft/aros-ctl" shot "$OUT/$name.png" >/dev/null 2>&1
     cp /tmp/aros-window.log "$OUT/$name.log" 2>/dev/null
 
-    alive=no; pgrep -f "Macaros -c" >/dev/null 2>&1 && alive=yes
+    alive=no; pgrep -f "PomAROS -c" >/dev/null 2>&1 && alive=yes
     gaps="$(grep -c "capability gap" "$OUT/$name.log" 2>/dev/null || echo 0)"
     faults="$(grep -c "JIT FAULT\|host fault in translated" "$OUT/$name.log" 2>/dev/null || echo 0)"
     hw="$(grep -c "classified hardware fault" "$OUT/$name.log" 2>/dev/null || echo 0)"
@@ -67,6 +67,6 @@ for entry in $APPS; do
     } >> "$report"
 done
 
-pkill -f "Macaros -c" 2>/dev/null
+pkill -f "PomAROS -c" 2>/dev/null
 echo "=== app sweep complete -> $OUT ==="
 cat "$report"

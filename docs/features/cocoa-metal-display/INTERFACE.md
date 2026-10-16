@@ -298,7 +298,7 @@ This is the design.md "main-thread crux", pinned so D2 proves the *real* model.
   framebuffer + offscreen oracle textures, best-effort live window. Called lazily
   on first `moHidd_Gfx_Show` (the SDL lazy-window pattern). `title` is kept in the
   signature for ABI stability but is **not** used: the host owns its own chrome and
-  titles the window from the app bundle's display name (`Macaros`), falling back to
+  titles the window from the app bundle's display name (`PomAROS`), falling back to
   that same name when running as a loose binary.
 - `cm_upload_rect(ctx, src, srcStride, x, y, w, h)` — copy a logical sub-rect from
   the AROS framebuffer into the GPU texture. Driven by `moHidd_BitMap_UpdateRect`.
@@ -395,7 +395,7 @@ This is the design.md "main-thread crux", pinned so D2 proves the *real* model.
 
 **Keycode → AROS rawkey:** my kbd hardware-driver class needs the
 macOS-VK→AROS-rawkey map. Source to adapt:
-`../aros-upstream/arch/all-hosted/hidd/x11/mac-x11-keycode2rawkey.table`.
+`../aros-core-pomaros/arch/all-hosted/hidd/x11/mac-x11-keycode2rawkey.table`.
 **Action (John):** drop an adapted copy as
 `docs/features/cocoa-metal-display/keycode2rawkey.table` so my input class includes
 one agreed table. Mouse deltas/buttons map directly to

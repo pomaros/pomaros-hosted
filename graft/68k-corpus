@@ -27,7 +27,7 @@ OUT="${2:-$ROOT/run/darwin-aarch64/corpus-$(date +%H%M%S).txt}"
 # recording it cost an hour.
 if [ -z "${EMU68K_BRIDGE_TREE:-}" ]; then
     _p=""
-    for _r in "$ROOT" "$ROOT/../aros-upstream"; do
+    for _r in "$ROOT" "$ROOT/../aros-core-pomaros"; do
         [ -d "$_r/.git" ] || continue
         _n=$(basename "$(cd "$_r" && pwd)")
         _b=$(git -C "$_r" rev-parse --abbrev-ref HEAD 2>/dev/null)
@@ -125,16 +125,16 @@ done
 } > "$RUN/startup"
 # A corpus sweep rewrites the boot Startup-Sequence and its `aros-ctl run`
 # call replaces an instance from that boot tree.  It must never do either to a
-# person's live interactive Macaros session by surprise.  CI normally has no
+# person's live interactive PomAROS session by surprise.  CI normally has no
 # instance, while a deliberate replacement remains available to an operator
 # who has saved their work and opts in explicitly.
-if pgrep -x Macaros >/dev/null 2>&1; then
+if pgrep -x PomAROS >/dev/null 2>&1; then
   if [ "${CORPUS_REPLACE_LIVE:-0}" != 1 ]; then
-    echo "68k-corpus: a live Macaros instance exists; refusing to replace it." >&2
+    echo "68k-corpus: a live PomAROS instance exists; refusing to replace it." >&2
     echo "68k-corpus: stop it yourself, or set CORPUS_REPLACE_LIVE=1 intentionally." >&2
     exit 2
   fi
-  pkill -f Macaros 2>/dev/null
+  pkill -f PomAROS 2>/dev/null
   sleep 1
 fi
 rm -f "$SHARE/corpus-out.txt"; : > /tmp/aros-window.log

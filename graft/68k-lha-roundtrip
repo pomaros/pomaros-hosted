@@ -47,7 +47,7 @@ Echo "=== DONE ===" >>MacRW:lharound-out.txt
 Wait 999999
 EOF
 
-pkill -f Macaros 2>/dev/null; sleep 1
+pkill -f PomAROS 2>/dev/null; sleep 1
 rm -f "$SHARE/lharound-out.txt"
 ( cd "$ROOT" && ./graft/aros-ctl deploy >/dev/null 2>&1 ) || true
 AROS_CTL_STARTUP_FILE="$DIR/.startup" AROS_HOST_VOLUME="MacRW:$SHARE;WRITE" \

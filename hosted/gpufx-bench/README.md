@@ -80,7 +80,7 @@ GpuFxBench >MacRW:bench.out
 
 The benchmark host-binds `cm_gpu_*` from `cocoametal.dylib` via
 `<aros/hostbind.h>` (the hosted/hostbind "Shape (b)" pattern). It runs inside
-the Macaros host process, so the shim's `cm_open` has already adopted the
+the PomAROS host process, so the shim's `cm_open` has already adopted the
 display's Metal device+queue as the shared GPU context — the benchmark measures
 that same context the window uses, not a second device. Without the GPU path
 (native build, or no shim) it reports software-only.

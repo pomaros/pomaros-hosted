@@ -4,7 +4,7 @@
 # keyboard + mouse input.
 #
 # Run this from a GUI session (Terminal.app, not over plain ssh): a window titled
-# "Macaros" opens showing the blue Workbench screen and the boot console. Click the
+# "PomAROS" opens showing the blue Workbench screen and the boot console. Click the
 # window to give it keyboard focus, then type at the "1> " shell prompt.
 #
 #   Dir MacRO:     list the shared Mac folder (read-only volume)
@@ -37,6 +37,7 @@ done
 HERE="$(cd "$(dirname "$SELF")" && pwd)"   # .../graft
 ROOT="$(cd "$HERE/.." && pwd)"             # repo root
 
+HOST_LIB_DIR="${AROS_HOST_LIB_DIR:-$ROOT/build/host-libs}"
 : "${AROS_HOST_CONF:=$HOME/Library/Application Support/AROS/aros-host.conf}"
 export AROS_HOST_CONF
 [ -f "$HERE/aros-host-conf.sh" ] && . "$HERE/aros-host-conf.sh"
@@ -55,31 +56,26 @@ ENT="${AROS_CTL_ENT:-$HERE/aros-host.entitlements.plist}"
 
 # The AROS boot dir (AROSBootstrap + .conf) is a BUILD OUTPUT outside the repo, so
 # discover it: $AROS_CTL_BOOTD wins, else the canonical build dir ($BUILD, default
-# ~/Source/aros-project/aros-build — see build-darwin-aarch64.sh; $HOME/Source/aros-project/aros-build is legacy, the macOS
+# ~/Source/aros-project/Build/pomaros-hosted — see build-darwin-aarch64.sh; $HOME/Source/aros-project/Build/pomaros-hosted is legacy, the macOS
 # periodic /tmp cleaner eats it across multi-day gaps), else an in-repo staging
 # dir, else the newest matching scratchpad build (newest AROSBootstrap by mtime
 # breaks ties).
 find_bootd() {
     if [ -n "${AROS_CTL_BOOTD:-}" ]; then printf '%s\n' "$AROS_CTL_BOOTD"; return; fi
-    best=""; bt=0
     for d in \
-        "${BUILD:-$HOME/Source/aros-project/aros-build}/bin/darwin-aarch64/AROS/boot/darwin" \
-        $HOME/Source/aros-project/aros-build/bin/darwin-aarch64/AROS/boot/darwin \
-        "$ROOT/build/AROS/boot/darwin" \
-        /private/tmp/*/*/*/scratchpad/arosbuild/bin/darwin-aarch64/AROS/boot/darwin \
-        /tmp/*/bin/darwin-aarch64/AROS/boot/darwin ; do
+        "${BUILD:-${AROS_BUILD:-$ROOT/../Build/pomaros-hosted}}/bin/darwin-aarch64/AROS/boot/darwin" \
+        "$ROOT/build/AROS/boot/darwin"; do
         [ -x "$d/AROSBootstrap" ] || continue
-        t="$(stat -f %m "$d/AROSBootstrap" 2>/dev/null || echo 0)"
-        if [ "$t" -ge "$bt" ]; then bt="$t"; best="$d"; fi
+        printf '%s\n' "$d"
+        return
     done
-    printf '%s\n' "$best"
 }
 BOOTD="$(find_bootd)"
 
 if [ -z "$BOOTD" ] || [ ! -x "$BOOTD/AROSBootstrap" ]; then
     echo "run-window.sh: no AROSBootstrap found." >&2
     echo "  point AROS_CTL_BOOTD at <build>/bin/darwin-aarch64/AROS/boot/darwin," >&2
-    echo "  or build one with graft/build-darwin-aarch64.sh (BUILD defaults to ~/Source/aros-project/aros-build)." >&2
+    echo "  or build one with graft/build-darwin-aarch64.sh (BUILD defaults to ~/Source/aros-project/Build/pomaros-hosted)." >&2
     exit 1
 fi
 echo ">> boot dir: $BOOTD"
@@ -96,7 +92,7 @@ artifact_line() {
 }
 
 ensure_desktop_payloads() {
-    upstream="${AROS_UPSTREAM:-$ROOT/../aros-upstream}"
+    upstream="${AROS_UPSTREAM:-$ROOT/../aros-core-pomaros}"
     fontsrc="$upstream/workbench/fonts"
 
     if [ -d "$fontsrc" ]; then
@@ -134,7 +130,7 @@ write_startup_sequence() {
 
     # Stage the PIPE: mount description (the L:pipe-handler binary is a build
     # artifact; the startup Mount below is guarded by If EXISTS).
-    _up="${AROS_UPSTREAM:-$ROOT/../aros-upstream}"
+    _up="${AROS_UPSTREAM:-$ROOT/../aros-core-pomaros}"
     if [ ! -f "$AROS/Devs/DOSDrivers/PIPE" ] && [ -f "$_up/workbench/devs/DOSDrivers/PIPE" ]; then
         mkdir -p "$AROS/Devs/DOSDrivers"
         cp -f "$_up/workbench/devs/DOSDrivers/PIPE" "$AROS/Devs/DOSDrivers/PIPE"
@@ -273,18 +269,18 @@ write_startup_sequence() {
 
 # Refuse to relaunch over the exact same boot tree while an older instance is
 # still alive. This script rewrites the conf, copies Storage/Monitors/Cocoa into
-# Devs/Monitors, and replaces/signs "$BOOTD/Macaros"; doing that underneath a
+# Devs/Monitors, and replaces/signs "$BOOTD/PomAROS"; doing that underneath a
 # running instance makes the next launch look randomly brittle.
 RUNNING_PIDS="$(ps -axo pid=,command= | awk -v conf="$BOOTD/AROSBootstrap.conf" '
     index($0, conf) &&
-    (index($0, "/Macaros ") || index($0, "./Macaros ") ||
-     index($0, " Macaros ") || index($0, "/AROSBootstrap ") ||
+    (index($0, "/PomAROS ") || index($0, "./PomAROS ") ||
+     index($0, " PomAROS ") || index($0, "/AROSBootstrap ") ||
      index($0, "./AROSBootstrap ") || index($0, " AROSBootstrap ")) {
         print $1
     }
 ')"
 if [ -n "$RUNNING_PIDS" ]; then
-    echo ">> stopping previous Macaros instance(s) for this boot tree: $RUNNING_PIDS"
+    echo ">> stopping previous PomAROS instance(s) for this boot tree: $RUNNING_PIDS"
     for pid in $RUNNING_PIDS; do
         kill "$pid" 2>/dev/null || true
     done
@@ -295,30 +291,30 @@ if [ -n "$RUNNING_PIDS" ]; then
 fi
 
 # Host shim: cocoametal.dylib must resolve by bare name under the hardened
-# runtime, so keep it in ~/lib and point DYLD_FALLBACK_LIBRARY_PATH there.
-mkdir -p "$HOME/lib"
-[ -f "$DYLIB_SRC" ] && cp -f "$DYLIB_SRC" "$HOME/lib/cocoametal.dylib"
+# runtime, so keep it in build/host-libs and point DYLD_FALLBACK_LIBRARY_PATH there.
+mkdir -p "$HOST_LIB_DIR"
+[ -f "$DYLIB_SRC" ] && cp -f "$DYLIB_SRC" "$HOST_LIB_DIR/cocoametal.dylib"
 # Clipboard bridge host shim: the AROS clipboard sync task loads it by bare name
-# via hostlib.resource, so it lives in ~/lib like cocoametal.dylib. Without it the
+# via hostlib.resource, so it lives in build/host-libs like cocoametal.dylib. Without it the
 # bridge starts but silently no-ops (build it with: make pasteboard-dylib).
-[ -f "$ROOT/build/libpasteboard.dylib" ] && cp -f "$ROOT/build/libpasteboard.dylib" "$HOME/lib/libpasteboard.dylib"
+[ -f "$ROOT/build/libpasteboard.dylib" ] && cp -f "$ROOT/build/libpasteboard.dylib" "$HOST_LIB_DIR/libpasteboard.dylib"
 # CoreAudio/AHI host shim, deployed beside the other HostLib dylibs so the
 # AROS-side audio driver can load it by bare name.
-[ -f "$ROOT/build/libcoreaudio.dylib" ] && cp -f "$ROOT/build/libcoreaudio.dylib" "$HOME/lib/libcoreaudio.dylib"
+[ -f "$ROOT/build/libcoreaudio.dylib" ] && cp -f "$ROOT/build/libcoreaudio.dylib" "$HOST_LIB_DIR/libcoreaudio.dylib"
 # bsdsocket.library host pump shim, deployed beside the other HostLib dylibs so
 # AROS-side networking can load it by bare name.
-[ -f "$ROOT/build/libbsdsockhost.dylib" ] && cp -f "$ROOT/build/libbsdsockhost.dylib" "$HOME/lib/libbsdsockhost.dylib"
-if [ ! -f "$HOME/lib/cocoametal.dylib" ]; then
+[ -f "$ROOT/build/libbsdsockhost.dylib" ] && cp -f "$ROOT/build/libbsdsockhost.dylib" "$HOST_LIB_DIR/libbsdsockhost.dylib"
+if [ ! -f "$HOST_LIB_DIR/cocoametal.dylib" ]; then
     echo "cocoametal.dylib missing — build it:" >&2
-    echo "    cd ~/Source/aros-project/Macaros && make cocoametal-dylib" >&2
+    echo "    cd ~/Source/aros-project/pomaros-hosted && make cocoametal-dylib" >&2
     exit 1
 fi
-echo ">> cocoametal.dylib $(shasum -a 256 "$HOME/lib/cocoametal.dylib" | awk '{print substr($1,1,12)}') from $HOME/lib"
+echo ">> cocoametal.dylib $(shasum -a 256 "$HOST_LIB_DIR/cocoametal.dylib" | awk '{print substr($1,1,12)}') from $HOST_LIB_DIR"
 
 # The Settings window is GENERATED from settings.json — deploy it beside the dylib
 # (the dylib resolves it next to itself, and the launch env points at it too).
 SCHEMA_SRC="$ROOT/hosted/cocoametal/settings.json"
-[ -f "$SCHEMA_SRC" ] && cp -f "$SCHEMA_SRC" "$HOME/lib/settings.json"
+[ -f "$SCHEMA_SRC" ] && cp -f "$SCHEMA_SRC" "$HOST_LIB_DIR/settings.json"
 
 # Cocoa as the sole display: deploy the driver to Devs/Monitors and drop the
 # headless fallback (its teardown clashes with a real display registering).
@@ -399,30 +395,30 @@ artifact_line "TestLib" "$AROS/C/TestLib"
 artifact_line "LoadMatrix" "$AROS/C/LoadMatrix"
 artifact_line "Wanderer" "$AROS/System/Wanderer/Wanderer"
 
-# Present in the macOS menu bar / Dock as "Macaros" (the host app), not the
-# bootstrap binary's name: run a copy named Macaros. macOS takes a non-bundled app's
-# menu-bar name from the executable's filename, so the file itself must be Macaros.
-# (AROS is the OS it runs; Macaros is the Mac app: a macaron, AROS on a Mac.)
-cp -f "$BOOTD/AROSBootstrap" "$BOOTD/Macaros"
+# Present in the macOS menu bar / Dock as "PomAROS" (the host app), not the
+# bootstrap binary's name: run a copy named PomAROS. macOS takes a non-bundled app's
+# menu-bar name from the executable's filename, so the file itself must be PomAROS.
+# (AROS is the OS it runs; PomAROS is the Mac app: a macaron, AROS on a Mac.)
+cp -f "$BOOTD/AROSBootstrap" "$BOOTD/PomAROS"
 
 # Sign with entitlements that allow DYLD_* env + loading the unsigned host shim.
-[ -f "$ENT" ] && codesign -s - -f -o runtime --entitlements "$ENT" "$BOOTD/Macaros" 2>/dev/null \
-              || codesign -s - -f "$BOOTD/Macaros" 2>/dev/null
+[ -f "$ENT" ] && codesign -s - -f -o runtime --entitlements "$ENT" "$BOOTD/PomAROS" 2>/dev/null \
+              || codesign -s - -f "$BOOTD/PomAROS" 2>/dev/null
 
-echo ">> A 'Macaros' window will open — click it for keyboard focus, then type."
+echo ">> A 'PomAROS' window will open — click it for keyboard focus, then type."
 mkdir -p "$ROOT/run/darwin-aarch64"   # File > screenshot/Record Movie land here
 AROS_RUN_DIR="$ROOT/run/darwin-aarch64"; export AROS_RUN_DIR
 [ -f "$HERE/report-env.sh" ] && . "$HERE/report-env.sh"
 cd "$BOOTD"
 if [ -n "${AROS_CM_CONTROL:-}" ]; then
     exec env AROS_DARWIN_THREADED=1 AROS_CM_CONTROL="$AROS_CM_CONTROL" \
-        DYLD_FALLBACK_LIBRARY_PATH="$HOME/lib" \
+        DYLD_FALLBACK_LIBRARY_PATH="$HOST_LIB_DIR" \
         AROS_HOST_VOLUME="$AROS_HOST_VOLUME" \
-        AROS_SETTINGS_SCHEMA="$HOME/lib/settings.json" \
-        ./Macaros -c "$BOOTD/AROSBootstrap.conf" ${AROS_KERNEL_ARGS:-}
+        AROS_SETTINGS_SCHEMA="$HOST_LIB_DIR/settings.json" \
+        ./PomAROS -c "$BOOTD/AROSBootstrap.conf" ${AROS_KERNEL_ARGS:-}
 else
-    exec env AROS_DARWIN_THREADED=1 DYLD_FALLBACK_LIBRARY_PATH="$HOME/lib" \
+    exec env AROS_DARWIN_THREADED=1 DYLD_FALLBACK_LIBRARY_PATH="$HOST_LIB_DIR" \
         AROS_HOST_VOLUME="$AROS_HOST_VOLUME" \
-        AROS_SETTINGS_SCHEMA="$HOME/lib/settings.json" \
-        ./Macaros -c "$BOOTD/AROSBootstrap.conf" ${AROS_KERNEL_ARGS:-}
+        AROS_SETTINGS_SCHEMA="$HOST_LIB_DIR/settings.json" \
+        ./PomAROS -c "$BOOTD/AROSBootstrap.conf" ${AROS_KERNEL_ARGS:-}
 fi

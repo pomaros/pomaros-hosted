@@ -46,7 +46,7 @@ this page is the design/why.
 
 > **Building your own** Rust program for AROS — empty Mac → a `C:` command that
 > runs from the Shell like `FFViewX`: **[hosted/rust/BUILDING-PROGRAMS.md](../../../hosted/rust/BUILDING-PROGRAMS.md)**
-> (0 → hero). The `RustHello` sample bundled with Macaros is that guide's endpoint.
+> (0 → hero). The `RustHello` sample bundled with PomAROS is that guide's endpoint.
 
 ## Goal
 

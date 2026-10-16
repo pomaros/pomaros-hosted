@@ -23,9 +23,9 @@ behind data that tells us what to build next.
 | 68k→AArch64 JIT engine, byte-exact, FPU incl. | [../68k-jit/](../68k-jit/README.md), `hosted/jit68k/` | built (host tool `run68k`) |
 | Independent reference interpreter (pure C) | `hosted/jit68k/` (the byte-exact verification CPU) | built |
 | Typed marshalling design + `genmodule` source of truth | [../68k-marshalling/](../68k-marshalling/README.md) | designed |
-| Hunk loader on **every** arch (magic `0x3F3`) | upstream [rom/dos/internalloadseg.c:85](../../../../aros-upstream/rom/dos/internalloadseg.c) | in tree, today |
-| Seglist 68k discriminator: DOS tags hunk seglists (`GSLI_68KHUNK`) and `RunCommand` already queries it before rejecting execution | upstream [rom/dos/runcommand.c:77](../../../../aros-upstream/rom/dos/runcommand.c), [getseglistinfo.c](../../../../aros-upstream/rom/dos/getseglistinfo.c) | in tree, today |
-| Workbench 68k-detect + delegate-to-emulator hook | upstream [workbench/libs/workbench/uae_integration.c](../../../../aros-upstream/workbench/libs/workbench/uae_integration.c) (port `"J-UAE Execute"`) | in tree, dormant |
+| Hunk loader on **every** arch (magic `0x3F3`) | upstream [rom/dos/internalloadseg.c:85](../../../../aros-core-pomaros/rom/dos/internalloadseg.c) | in tree, today |
+| Seglist 68k discriminator: DOS tags hunk seglists (`GSLI_68KHUNK`) and `RunCommand` already queries it before rejecting execution | upstream [rom/dos/runcommand.c:77](../../../../aros-core-pomaros/rom/dos/runcommand.c), [getseglistinfo.c](../../../../aros-core-pomaros/rom/dos/getseglistinfo.c) | in tree, today |
+| Workbench 68k-detect + delegate-to-emulator hook | upstream [workbench/libs/workbench/uae_integration.c](../../../../aros-core-pomaros/workbench/libs/workbench/uae_integration.c) (port `"J-UAE Execute"`) | in tree, dormant |
 | Crash bundles (fault → self-contained `.tar.gz`) | [run68k.md](../../../hosted/jit68k/run68k.md), `[J5n]` diagnostics | built (host side) |
 | Native symbolized guru | [../crash-handling/](../crash-handling/README.md) | built |
 | Headless drive/verify harness | [../control-harness/](../control-harness/README.md) (`aros-ctl`) | built |
@@ -82,14 +82,14 @@ upstream AROS submission is part of this plan** (see
 The first draft of this design wrapped every hunk seglist with a trampoline at
 `LoadSeg`. That is too broad: `LoadSeg` is also AROS's loader for
 *non-executable* hunk data, and those consumers inspect the seglist layout
-directly (keymaps: [kms/openkeymap.c:117](../../../../aros-upstream/workbench/libs/kms/openkeymap.c),
-disk fonts: [diskfont/diskfont_io.c:522](../../../../aros-upstream/workbench/libs/diskfont/diskfont_io.c)).
+directly (keymaps: [kms/openkeymap.c:117](../../../../aros-core-pomaros/workbench/libs/kms/openkeymap.c),
+disk fonts: [diskfont/diskfont_io.c:522](../../../../aros-core-pomaros/workbench/libs/diskfont/diskfont_io.c)).
 Prepending a segment would corrupt what they parse.
 
 AROS already provides the right discriminator: DOS tags hunk seglists with
 `GSLI_68KHUNK`, and `RunCommand` already queries `GetSegListInfo()` and
 rejects non-ELF tracked seglists before jumping
-([runcommand.c:77](../../../../aros-upstream/rom/dos/runcommand.c)). So:
+([runcommand.c:77](../../../../aros-core-pomaros/rom/dos/runcommand.c)). So:
 
 - **LoadSeg stays data-faithful.** Hunk files load and relocate exactly as
   today; no wrapping, no layout change; keymaps and fonts unaffected.
@@ -117,10 +117,10 @@ sandbox already separates the logical 32-bit guest address space from
 high host backing. AROS-side loading has to adopt the same split, because
 "just allocate low" is not available on this host: upstream's hunk loader
 hard-requires `MEMF_31BIT` on 64-bit targets
-([internalloadseg_aos.c:196](../../../../aros-upstream/rom/dos/internalloadseg_aos.c))
+([internalloadseg_aos.c:196](../../../../aros-core-pomaros/rom/dos/internalloadseg_aos.c))
 while the darwin bootstrap documents that `MAP_32BIT` fails, the low 4 GiB
 being unavailable
-([arch/all-unix/bootstrap/memory.c:57](../../../../aros-upstream/arch/all-unix/bootstrap/memory.c)).
+([arch/all-unix/bootstrap/memory.c:57](../../../../aros-core-pomaros/arch/all-unix/bootstrap/memory.c)).
 **Decided and proven 2026-08-01** (`[T0-P1]`, `make hosted-emu68k-t0p1`): the
 **proxy seglist**. The `[J4]` loader loads and relocates payloads with guest
 addresses in a 32-bit arena; LoadSeg returns a chain of small native
@@ -196,10 +196,10 @@ never promises state was preserved: the program is *relaunched*, not migrated.
    file. Same pattern as every other host service.
 2. *In-AROS delegation daemon*: implement a listener on the `"J-UAE Execute"`
    message port protocol, which makes upstream's existing, dormant Workbench
-   hook ([uae_integration.c](../../../../aros-upstream/workbench/libs/workbench/uae_integration.c))
+   hook ([uae_integration.c](../../../../aros-core-pomaros/workbench/libs/workbench/uae_integration.c))
    fire without touching workbench.library. **Caution: that hook forwards
    *every* detected 68k executable before the normal Workbench launch path**
-   ([openworkbenchobjecta.c:87](../../../../aros-upstream/workbench/libs/workbench/openworkbenchobjecta.c)),
+   ([openworkbenchobjecta.c:87](../../../../aros-core-pomaros/workbench/libs/workbench/openworkbenchobjecta.c)),
    so the daemon cannot be a dumb forwarder: it must itself run the full
    `AUTO|JIT|FULL` router (JIT-routed programs are launched back through the
    normal path), or its mere existence would force every Workbench 68k
