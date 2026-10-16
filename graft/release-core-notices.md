@@ -1,9 +1,10 @@
-# PomAROS Hosted internal development candidate
+# PomAROS Hosted public core preview
 
 This core-only candidate contains the AROS operating system, Wanderer and
 standard AROS tools, PomAROS host bridges, and the Emu68-based 68k execution
 engine. It excludes Zed, Ferail, FFView/FFViewX, FFmpeg media libraries,
-RustHello, gpufx.library, and Moonstone and its proprietary game assets.
+RustHello, gpufx.library, Moonstone and its proprietary game assets, and
+optional TrueType fonts.
 
 AROS contains components under APL 1.1, GPL, LGPL, BSD, MIT, and other licences.
 Excluding the optional applications does not remove the source-distribution
@@ -20,8 +21,14 @@ https://github.com/pomaros/pomaros-hosted. The shared operating-system source is
 https://github.com/pomaros/aros-core, at the exact revision recorded in the
 build manifest. Native Apple hardware work is excluded from that repository.
 
-This candidate is for internal testing by John. It has not been approved for
-public redistribution. Before redistribution, provide exact corresponding
-source and any required relinking/build materials for every included
-copyleft component, and complete the target-specific dependency audit.
+Matching corresponding-source assets and build materials accompany the public
+preview at https://github.com/pomaros/pomaros-hosted/releases/tag/v0.2.2-preview.1.
+Use the exact revisions recorded in BUILD-MANIFEST.txt. The supplied release
+source assets include the necessary submodules and external-source materials;
+GitHub's automatic product repository archive alone is not the complete source
+closure. Refer to the component licence texts for their respective terms.
+The five standard bitmap font families (XEN, arial, fixed, stop and ttcourier)
+come from the public core workbench/fonts tree, retaining its LEGAL/default APL
+provenance. Optional outline font families are excluded from this profile.
+
 Apple system frameworks are loaded from macOS and are not redistributed.

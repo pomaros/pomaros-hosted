@@ -8,9 +8,10 @@ its corresponding source and dependency audits must be completed separately.
 
 Core AROS still includes GPL/LGPL components, and Emu68 sources are MPL 2.0.
 The core profile does not remove their corresponding-source obligations.
-These candidates are internal development distributions for John. Before public
-redistribution, provide the exact source/build/relinking materials required for
-all included components and complete the component audit. Private native Apple
+Public preview publication requires matching source/build/relinking materials
+for all included components and a completed payload-specific component audit.
+The 0.2.2 build 9 preview uses public core `89db046` and the release tag
+`v0.2.2-preview.1`. Private native Apple
 hardware implementation and history remain outside the public core.
 
 Read the [build](docs/features/build/README.md) and
@@ -48,7 +49,8 @@ and DMG, but its blocking waits should be monitored by the release operator.
 Keep VERSION, clean source revisions, BUILD-MANIFEST.txt, exact component
 notices, build/runtime logs, checksums and Apple submission reports with the
 candidate. A notarized binary is not proof of general app compatibility.
-Do not upload a GitHub Release without separate authorization.
+The coordinator publishes the authorized GitHub Release after reviewing the
+exact artifacts, source closure, signatures and Apple acceptance.
 
 The existing notarized build 8 records the earlier private core revision
 `9f346ab00d644bd40e0f53e2624c3f625d28f182`. Keep that signed manifest, its

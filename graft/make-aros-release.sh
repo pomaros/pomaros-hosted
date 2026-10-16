@@ -384,6 +384,15 @@ if [ "${1:-}" = "--check" ]; then
     [ -f "$A/Resources/AROS/AROS.boot" ];               ck $? "AROS.boot embedded"
     [ -d "$A/Resources/AROS/Prefs/Presets/Themes/AROSDefault" ]; ck $? "AROSDefault theme embedded"
     [ -e "$A/Resources/AROS/System/Wanderer/Wanderer" ]; ck $? "Wanderer embedded"
+    if [ "$RELEASE_PROFILE" = core ]; then
+        for font in "$A/Resources/AROS/Fonts"/*; do
+            [ -e "$font" ] || continue
+            case "$(basename "$font")" in
+                XEN|XEN.font|XEN.otag|arial|arial.font|arial.otag|fixed|fixed.font|fixed.otag|stop|stop.font|stop.otag|ttcourier|ttcourier.font|ttcourier.otag) ;;
+                *) echo "    FAIL: unaudited optional font: $font"; fail=1 ;;
+            esac
+        done
+    fi
     if [ "$RELEASE_PROFILE" = complete ]; then
     [ -e "$A/Resources/AROS/C/FFViewX" ];               ck $? "FFViewX embedded (C:FFViewX)"
     [ -e "$A/Resources/AROS/Libs/gpufx.library" ];      ck $? "gpufx.library embedded (LIBS:)"
@@ -521,6 +530,15 @@ else
     rm -f "$DST/C/Zed" "$DST/C/Zed.info" "$DST/C/Ferail" "$DST/C/Ferail.info"
     rm -f "$DST/C/FFViewX" "$DST/C/FFViewX.info" "$DST/C/FFView" "$DST/C/FFView.info" "$DST/C/RustHello" "$DST/Libs/gpufx.library"
     : > "$DST/.backdrop"
+    # The public core profile retains the standard bitmap families only.
+    # Optional TrueType/demo fonts need their own redistribution audit.
+    for font in "$DST/Fonts"/*; do
+        [ -e "$font" ] || continue
+        case "$(basename "$font")" in
+            XEN|XEN.font|XEN.otag|arial|arial.font|arial.otag|fixed|fixed.font|fixed.otag|stop|stop.font|stop.otag|ttcourier|ttcourier.font|ttcourier.otag) ;;
+            *) rm -rf "$font" ;;
+        esac
+    done
 fi
 
 if [ "$INCLUDE_MOONSTONE" = 1 ]; then

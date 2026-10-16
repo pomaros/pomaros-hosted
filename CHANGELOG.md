@@ -2,6 +2,11 @@
 
 ## 2026-10-16 - PomAROS Hosted migration
 
+The 0.2.2 build 9 core preview packages the public shared AROS source, a
+self-contained desktop and host bridges with full host-code signing. Optional
+applications and TrueType fonts remain outside this distribution; matching
+source and build materials accompany its public release.
+
 Public core source acquisition and an explicit first-time toolchain build plan
 let new contributors prepare the same source inputs without private repository
 access. Compiler checks reject incompatible preserved LLVM versions before
