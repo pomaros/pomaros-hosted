@@ -6,8 +6,6 @@ arm64 process, presents the Wanderer desktop in a Cocoa/Metal window, and uses
 macOS for display, sound, networking, clipboard, and access to shared files.
 New profiles start in a window; fullscreen remains an explicit user choice.
 
-![The PomAROS Wanderer desktop on Apple Silicon](docs/aros-apple-silicon-pomaros.png)
-
 PomAROS is not an emulator for one historic Amiga model. It is a hosted build
 of AROS itself, compiled for AArch64 and integrated with the Mac.
 
