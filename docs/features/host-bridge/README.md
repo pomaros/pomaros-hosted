@@ -30,7 +30,7 @@ the (unavoidably custom) dylib on top.
 ## The helper: `<aros/hostbind.h>`
 
 A header-only convenience layer over `hostlib.resource` (source:
-`compiler/include/aros/hostbind.h` in `aros-core-pomaros`). Two calls:
+`compiler/include/aros/hostbind.h` in `aros-core`). Two calls:
 
 ```c
 #include <aros/hostbind.h>

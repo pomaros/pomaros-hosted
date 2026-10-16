@@ -38,7 +38,7 @@ Both verify the same unattended way: enumerate, open, rasterize a known glyph, a
   into the Startup-Sequence). `grep -ri 'coretext|diskfont|bullet|freetype|OpenFont|
   AvailFonts|FONTS:'` over `.` returns only that line. So
   there is **no CoreText shim, no host font enumeration, no engine bridge** today.
-- Upstream `../aros-core-pomaros` ships **every AROS-side piece we reuse**:
+- Upstream `../aros-core` ships **every AROS-side piece we reuse**:
   - `graphics.library` — the consumer API (`OpenFont`/`AskFont`/`Text`,
     `rom/graphics/`).
   - `diskfont.library` (`workbench/libs/diskfont/`, basename **Diskfont** v50.3) —
@@ -468,7 +468,7 @@ existing bash watchdog; markers are unique per spike so a regression localizes.
 
 ## References
 
-AROS upstream (`../aros-core-pomaros`):
+AROS upstream (`../aros-core`):
 - Consumer API: `compiler/include/graphics/text.h` (`TextFont` :22, `TextAttr` :72,
   `TTextAttr` :80, `FPF_*` :107, `FSF_*` :92), `compiler/include/graphics/gfxbase.h:53`
   (`TextFonts` list); `rom/graphics/openfont.c:19`, `rom/graphics/text.c` (render :76,

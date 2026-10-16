@@ -40,7 +40,7 @@ INPUT   ?= ping\nticks\nquit\n
 
 # The AROS OS source tree (kernel, modules, libraries) lives OUTSIDE this repo;
 # this one is the host/graft layer. Override if your checkout is elsewhere.
-AROS_SRC ?= $(abspath ../aros-core-pomaros)
+AROS_SRC ?= $(abspath ../aros-core)
 M68K_AROS_BUILD ?= $(HOME)/Source/aros-project/aros-m68k-build
 M68K_AROS_GCC ?= $(M68K_AROS_BUILD)/bin/darwin-aarch64/tools/crosstools/m68k-aros-gcc
 ELF2HUNK ?= $(M68K_AROS_BUILD)/bin/darwin-aarch64/tools/elf2hunk
@@ -2449,7 +2449,10 @@ clean:
 
 # Configure/rebuild the hosted OS, rebuild the host bridge, then assemble the
 # development app. The app references the stable external OS output tree.
-.PHONY: pomaros-hosted pomaros-hosted-check
+.PHONY: pomaros-source pomaros-hosted pomaros-hosted-check
+pomaros-source:
+	AROS_SRC="$(AROS_SRC)" ./graft/fetch-core
+
 pomaros-hosted:
 	POMAROS_CONFIGURE_ONLY=1 ./graft/build-darwin-aarch64.sh
 	./graft/rebuild-aros.sh

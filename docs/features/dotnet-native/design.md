@@ -98,21 +98,21 @@ JIT-compiling it* — the W^X-safe path, and the only one that runs PowerShell.
 ## What a .NET runtime needs vs. what this AROS port already has
 
 The load-bearing table — every "have" is a real file, every gap is named. (Facility audit
-against `../aros-core-pomaros`, 2026-06-29.)
+against `../aros-core`, 2026-06-29.)
 
 | Runtime needs (PAL/shim seam) | AROS status | Where |
 |---|---|---|
-| **Threads** (`CreateThread`, suspend/resume, TLS) | **PRESENT** — full `pthread` over exec tasks; map runtime threads onto AROS tasks. *Single-threaded first* (the WASI model) sidesteps the robustness risk | [compiler/pthread/](../../../../aros-core-pomaros/compiler/pthread/); `pthread_key_create` in `posixc` |
-| **Virtual memory** (reserve/commit/protect) | **PRESENT** — `mmap`/`mprotect` via `KrnAllocPages`/`KrnSetProtection` | [arch/all-unix/kernel/setprotection.c](../../../../aros-core-pomaros/arch/all-unix/kernel/setprotection.c); [allocpages.c](../../../../aros-core-pomaros/arch/all-unix/kernel/allocpages.c) |
+| **Threads** (`CreateThread`, suspend/resume, TLS) | **PRESENT** — full `pthread` over exec tasks; map runtime threads onto AROS tasks. *Single-threaded first* (the WASI model) sidesteps the robustness risk | [compiler/pthread/](https://github.com/pomaros/aros-core/tree/main/compiler/pthread/); `pthread_key_create` in `posixc` |
+| **Virtual memory** (reserve/commit/protect) | **PRESENT** — `mmap`/`mprotect` via `KrnAllocPages`/`KrnSetProtection` | [arch/all-unix/kernel/setprotection.c](https://github.com/pomaros/aros-core/blob/main/arch/all-unix/kernel/setprotection.c); [allocpages.c](https://github.com/pomaros/aros-core/blob/main/arch/all-unix/kernel/allocpages.c) |
 | **Executable memory** (trampolines only, in interp mode) | **PRESENT & PROVEN** — `MAP_JIT` + `pthread_jit_write_protect_np` + `sys_icache_invalidate` | [hosted/jit68k/jit_region.c](../../../hosted/jit68k/jit_region.c); [68k-jit INTERFACE §2](../68k-jit/INTERFACE.md) |
-| **Hardware-fault → managed exception** (SIGSEGV for null-checks / GC) | **PARTIAL — machinery wired, bridge is new code** — `sigaction` for SIGSEGV/SIGBUS/SIGILL/SIGFPE installed; SIGSEGV→trap 2 mapped; `ExceptionContext` aarch64 layout fixed. The runtime's `signal→DispatchManagedException` bridge is the .NET-side wiring | [arch/all-unix/kernel/kernel.c:408-461](../../../../aros-core-pomaros/arch/all-unix/kernel/kernel.c); [cpu_aarch64.c:20-30](../../../../aros-core-pomaros/arch/all-unix/kernel/cpu_aarch64.c) |
+| **Hardware-fault → managed exception** (SIGSEGV for null-checks / GC) | **PARTIAL — machinery wired, bridge is new code** — `sigaction` for SIGSEGV/SIGBUS/SIGILL/SIGFPE installed; SIGSEGV→trap 2 mapped; `ExceptionContext` aarch64 layout fixed. The runtime's `signal→DispatchManagedException` bridge is the .NET-side wiring | [arch/all-unix/kernel/kernel.c:408-461](https://github.com/pomaros/aros-core/blob/main/arch/all-unix/kernel/kernel.c); [cpu_aarch64.c:20-30](https://github.com/pomaros/aros-core/blob/main/arch/all-unix/kernel/cpu_aarch64.c) |
 | **Sockets** (BCL `System.Native` `SocketPal`) | **PRESENT & LIVE** — `bsdsocket` proven (WaitSelect + DNS). Managed sockets come *nearly free*, exactly as Rust `net` does | [bsdsocket-net](../bsdsocket-net/README.md) |
-| **File / stream I/O** | **PRESENT** — `posixc` (`open`/`read`/`write`) over `dos.library` | [compiler/crt/stdc/](../../../../aros-core-pomaros/compiler/crt/stdc/) |
+| **File / stream I/O** | **PRESENT** — `posixc` (`open`/`read`/`write`) over `dos.library` | [compiler/crt/stdc/](https://github.com/pomaros/aros-core/tree/main/compiler/crt/stdc/) |
 | **Time / env / exit** | **PRESENT** — `clock_gettime`, `nanosleep`, `getenv` in `posixc` | `compiler/posixc/` |
-| **Dynamic loading** (`dlopen`) | **ABSENT — but not on the critical path.** Managed assemblies load via Mono's *own* loader (not `dlopen`). Native P/Invoke into host libs uses [hostlib.resource](../../../../aros-core-pomaros/arch/all-hosted/hostlib/) (`HostLib_Open`/`GetPointer`); the runtime itself links as a native AROS module (`LoadSeg`, **code-model=large**) | hostlib + [internalloadseg_elf.c](../../../../aros-core-pomaros/rom/dos/internalloadseg_elf.c) |
+| **Dynamic loading** (`dlopen`) | **ABSENT — but not on the critical path.** Managed assemblies load via Mono's *own* loader (not `dlopen`). Native P/Invoke into host libs uses [hostlib.resource](https://github.com/pomaros/aros-core/tree/main/arch/all-hosted/hostlib/) (`HostLib_Open`/`GetPointer`); the runtime itself links as a native AROS module (`LoadSeg`, **code-model=large**) | hostlib + [internalloadseg_elf.c](https://github.com/pomaros/aros-core/blob/main/rom/dos/internalloadseg_elf.c) |
 | **Unwinding** (libunwind — exceptions, both C++ and managed) | **PARTIAL/UNVERIFIED** — libunwind is in the crosstools LLVM build; wiring untested (same open item as Rust unwinding) | [rust-aros/README.md](../rust-aros/README.md) (item: `eh_personality`/libunwind) |
 | **C / C++ toolchain** | **Mono is C** → fits the proven path. (CoreCLR is C++; basic C++ exceptions compile, RTTI untested — another reason Mono wins first) | [rust-aros](../rust-aros/README.md) precedent; `developer/debug/test/cplusplus/exception.cpp` |
-| **C library completeness** (`posixc`) | **PARTIAL — the real grind** — the `printf`-float bug ([__vcformat.c](../../../../aros-core-pomaros/compiler/crt/stdc/__vcformat.c)) is the prototype; expect `glob`/locale/large-file gaps the Mono PAL assumes. Shared with Rust-std + ffmpeg — harden once | [build/](../build/README.md), `UPSTREAM-NOTES.md` item 34 |
+| **C library completeness** (`posixc`) | **PARTIAL — the real grind** — the `printf`-float bug ([__vcformat.c](https://github.com/pomaros/aros-core/blob/main/compiler/crt/stdc/__vcformat.c)) is the prototype; expect `glob`/locale/large-file gaps the Mono PAL assumes. Shared with Rust-std + ffmpeg — harden once | [build/](../build/README.md), `UPSTREAM-NOTES.md` item 34 |
 | **GOT-free codegen** (`-mcmodel=large`) | **REQUIRED & PROVEN** — AROS loads GOT-less; non-negotiable for the runtime's native objects | [rust-aros/README.md](../rust-aros/README.md) ([RS0] gotcha) |
 
 **Reading of the table:** the *mechanisms* are largely present (W^X proven, signals wired,
@@ -240,7 +240,7 @@ implementation is consulted — the runtime being ported is itself the licensed 
 
 ## References
 
-AROS tree (`../aros-core-pomaros`) and this repo, confirmed 2026-06-29.
+AROS tree (`../aros-core`) and this repo, confirmed 2026-06-29.
 
 Project substrate this leans on:
 - [hosted/jit68k/jit_region.{h,c}](../../../hosted/jit68k/) — the `MAP_JIT` +
@@ -255,14 +255,14 @@ Project substrate this leans on:
 - [../ffmpeg-native/README.md](../ffmpeg-native/README.md) — the shared `posixc`-hardening grind.
 - [../arexx-host-port/README.md](../arexx-host-port/README.md) — the language-runtime-host
   theme (Regina); PowerShell is its heavyweight cousin.
-- AROS facility cites: [arch/all-unix/kernel/setprotection.c](../../../../aros-core-pomaros/arch/all-unix/kernel/setprotection.c),
-  [allocpages.c](../../../../aros-core-pomaros/arch/all-unix/kernel/allocpages.c),
-  [kernel.c:408-461](../../../../aros-core-pomaros/arch/all-unix/kernel/kernel.c),
-  [cpu_aarch64.c:20-30](../../../../aros-core-pomaros/arch/all-unix/kernel/cpu_aarch64.c),
-  [compiler/pthread/](../../../../aros-core-pomaros/compiler/pthread/),
-  [compiler/crt/stdc/__vcformat.c](../../../../aros-core-pomaros/compiler/crt/stdc/__vcformat.c),
-  [arch/all-hosted/hostlib/](../../../../aros-core-pomaros/arch/all-hosted/hostlib/),
-  [rom/dos/internalloadseg_elf.c](../../../../aros-core-pomaros/rom/dos/internalloadseg_elf.c).
+- AROS facility cites: [arch/all-unix/kernel/setprotection.c](https://github.com/pomaros/aros-core/blob/main/arch/all-unix/kernel/setprotection.c),
+  [allocpages.c](https://github.com/pomaros/aros-core/blob/main/arch/all-unix/kernel/allocpages.c),
+  [kernel.c:408-461](https://github.com/pomaros/aros-core/blob/main/arch/all-unix/kernel/kernel.c),
+  [cpu_aarch64.c:20-30](https://github.com/pomaros/aros-core/blob/main/arch/all-unix/kernel/cpu_aarch64.c),
+  [compiler/pthread/](https://github.com/pomaros/aros-core/tree/main/compiler/pthread/),
+  [compiler/crt/stdc/__vcformat.c](https://github.com/pomaros/aros-core/blob/main/compiler/crt/stdc/__vcformat.c),
+  [arch/all-hosted/hostlib/](https://github.com/pomaros/aros-core/tree/main/arch/all-hosted/hostlib/),
+  [rom/dos/internalloadseg_elf.c](https://github.com/pomaros/aros-core/blob/main/rom/dos/internalloadseg_elf.c).
 
 .NET / Mono / PowerShell upstream (web, MIT source — the port's basis, not consulted as
 competitor implementation):

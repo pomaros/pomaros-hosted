@@ -1,6 +1,6 @@
 #!/bin/sh
 # make-aros-release.sh — build a SELF-CONTAINED, relocatable PomAROS.app that boots
-# the full AROS Wanderer desktop on a clean Mac (no ~/Source/aros-project/Build/pomaros-hosted, no ../aros-core-pomaros).
+# the full AROS Wanderer desktop on a clean Mac (no ~/Source/aros-project/Build/pomaros-hosted, no ../aros-core).
 #
 # Sibling to make-aros-app.sh (the dev wrapper). The difference is self-containment:
 # this EMBEDS a release-filtered AROS volume (fonts + AROSDefault theme + Cocoa
@@ -50,7 +50,7 @@ BUILD_NUMBER="${POMAROS_BUILD_NUMBER:-}"
 RELEASE_PROFILE="${POMAROS_RELEASE_PROFILE:-core}"
 case "$RELEASE_PROFILE" in core) PRODUCT_NOTICES="$HERE/release-core-notices.md" ;; complete) ;; *) echo "invalid release profile" >&2; exit 2 ;; esac
 INCLUDE_MOONSTONE="${POMAROS_INCLUDE_MOONSTONE:-0}"
-AROS_SOURCE_TREE="${POMAROS_AROS_SOURCE:-$ROOT/../aros-core-pomaros}"
+AROS_SOURCE_TREE="${POMAROS_AROS_SOURCE:-${AROS_SRC:-$ROOT/../aros-core}}"
 ZED_SOURCE_TREE="${POMAROS_ZED_SOURCE:-$ROOT/../zed-aros}"
 FERAIL_SOURCE_TREE="${POMAROS_FERAIL_SOURCE:-$ROOT/../Ferail}"
 MOONSTONE_SOURCE_TREE="${POMAROS_MOONSTONE_SOURCE:-$ROOT/../MoonstoneCS}"

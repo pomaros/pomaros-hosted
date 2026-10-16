@@ -189,7 +189,7 @@ metadata sidecar are all layered on top of that, inside the handler.
 
 ## Where the code lives
 
-In the AROS source tree (`aros-core-pomaros`, branch `aarch64-darwin-graft`):
+In the AROS source tree (`aros-core`, branch `main`):
 
 - `arch/all-hosted/filesys/emul_handler/` — portable core: packet dispatch,
   `new_volume` (device-string + `;WRITE` parse), the launcher (`mount_hostvol`),

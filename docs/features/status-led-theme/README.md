@@ -4,7 +4,7 @@ Amiga-style **Power + Activity LEDs** in the PomAROS window's status bar, plus a
 **Dark / Light / System** appearance switch so the whole app — title bar, menus,
 Settings, and the status bar — reads as one coherent theme.
 
-All host-side (`hosted/cocoametal/`). **No `../aros-core-pomaros` change; the cocoametal
+All host-side (`hosted/cocoametal/`). **No `../aros-core` change; the cocoametal
 ABI stays at version 2.**
 
 ## What you see

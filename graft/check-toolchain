@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 John Knipper
+"""Check the preserved AROS compiler before building hosted objects."""
+import os
+from pathlib import Path
+import subprocess
+root = Path(__file__).resolve().parent.parent
+prefix = Path(os.getenv('AROS_CROSSTOOLS', os.getenv('XT', root.parent / 'aros-crosstools')))
+for name in ['clang', 'llvm-ar', 'llvm-ranlib', 'llvm-objcopy', 'llvm-objdump']:
+    if not (prefix / 'bin' / name).is_file():
+        raise SystemExit('Missing AROS tool: ' + str(prefix / 'bin' / name) + '; see graft/bootstrap-toolchain')
+compiler = str(prefix / 'bin/clang')
+version = subprocess.check_output([compiler, '-dumpversion'], text=True).strip()
+if version != '20.1.0':
+    raise SystemExit('Hosted source recipe requires AROS LLVM 20.1.0; found ' + version + '. Select a matching compiler prefix; no compiler will be overwritten.')
+subprocess.run([compiler, '--target=aarch64-unknown-aros', '-noposixc', '-ffixed-x18',
+                '-x', 'c', '-fsyntax-only', '-'], check=True, input='_Static_assert(__SIZEOF_POINTER__ == 8, "AArch64 required");\n', text=True)
+print('AROS LLVM ' + version + ' driver and hosted x18 flags verified: ' + str(prefix))

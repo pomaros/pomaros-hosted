@@ -131,7 +131,7 @@ it and watch it go) was verified by hand on 2026-08-28.
 
 ## Upstream state
 
-Carried on the `darwin-hostdisk` branch in `../aros-core-pomaros`: `C:MediaWatch`
+Carried in public `aros-core` (`main`, pinned by `CORE.lock`): `C:MediaWatch`
 is new, and the Darwin side of `hostdisk.device` needed three fixes:
 
 - the darwin build compiled the non-functional template host backend, because

@@ -1,3 +1,5 @@
+> Historical handoff/plan: retain the original source paths, branches, commits and observations below as recorded. For current public-core acquisition and builds, use [GETTING-STARTED.md](../../../GETTING-STARTED.md) and `CORE.lock`; these older workflow instructions do not override the current guide.
+
 # Transparent 68k execution - the staged plan
 
 > Status: active implementation (T0-T2 complete; T3a/T3b0/T3e complete;

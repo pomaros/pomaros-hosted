@@ -33,9 +33,9 @@ separate, substantially larger project.
 
 | Component | Current location | Portability assessment |
 |---|---|---|
-| Public launch contract | [`compiler/include/libraries/emu68k.h`](../../../../aros-core-pomaros/compiler/include/libraries/emu68k.h) | Generic AROS API |
-| Hunk-image retention and launch routing | [`rom/dos/emu68k_route.c`](../../../../aros-core-pomaros/rom/dos/emu68k_route.c), `runcommand.c`, `createnewproc.c`, and `internalloadseg*` | Mostly generic AROS; should remain in the AROS fork |
-| `emu68k.library`, native calls and marshalling | [`arch/all-darwin/libs/emu68k/`](../../../../aros-core-pomaros/arch/all-darwin/libs/emu68k/) | Predominantly portable C, but placed under Darwin and bound to `libemu68k.dylib` through `hostlib.resource` |
+| Public launch contract | [`compiler/include/libraries/emu68k.h`](https://github.com/pomaros/aros-core/blob/main/compiler/include/libraries/emu68k.h) | Generic AROS API |
+| Hunk-image retention and launch routing | [`rom/dos/emu68k_route.c`](https://github.com/pomaros/aros-core/blob/main/rom/dos/emu68k_route.c), `runcommand.c`, `createnewproc.c`, and `internalloadseg*` | Mostly generic AROS; should remain in the AROS fork |
+| `emu68k.library`, native calls and marshalling | [`arch/all-darwin/libs/emu68k/`](https://github.com/pomaros/aros-core/tree/main/arch/all-darwin/libs/emu68k/) | Predominantly portable C, but placed under Darwin and bound to `libemu68k.dylib` through `hostlib.resource` |
 | Host runtime, guest address space, contexts and guest libraries | [`hosted/emu68k/`](../../../hosted/emu68k/) | Mostly reusable logic with POSIX, macOS and current-engine assumptions mixed in |
 | JIT dispatcher, hunk loader and diagnostics | [`hosted/jit68k/`](../../../hosted/jit68k/) | Loader and dispatcher concepts are reusable; generated-code paths are AArch64-specific |
 | Adopted Emu68 sources | [`hosted/jit68k/emu68/`](../../../hosted/jit68k/emu68/) | MPL-2.0 boundary; its decoders and register model are coupled to the AArch64 emitter |

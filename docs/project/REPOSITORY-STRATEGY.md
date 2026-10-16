@@ -8,7 +8,7 @@ policy, packaging, signing workflow, and release notes.
 The implementation boundaries are:
 
 - **PomAROS** assembles and tests the product.
-- **aros-core-pomaros** is the shared AROS source checkout consumed by all
+- **aros-core** is the shared AROS source checkout consumed by all
   products; `CORE.lock` records the reviewed revision. Hosted reserves x18 and
   builds its Darwin adaptation; native targets use their own platform binaries.
 - **AROS-AArch64** is retained as a redirect; its standalone QEMU experiment and

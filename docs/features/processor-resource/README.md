@@ -80,5 +80,5 @@ invent one. Both are owner-gated; see design.md / spec.md "Open questions".
   (for the Mach load path); the [control harness](../control-harness/README.md) (the
   `[CP5]` `ShowConfig`/`CPUInfo` screenshot).
 - Consumed by: [system monitor](../system-monitor/README.md) (CPU load / Host page).
-- Source to add: `arch/all-darwin/processor/` (in `aros-core-pomaros`); shim
+- Source to add: `arch/all-darwin/processor/` (in `aros-core`); shim
   `hosted/hostcpu/` (in this repo).

@@ -9,7 +9,7 @@ working on the project after the repository split.
 - **PomAROS:** macOS host bridges, `graft/` build and release tools, the
   unattended harness, 68k compatibility integration, packaging, release notes,
   third-party notices, and product documentation.
-- **aros-core-pomaros:** the shared AROS operating-system source checkout,
+- **aros-core:** the shared AROS operating-system source checkout,
   including the Darwin adaptation; see `CORE.lock` for the exact input.
 - **[zed-aros](https://github.com/jonx/zed-aros):** the AROS port of Zed.
 - **[Ferail](https://github.com/jonx/Ferail):** Ferail application work.

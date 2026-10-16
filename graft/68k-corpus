@@ -27,7 +27,7 @@ OUT="${2:-$ROOT/run/darwin-aarch64/corpus-$(date +%H%M%S).txt}"
 # recording it cost an hour.
 if [ -z "${EMU68K_BRIDGE_TREE:-}" ]; then
     _p=""
-    for _r in "$ROOT" "$ROOT/../aros-core-pomaros"; do
+    for _r in "$ROOT" "${AROS_SRC:-$ROOT/../aros-core}"; do
         [ -d "$_r/.git" ] || continue
         _n=$(basename "$(cd "$_r" && pwd)")
         _b=$(git -C "$_r" rev-parse --abbrev-ref HEAD 2>/dev/null)

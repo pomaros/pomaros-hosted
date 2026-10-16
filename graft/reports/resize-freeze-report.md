@@ -1,5 +1,7 @@
 # Report: the window-resize freeze on hosted AROS (aarch64-darwin)
 
+> Historical integration record: branch names, local paths and commit references below describe their original investigation. Use the [current source/build guide](../../GETTING-STARTED.md) and `CORE.lock` for maintained public-core instructions.
+
 Date: 2026-07-02.
 Branches: `crash-containment` in `../aros-core-pomaros` (guest fixes),
 `graft/aros-ctl-diag-keymap-boot` here (tooling).

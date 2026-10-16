@@ -37,7 +37,7 @@ upstream tree, and there is no JIT at all in this checkout.
 - **Petunia does not exist here.** Petunia is AROS's historical x86 68k JIT (the
   "emulation"-flavour `emul.handler` / `m68k.library` path used by the
   i386/x86_64 hosted ports to run Amiga binaries). It is **absent** from
-  `../aros-core-pomaros`:
+  `../aros-core`:
 
   ```
   $ grep -rli petunia --include='*.c' --include='*.h' --include='*.conf' .   # → (no output)
@@ -84,7 +84,7 @@ upstream tree, and there is no JIT at all in this checkout.
   AROS has never had).
 
 **External prior art (web-grounded, *not* in the AROS tree).** Two projects matter and
-neither lives in `aros-core-pomaros`:
+neither lives in `aros-core`:
 
 - **Emu68** (`github.com/michalsc/Emu68`, MPL-2.0) — a real, fast, actively-developed
   **m68k→AArch64 JIT** (the engine behind PiStorm, "Amiga on a Raspberry Pi"). It is
@@ -374,7 +374,7 @@ Honest debt — none of this is free:
 
 ## References
 
-Every cited path is under `../aros-core-pomaros` unless noted.
+Every cited path is under `../aros-core` unless noted.
 
 - `arch/.unmaintained/m68k-emul/machine.h` — proves m68k-emul is AROS-compiled-to-m68k
   on a Linux/m68k host, not a translator ("machine.h include file for Linux/m68k").

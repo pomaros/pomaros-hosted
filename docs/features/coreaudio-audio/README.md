@@ -13,7 +13,7 @@ Implemented pieces:
   `hosted/coreaudio/coreaudio_shim.h`, `hosted/coreaudio/coreaudio.exports`,
   `build/libcoreaudio.dylib`
 - AROS AHI sub-driver:
-  `../aros-core-pomaros/workbench/devs/AHI/Drivers/CoreAudio/`
+  `../aros-core/workbench/devs/AHI/Drivers/CoreAudio/`
 - AHI mode file: `DEVS:AudioModes/COREAUDIO`
 - AROS playback smoke command: `C:AHISmoke`
 - host harness: `graft/audio-smoke` / `make audio-smoke`
@@ -134,7 +134,7 @@ Two things made it first-class (`workbench/devs/AHI/mmakefile.src`):
   `duplicate symbol __aros_libreq_SysBase`.
 
 The translation catalogs (`workbench/devs/AHI/{AHI,Device}/translations`) must
-be present as git submodules; they are already initialized in `../aros-core-pomaros`.
+be present as git submodules; they are already initialized in `../aros-core`.
 
 ## Streaming Clients (Moonstone)
 

@@ -263,7 +263,7 @@ same build works from Terminal.
 - [hosted/cocoametal/cocoametal.h](../../../hosted/cocoametal/cocoametal.h) — the
   `CMEvent` / `CM_EV_*` / `CM_MOD_*` ABI the injected events ride.
 
-**AROS side (`aros-core-pomaros`, branch `aarch64-darwin-graft`):**
+**AROS side (`aros-core`, branch `main`):**
 
 - `arch/all-darwin/hidd/cocoa/cocoa_input.c` — polls `cm_pump_events` each VBlank,
   maps each macOS virtual keycode through `cocoa_keymap[]` to an Amiga `RAWKEY` (+

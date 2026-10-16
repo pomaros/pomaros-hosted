@@ -7,7 +7,7 @@
 set -eu
 
 HERE=$(cd "$(dirname "$0")" && pwd)
-SRC=${AROS_UPSTREAM:-$HERE/../../../aros-core-pomaros}
+SRC=${AROS_SRC:-${AROS_UPSTREAM:-$HERE/../../../aros-core}}
 A64=${AROS_BUILD:-$HOME/Source/aros-project/Build/pomaros-hosted}
 M68K=${AROS_M68K_BUILD:-$HOME/Source/aros-project/aros-m68k-build}
 

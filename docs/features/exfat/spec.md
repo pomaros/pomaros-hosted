@@ -1,10 +1,12 @@
 # exFAT handler — Phase 1 functional specification
 
+> Development history below predates the public-core export. Use the [current build guide](../build/README.md) and `CORE.lock` for today's source and revision; the historical branches are not build instructions.
+
 > Cleanroom spec under [CLEANROOM.md](../CLEANROOM.md). Role A artefact: this document
 > is the **only** description of behaviour Role B implements from, together with the
 > approved public sources named here.
 >
-> Branch `exfat-handler` on `../aros-core-pomaros`, off `dos64-packets`.
+> Branch `exfat-handler` on `../aros-core`, off `dos64-packets`.
 > Status: **revision 2, implemented and accepted for the Phase 1 read-only
 > core.** The completed writable extension is specified separately in
 > [write-spec.md](write-spec.md); its mutation, recovery and formatting gates

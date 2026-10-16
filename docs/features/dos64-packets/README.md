@@ -1,6 +1,8 @@
 # dos64-packets — the 64-bit DOS packet ABI in AROS
 
-> Status: **Phase 0, in progress.** Branch `dos64-packets` on `../aros-core-pomaros`,
+> Development history below predates the public-core export. Use the [current build guide](../build/README.md) and `CORE.lock` for today's source and revision; the historical branches are not build instructions.
+
+> Status: **Phase 0, in progress.** Branch `dos64-packets` on `../aros-core`,
 > off `aarch64-darwin-graft`. Contains no exFAT code or assumptions.
 >
 > `dos64.library` has been taken from master (`7cb141bdfd`) unmodified. An attempt to
@@ -21,7 +23,7 @@ ABI.** No new packet IDs. No new LVOs.
 ## What is and is not already present
 
 The four action constants are **already public** in
-[`compiler/include/dos/dosextens.h:610`](../../../../aros-core-pomaros/compiler/include/dos/dosextens.h),
+[`compiler/include/dos/dosextens.h:610`](https://github.com/pomaros/aros-core/blob/main/compiler/include/dos/dosextens.h),
 under the comment `/* AmigaOS 4 (tm) compatable Extension(s) */`, present on
 `aarch64-darwin-graft` and attributed to the repository's initial import. Publishing
 them is **not** part of this work, and the `#if defined(ACTION_…)` guards in the NTFS

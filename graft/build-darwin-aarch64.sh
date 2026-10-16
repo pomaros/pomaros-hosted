@@ -13,12 +13,12 @@
 #
 # Usage:
 #   graft/build-darwin-aarch64.sh                 # configure + build the boot set
-#   AROS_SRC=../aros-core-pomaros graft/build-darwin-aarch64.sh
+#   AROS_SRC=../aros-core graft/build-darwin-aarch64.sh
 set -euo pipefail
 
 # Paths are relative to the checkout, independent of the caller's directory.
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-AROS_SRC="${AROS_SRC:-$ROOT/../aros-core-pomaros}"
+AROS_SRC="${AROS_SRC:-$ROOT/../aros-core}"
 BUILD="${BUILD:-${AROS_BUILD:-$ROOT/../Build/pomaros-hosted}}"
 XT="${XT:-${AROS_CROSSTOOLS:-$ROOT/../aros-crosstools}}"
 LLVM="${LLVM:-/opt/homebrew/opt/llvm/bin}"
@@ -32,12 +32,7 @@ BUILD="$(cd "$BUILD" && pwd)"
 
 # Toolchain construction is an explicit first-time operation; normal rebuilds
 # reuse the preserved compiler and never remove the configured build tree.
-for tool in clang llvm-ar llvm-ranlib; do
-    if [ ! -x "$XT/bin/$tool" ]; then
-        echo "Missing preserved AROS tool: $XT/bin/$tool (see GETTING-STARTED.md)" >&2
-        exit 2
-    fi
-done
+AROS_CROSSTOOLS="$XT" "$ROOT/graft/check-toolchain"
 mkdir -p "$SHIM"
 ln -sf "$LLVM/llvm-objcopy" "$SHIM/objcopy"
 ln -sf "$XT/bin/llvm-ar" "$SHIM/ar"

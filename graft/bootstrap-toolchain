@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 John Knipper
+"""Plan or explicitly build the public core's first-time LLVM cross compiler."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shlex
+import shutil
+import subprocess
+import sys
+
+parser = argparse.ArgumentParser(description=__doc__)
+mode = parser.add_mutually_exclusive_group()
+mode.add_argument('--plan', action='store_true', help='print the build plan (default)')
+mode.add_argument('--build', action='store_true', help='perform the one-time compiler build')
+a = parser.parse_args()
+root = Path(__file__).resolve().parent.parent
+source = Path(os.getenv('AROS_SRC', root.parent / 'aros-core')).resolve()
+build = Path(os.getenv('AROS_TOOLCHAIN_BUILD', root.parent / 'Build/pomaros-toolchain')).resolve()
+prefix = Path(os.getenv('AROS_CROSSTOOLS', os.getenv('XT', root.parent / 'aros-crosstools'))).resolve()
+subprocess.run([str(root / 'graft/check-core'), '--source-only'], check=True,
+               env={**os.environ, 'AROS_SRC': str(source)}, stdout=sys.stderr)
+if (source / 'config/llvm_def').read_text().strip() != '20.1.0':
+    raise SystemExit('The hosted toolchain recipe requires reviewed LLVM 20.1.0 sources')
+patches = sorted((source / 'tools/crosstools/llvm').glob('*20.1.0.src-aros.diff'))
+if len(patches) != 7:
+    raise SystemExit('Missing tracked LLVM 20.1.0 component patches')
+revision = subprocess.check_output(['git', '-C', str(source), 'rev-parse', 'HEAD'], text=True).strip()
+commands = [[str(source / 'configure'), '--target=darwin-aarch64', '--with-toolchain=llvm', '--with-llvm-version=20.1.0', '--without-x'],
+            ['make', '-j' + os.getenv('AROS_BUILD_JOBS', '4'), 'crosstools-toolchain']]
+plan = {'source_revision': revision, 'build_directory': str(build), 'install_prefix': str(prefix),
+        'upstream_source': 'https://github.com/llvm/llvm-project/releases/tag/llvmorg-20.1.0',
+        'patch_sha256': {str(p.relative_to(source)): hashlib.sha256(p.read_bytes()).hexdigest() for p in patches},
+        'commands': commands, 'install_from': str(build / 'bin/darwin-aarch64/tools/crosstools'),
+        'relocation_status': 'unqualified; retain the stable toolchain build tree'}
+print(json.dumps(plan, indent=2), flush=True)
+if not a.build:
+    raise SystemExit(0)
+if prefix.exists():
+    raise SystemExit('Compiler destination already exists; refusing to overwrite it. Select a new AROS_CROSSTOOLS, or reuse the existing compiler with make pomaros-hosted.')
+if (build / 'Makefile').exists():
+    raise SystemExit('Toolchain build is already configured; resume it explicitly or select a fresh AROS_TOOLCHAIN_BUILD.')
+for tool in ['make', 'cmake', 'ninja', 'clang', 'clang++', 'python3']:
+    if not shutil.which(tool):
+        raise SystemExit('Missing build prerequisite: ' + tool + '; see GETTING-STARTED.md')
+build.mkdir(parents=True, exist_ok=True)
+llvm = Path(os.getenv('LLVM', '/opt/homebrew/opt/llvm/bin'))
+shim = build / 'host-tools'
+shim.mkdir(exist_ok=True)
+for alias, tool in [('ar', 'llvm-ar'), ('ranlib', 'llvm-ranlib'), ('objcopy', 'llvm-objcopy')]:
+    target = llvm / tool
+    if not target.is_file():
+        raise SystemExit('Missing host archive tool: ' + str(target))
+    link = shim / alias
+    if link.exists() or link.is_symlink(): link.unlink()
+    link.symlink_to(target)
+env = os.environ.copy()
+venv = Path(os.getenv('AROS_BUILD_VENV', root.parent / 'build-venv'))
+env['PATH'] = ':'.join([str(shim), str(venv / 'bin'), '/opt/homebrew/opt/make/libexec/gnubin', '/opt/homebrew/bin', env['PATH']])
+env.setdefault('SOURCE_DATE_EPOCH', subprocess.check_output(['git', '-C', str(source), 'show', '-s', '--format=%ct', 'HEAD'], text=True).strip())
+plan['SOURCE_DATE_EPOCH'] = env['SOURCE_DATE_EPOCH']
+(build / 'toolchain-inputs.json').write_text(json.dumps(plan, indent=2) + '\n')
+with (build / 'toolchain-build.log').open('w') as log:
+    for command in commands:
+        print('+ ' + shlex.join(command), flush=True)
+        subprocess.run(command, cwd=build, env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
+shutil.copytree(Path(plan['install_from']), prefix, symlinks=True)
+subprocess.run([str(root / 'graft/check-toolchain')], check=True,
+               env={**env, 'AROS_CROSSTOOLS': str(prefix)})
+(prefix / 'pomaros-toolchain-inputs.json').write_text(json.dumps(plan, indent=2) + '\n')
+print('Stable compiler prefix ready: ' + str(prefix))
+print('Retain the toolchain build tree; independent prefix relocation remains unqualified: ' + str(build))

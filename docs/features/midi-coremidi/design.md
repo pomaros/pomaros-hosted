@@ -49,7 +49,7 @@ crossing that boundary safely.
 - This repo: `grep -rniE 'coremidi|camd|MIDIClient|MIDIReceived|MIDIPacket'` over
   `.` returns nothing. No CoreMIDI shim, no MIDI work.
 - Upstream: `grep -rniE 'coremidi|MIDIClientCreate|MIDIReceived'` over
-  `../aros-core-pomaros` returns nothing — AROS has never had a macOS
+  `../aros-core` returns nothing — AROS has never had a macOS
   MIDI backend.
 - Upstream **does** ship every piece we mirror or reuse:
   - the whole router: `workbench/libs/camd/` (clusters, links, the inbound parser
@@ -491,7 +491,7 @@ PASS/FAIL covers "right bytes, right order, right framing, no drops".
 
 ## References
 
-AROS upstream (`../aros-core-pomaros`):
+AROS upstream (`../aros-core`):
 - Driver contract: `compiler/include/midi/camddevices.h` (`MidiDeviceData`,
   `MidiPortData`, `MDD_Magic` :62), `compiler/include/midi/camd.h`
   (`MidiMsg`/`MidiNode`/`MidiCluster`/`MidiLink`, `CMEF_*`),

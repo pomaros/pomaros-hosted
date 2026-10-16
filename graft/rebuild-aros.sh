@@ -8,7 +8,7 @@
 # Stable locations (canonical, out of /tmp so the periodic cleaner can't eat them):
 #   AROS_BUILD        ~/Source/aros-project/Build/pomaros-hosted          the AROS build tree / SDK / boot image
 #   AROS_CROSSTOOLS   ~/Source/aros-project/aros-crosstools     the patched clang/lld + compiler-rt
-#   AROS_SRC          ~/Source/aros-project/aros-core-pomaros (branch: pomaros-common)
+#   AROS_SRC          ~/Source/aros-project/aros-core (public branch: main)
 #
 #   graft/rebuild-aros.sh                 # build the whole boot+desktop set
 #   TARGETS="kernel-dos kernel-intuition" graft/rebuild-aros.sh   # subset
@@ -20,7 +20,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-AROS_SRC="${AROS_SRC:-$ROOT/../aros-core-pomaros}"
+AROS_SRC="${AROS_SRC:-$ROOT/../aros-core}"
 AROS_BUILD="${AROS_BUILD:-${BUILD:-$ROOT/../Build/pomaros-hosted}}"
 AROS_CROSSTOOLS="${AROS_CROSSTOOLS:-${XT:-$ROOT/../aros-crosstools}}"
 AROS_SRC="$AROS_SRC" "$ROOT/graft/check-core" || exit $?
@@ -29,14 +29,16 @@ export SOURCE_DATE_EPOCH
 LOGDIR="${LOGDIR:-$AROS_BUILD/rebuild-logs}"
 mkdir -p "$LOGDIR"
 
-# objcopy: macOS has none; the crosstools ship llvm-objcopy. Ensure a plain
-# `objcopy` name exists on PATH (symlinked next to llvm-objcopy, a stable dir).
-[ -e "$AROS_CROSSTOOLS/bin/objcopy" ] || \
-    ln -sf "$AROS_CROSSTOOLS/bin/llvm-objcopy" "$AROS_CROSSTOOLS/bin/objcopy"
+# Keep compiler prefixes immutable; aliases belong to this output tree.
+HOST_TOOLS="$AROS_BUILD/host-tools"
+mkdir -p "$HOST_TOOLS"
+ln -sf "$AROS_CROSSTOOLS/bin/llvm-objcopy" "$HOST_TOOLS/objcopy"
+ln -sf "$AROS_CROSSTOOLS/bin/llvm-ar" "$HOST_TOOLS/ar"
+ln -sf "$AROS_CROSSTOOLS/bin/llvm-ranlib" "$HOST_TOOLS/ranlib"
 AROS_BUILD_VENV="${AROS_BUILD_VENV:-$ROOT/../build-venv}"
-export PATH="$AROS_CROSSTOOLS/bin:$AROS_BUILD_VENV/bin:/opt/homebrew/opt/make/libexec/gnubin:/opt/homebrew/bin:$PATH"
+export PATH="$HOST_TOOLS:$AROS_CROSSTOOLS/bin:$AROS_BUILD_VENV/bin:/opt/homebrew/opt/make/libexec/gnubin:/opt/homebrew/bin:$PATH"
 
-[ -x "$AROS_CROSSTOOLS/bin/clang" ] || { echo "FATAL: no crosstools at $AROS_CROSSTOOLS" >&2; exit 2; }
+AROS_CROSSTOOLS="$AROS_CROSSTOOLS" "$ROOT/graft/check-toolchain" || exit 2
 [ -f "$AROS_BUILD/Makefile" ] || { echo "FATAL: $AROS_BUILD is not a configured build tree (no Makefile). Configure it first:" >&2
     echo "  cd $AROS_BUILD && $AROS_SRC/configure --target=darwin-aarch64 --with-toolchain=llvm --with-aros-toolchain=yes --with-aros-toolchain-install=$AROS_CROSSTOOLS --without-x --with-resolution=1366x768x8" >&2
     exit 3; }
@@ -101,7 +103,7 @@ iconset-Gorilla-wbench-icons workbench-images"
 APP_TARGETS="workbench-tools workbench-tools-systemmonitor workbench-tools-ahirecord workbench-tools-hdtoolbox
 workbench-tools-installaros workbench-tools-sysexplorer-app
 workbench-utilities-help workbench-utilities-installer
-workbench-devs-diskimage-gui workbench-prefs-boot
+workbench-devs-diskimage-gui workbench-prefs-boot workbench-prefs-softwareupdate
 external-openurl-includes external-openurl-fd external-openurl-lib
 external-openurl-cmd external-openurl-prefs kernel-usb-trident"
 
@@ -145,25 +147,25 @@ TARGETS="${TARGETS:-$BOOT_TARGETS $BRIDGE_TARGETS $DESKTOP_TARGETS $APP_TARGETS}
 cd "$AROS_BUILD"
 ok=0; fail=0; failed=""
 # Configure AHI before apps such as AHIRecord can pull it into the base graph.
+# Its executable linker probe needs the complete SDK linklibs on a fresh tree.
 # Header presence in the shared SDK is not physical hardware availability hosted.
 if [ -n "$FULL_SET" ]; then
     ahi_dir="$AROS_BUILD/bin/darwin-aarch64/gen/workbench/devs/AHI"
-    audio_profile="hosted-coreaudio-v2:$(git -C "$AROS_SRC" rev-parse HEAD):$AROS_CROSSTOOLS"
+    audio_profile="hosted-coreaudio-v3:$(git -C "$AROS_SRC" rev-parse HEAD):$AROS_CROSSTOOLS"
     if [ "$(cat "$ahi_dir/.pomaros-profile" 2>/dev/null || true)" != "$audio_profile" ]; then
         if [ -d "$ahi_dir" ]; then
             find "$ahi_dir" -type f \( -name '*.o' -o -name '*.d' -o -name '*.a' -o -name Makefile.dep \) -delete
         fi
         rm -f "$ahi_dir/.configured" "$ahi_dir/.installed"
     fi
-    if ac_cv_header_asm_io_h=no ac_cv_header_aros_apple_audio_h=no \
+    if ac_cv_header_asm_io_h=no \
         "$ROOT/graft/build-targets" --build "$AROS_BUILD" --log "$LOGDIR/hosted-audio-configure.log" \
         --make-var "AR_PLAIN=$AROS_CROSSTOOLS/bin/llvm-ar" \
         --make-var "RANLIB=$AROS_CROSSTOOLS/bin/llvm-ranlib" \
-        AHI-coreaudio-bridge-darwin workbench-devs-AHI-subsystem-configure; then
+        includes linklibs core-linklibs AHI-coreaudio-bridge-darwin workbench-devs-AHI-subsystem-configure; then
         if [ -f "$ahi_dir/Drivers/CoreAudio/Makefile" ] && \
             grep -Eq '^HAVE_COREAUDIO[[:space:]]*=[[:space:]]*1' "$ahi_dir/Drivers/Makefile" && \
             grep -Eq '^HAVE_ASMIO[[:space:]]*=[[:space:]]*$' "$ahi_dir/Drivers/Makefile" && \
-            grep -Eq '^HAVE_APPLE_AUDIO_H[[:space:]]*=[[:space:]]*$' "$ahi_dir/Drivers/Makefile" && \
             grep -Fq "$AROS_CROSSTOOLS/bin/clang" "$ahi_dir/Device/Makefile" && \
             grep -Fq "$AROS_CROSSTOOLS/bin/llvm-ar" "$ahi_dir/Device/Makefile" && \
             grep -Fq "$AROS_CROSSTOOLS/bin/llvm-ranlib" "$ahi_dir/Device/Makefile"; then
@@ -187,7 +189,7 @@ fi
 
 if [ -n "$FULL_SET" ] && [ "$fail" -eq 0 ]; then
     build_workbench_system_base
-    if ! ac_cv_header_asm_io_h=no ac_cv_header_aros_apple_audio_h=no \
+    if ! ac_cv_header_asm_io_h=no \
         "$ROOT/graft/build-targets" --build "$AROS_BUILD" --log "$LOGDIR/hosted-audio-assemble.log" \
         --make-var "AR_PLAIN=$AROS_CROSSTOOLS/bin/llvm-ar" \
         --make-var "RANLIB=$AROS_CROSSTOOLS/bin/llvm-ranlib" \
@@ -195,8 +197,7 @@ if [ -n "$FULL_SET" ] && [ "$fail" -eq 0 ]; then
         fail=$((fail+1)); failed="$failed audio-assembly"
     fi
     if ! grep -Eq '^HAVE_COREAUDIO[[:space:]]*=[[:space:]]*1' "$ahi_dir/Drivers/Makefile" ||
-       ! grep -Eq '^HAVE_ASMIO[[:space:]]*=[[:space:]]*$' "$ahi_dir/Drivers/Makefile" ||
-       ! grep -Eq '^HAVE_APPLE_AUDIO_H[[:space:]]*=[[:space:]]*$' "$ahi_dir/Drivers/Makefile"; then
+       ! grep -Eq '^HAVE_ASMIO[[:space:]]*=[[:space:]]*$' "$ahi_dir/Drivers/Makefile"; then
         fail=$((fail+1)); failed="$failed final-audio-profile"
     fi
 fi

@@ -25,21 +25,27 @@ ships. The work is published as John's, product-neutral, with no AI attribution.
 - **Name no other products or brands** in code, comments, or PR text.
 - Plain, concise English. No em-dashes (John is French, non-native).
 - **A wrapped-grep "no matches" is not evidence.** The shell `grep` here skips
-  non-UTF-8 files silently, and 21% of `../aros-core-pomaros` is non-UTF-8. Before
+  non-UTF-8 files silently; a historical AROS audit found many such files. Before
   claiming something is absent, or counting call sites, follow
   [search-evidence](../search-evidence/SKILL.md).
 
 ## Repos and trees (see docs/features/build + deployment)
 
-- OS source: `../aros-core-pomaros`, branch `aarch64-darwin-graft`. Edit, build, and
-  commit here. Push to remote `fork` (github.com/jonx/AROS).
-- Pristine upstream: `../aros-core-pomaros-master` (a worktree; keep it at
-  `origin/master` for grepping current master).
-- Build tree: `~/Source/aros-project/Build/pomaros-hosted`. Crosstools: `~/Source/aros-project/aros-crosstools`. Never rebuild LLVM.
-- PR branches are cut off `origin/master` (clean, upstream-targetable), but
-  `origin/master` cannot build on darwin (no host layer) so you VERIFY on the
-  `aarch64-darwin-graft` tree. Confirm the touched file is identical on both
-  (`git diff --quiet origin/master HEAD -- <file>`) so the diff ports cleanly.
+- Shared OS source: public `../aros-core`, branch `main`, repository
+  `https://github.com/pomaros/aros-core.git`. `CORE.lock` pins the reviewed source.
+  Claim paths and coordinate with its owner before editing this shared checkout.
+- Official upstream: remote `upstream` points to
+  `https://github.com/aros-development-team/AROS.git`. Use an isolated worktree
+  based on the reviewed `upstream/master` revision for upstream patches. Do not
+  assume an old sibling worktree or a historical graft branch exists.
+- Build tree: `../Build/pomaros-hosted`, or the explicit stable `AROS_BUILD`.
+  Reuse the preserved `AROS_CROSSTOOLS`; never rebuild LLVM during a bug fix.
+- Validate product changes on a coordinated source commit/pin and owned output
+  tree. The official upstream tree does not yet contain every Hosted adaptation;
+  describe that validation boundary when preparing a portable upstream patch.
+- Read [upstream-pr](../upstream-pr/SKILL.md) before any upstream action.
+  Public product/core repository authorization does not authorize an upstream
+  PR, comment, or update to an upstream PR branch. Follow CLAUDE.md's gate.
 
 ## Workflow
 
@@ -50,34 +56,37 @@ ships. The work is published as John's, product-neutral, with no AI attribution.
      Vampire, SMP, x86 install/boot, X11/SDL, native-GPU drivers (nouveau, ata,
      ahci, intelgma...).
    - Already resolved? Grep the TODO text or symptom **tree-wide** in
-     `../aros-core-pomaros-master` (not just the original path). Watch for
+     the isolated official upstream worktree (not just the original path). Watch for
      renames/moves: a file can be renamed and the TODO travel with it, so a
      missing-at-old-path result is NOT proof it's gone.
 2. **Reproduce** on the hosted build with `graft/aros-ctl` (run / wait / type /
    enter / shot). Ground the bug in an observed artifact before touching code.
 3. **Root-cause** in the source. Read the actual code path; do not guess.
-4. **Fix** in the `aros-core-pomaros` working tree (minimal change).
+4. **Fix** in a coordinated `aros-core` feature worktree (minimal change).
+   Commit and review the source pin before using guarded product build scripts.
 5. **Build** the specific metatarget in `~/Source/aros-project/Build/pomaros-hosted`
    (`PATH=~/Source/aros-project/aros-crosstools/bin:$PATH; make <metatarget>`). Never a bare `make`.
    Find the metatarget name in the module's `mmakefile.src` (`mmake=...`).
 6. **Verify**: `aros-ctl deploy` -> `run` -> drive the repro -> `shot`. Test
    every affected case for a behaviour change. For high-blast-radius code
    (console write path, exec, dos), also confirm no regression to normal use.
-7. **Author the PR branch** off `origin/master` in a dedicated worktree
-   (`git worktree add`), apply the same change, commit (no trailer), then
-   **revert the working tree** in `aros-core-pomaros` so the graft branch stays
-   clean (the fix lives only on the PR branch).
-8. **Ship**: `git push -u fork <branch>`, then
-   `gh pr create --repo aros-development-team/AROS --base master --head
-   jonx:<branch>`. Body ends with `Fixes #<n>`. No brands, no AI mention.
+7. **Prepare the upstream patch** in an isolated worktree based on
+   `upstream/master`. Port the verified change with upstream anchors and record
+   any contextual differences. Preserve the shared source checkout, its commits,
+   and every unrelated working change; do not revert a shared tree as cleanup.
+8. **Request the required upstream approval** with the exact patch, validation
+   and proposed PR text. After approval, push the dedicated branch to the public
+   `pomaros/aros-core` fork and open the authorized PR against
+   `aros-development-team/AROS`, base `master`, head `pomaros:<branch>`.
+   The PR body ends with `Fixes #<n>`.
 
 ## Triage-only outcomes (we are not maintainers, cannot close issues)
 
-- Already fixed: comment "the TODO is no longer present in `<file>` on current
+- After upstream-comment approval, already fixed: comment "the TODO is no longer present in `<file>` on current
   master ... can be closed as resolved."
-- Moved: comment where it now lives ("renamed to `<file>:<line>`").
-- Not our call (needs a design decision or a big refactor): post the root-cause
-  analysis + proposed approach as a comment for whoever picks it up.
+- After upstream-comment approval, moved: comment where it now lives ("renamed to `<file>:<line>`").
+- Not our call (needs a design decision or a big refactor): prepare the root-cause
+  analysis and proposed approach for review before any upstream comment.
 
 ## Gotchas learned
 
@@ -92,12 +101,12 @@ ships. The work is published as John's, product-neutral, with no AI attribution.
 - If John is rebuilding in parallel, avoid concurrent `make` in `~/Source/aros-project/Build/pomaros-hosted`
   (shared mmake DB) unless told it's fine; the single hosted instance is shared
   too (reboot to run-verify only when free).
-- When the touched file DIFFERS between graft and origin/master: implement and
-  verify on the graft tree, then re-apply hunk by hunk to the PR branch with
+- When the touched file differs between the public product core and upstream:
+  implement and verify on the coordinated product worktree, then port to the PR branch with
   upstream anchors, and prove equivalence by diffing the added lines of both
   patches (`git diff | grep '^+'` on each side must match).
 - SYS: is the live host dir `~/Source/aros-project/Build/pomaros-hosted/bin/darwin-aarch64/AROS/` -- files
   written there (test binaries, scripts) are visible to the RUNNING instance
   immediately, while in-memory handlers/modules stay old until reboot. Useful
   to repro a bug on the old module with a fresh test binary.
-- `CLAUDE.md` is git-excluded (local-only). Don't try to commit it.
+- `CLAUDE.md` is tracked here and owns the current source and publication rules.

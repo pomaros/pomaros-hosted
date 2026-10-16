@@ -230,7 +230,7 @@ copy_if_changed() {
 }
 
 ensure_desktop_payloads() {
-    local upstream="${AROS_UPSTREAM:-$ROOT/../aros-core-pomaros}"
+    local upstream="${AROS_SRC:-${AROS_UPSTREAM:-$ROOT/../aros-core}}"
     local fontsrc="$upstream/workbench/fonts"
     local d default_images
 
@@ -271,7 +271,7 @@ write_startup_sequence() {
 
     # Stage the PIPE: mount description (L:pipe-handler is a build artifact; the
     # startup Mount below is guarded by If EXISTS).
-    local _up="${AROS_UPSTREAM:-$ROOT/../aros-core-pomaros}"
+    local _up="${AROS_SRC:-${AROS_UPSTREAM:-$ROOT/../aros-core}}"
     if [ ! -f "$AROS/Devs/DOSDrivers/PIPE" ] && [ -f "$_up/workbench/devs/DOSDrivers/PIPE" ]; then
         mkdir -p "$AROS/Devs/DOSDrivers"
         cp -f "$_up/workbench/devs/DOSDrivers/PIPE" "$AROS/Devs/DOSDrivers/PIPE"

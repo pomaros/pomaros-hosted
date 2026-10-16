@@ -64,8 +64,7 @@ qualification; see [RELEASE.md](RELEASE.md).
 - Self-contained core candidates use Developer ID signing and hardened runtime
   for the complete host layer. Retain their Apple notarization reports with
   each artifact. Public redistribution still requires the corresponding source
-  and licence materials for every included copyleft component; the shared AROS
-  checkout remains private.
+  and licence materials for every included copyleft component.
 
 ## Repository boundary
 
@@ -86,7 +85,7 @@ platform, not as the current PomAROS implementation plan.
 The source projects remain separate so their histories and responsibilities do
 not become tangled:
 
-- `aros-core-pomaros` is the shared operating-system source; `CORE.lock` records
+- [`aros-core`](https://github.com/pomaros/aros-core) is the public shared operating-system source; `CORE.lock` records
   its repository, branch, and tested revision.
 - [jonx/AROS-AArch64](https://github.com/jonx/AROS-AArch64) is retained as a
   redirect to this repository so old links and history remain understandable.
@@ -113,7 +112,7 @@ The complete source-build path is in
 ```text
 Source/
 ├── pomaros-hosted/
-├── aros-core-pomaros/    shared AROS source at CORE.lock revision
+├── aros-core/    shared AROS source at CORE.lock revision
 ├── zed-aros/
 └── Ferail/
 ```

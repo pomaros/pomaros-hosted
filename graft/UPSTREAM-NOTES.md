@@ -1,5 +1,7 @@
 # Upstream notes — friction hit bringing up `darwin-aarch64`, worth fixing for everyone
 
+> Historical integration record: branch names, local paths and commit references below describe their original investigation. Use the [current source/build guide](../GETTING-STARTED.md) and `CORE.lock` for maintained public-core instructions.
+
 A running list of AROS build-system issues found while grafting a new
 `darwin-aarch64` (hosted-on-Apple-Silicon) target. Most aren't AArch64-specific —
 they're general robustness/bit-rot problems that bite anyone building AROS today,

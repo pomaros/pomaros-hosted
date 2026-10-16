@@ -34,7 +34,9 @@ without saying so:
   No warning. Clean exit status. Indistinguishable from "no matches".
 - **`--ignore-files`** applies ignore-file rules, so ignored paths vanish too.
 
-**`../aros-core-pomaros` is 21% non-UTF-8: 4,404 of 21,123 files.** Much of AROS is
+**A prior audit of the former shared checkout found 21% non-UTF-8: 4,404 of
+21,123 files.** The current public source is `../aros-core` at `CORE.lock`;
+repeat counts there before treating that historical measurement as current. Much of AROS is
 ISO-8859. Every one of those files is invisible to the wrapped `grep`.
 
 Other tools worth preflighting rather than assuming: this is BSD userland, so

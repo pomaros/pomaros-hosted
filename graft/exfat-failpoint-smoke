@@ -6,7 +6,7 @@ export AROS_CTL_STARTUP_MODE
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/.." && pwd)"
-UPSTREAM="${AROS_UPSTREAM:-$ROOT/../aros-core-pomaros}"
+UPSTREAM="${AROS_SRC:-${AROS_UPSTREAM:-$ROOT/../aros-core}}"
 TOP="${AROS_BUILD:-$HOME/Source/aros-project/Build/pomaros-hosted}"
 BUILD="$TOP/bin/darwin-aarch64"
 AROS="$BUILD/AROS"

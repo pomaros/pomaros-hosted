@@ -12,11 +12,11 @@
  *               -- the value NSEvent.keyCode produces.
  *   RIGHT side = the AROS "rawkey" code the input.device / keyboard.hidd expects,
  *               i.e. a RAWKEY_* value from:
- *                 compiler/include/devices/rawkeycodes.h   (aros-core-pomaros)
+ *                 compiler/include/devices/rawkeycodes.h   (aros-core)
  *               (Standard Amiga / AROS virtual rawkey codes.)
  *
  * ADAPTED FROM  (in-tree AROS, free to reuse -- no GPL source consulted)
- *   arch/all-hosted/hidd/x11/mac-x11-keycode2rawkey.table   (in aros-core-pomaros)
+ *   arch/all-hosted/hidd/x11/mac-x11-keycode2rawkey.table   (in aros-core)
  *   That file is a raw 256-byte array indexed by the X11 keycode delivered by
  *   Apple's X11 server (XQuartz), where  X11keycode = macOS_VK + 8. Decoding it
  *   byte-for-byte and subtracting the +8 XQuartz offset reproduces a clean

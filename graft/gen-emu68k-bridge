@@ -35,10 +35,11 @@ import json
 import hashlib
 import subprocess
 
-AROS = os.environ.get("AROS_SRC", os.path.expanduser("~/Source/aros-project/aros-core-pomaros"))
-AROS_BUILD = os.environ.get("AROS_BUILD", os.path.expanduser("~/Source/aros-project/Build/pomaros-hosted"))
+WORKSPACE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+AROS = os.environ.get("AROS_SRC", os.path.join(WORKSPACE, "aros-core"))
+AROS_BUILD = os.environ.get("AROS_BUILD", os.path.join(WORKSPACE, "Build/pomaros-hosted"))
 AROS_CC = os.environ.get(
-    "AROS_CC", os.path.expanduser("~/Source/aros-project/aros-crosstools/bin/clang"))
+    "AROS_CC", os.path.join(os.environ.get("AROS_CROSSTOOLS", os.path.join(WORKSPACE, "aros-crosstools")), "bin/clang"))
 LAYOUT_TOOL = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                            "gen-struct-layouts")
 POLICY_PATH = os.environ.get(
@@ -52,7 +53,7 @@ POLICY_PATH = os.environ.get(
 # presence of the header the natural test for "can we generate for this".
 GENINC = os.environ.get(
     "AROS_GENINC",
-    os.path.expanduser("~/Source/aros-project/Build/pomaros-hosted/bin/darwin-aarch64/gen/include"))
+    os.path.join(AROS_BUILD, "bin/darwin-aarch64/gen/include"))
 
 # The libraries a 68k Amiga program plausibly calls: the AmigaOS application
 # surface. Every .conf in the tree is CLASSIFIED (see --report-all, 175 of them),

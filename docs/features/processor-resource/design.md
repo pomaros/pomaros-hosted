@@ -74,7 +74,7 @@ same number:
 
 **No darwin/AArch64 `processor.resource` backend exists** — in this repo or upstream.
 
-In-tree arch backends (`../aros-core-pomaros/arch/*/processor/`):
+In-tree arch backends (`../aros-core/arch/*/processor/`):
 
 - `arch/all-pc/processor/` — the **full-replacement** pattern: its own
   `getcpuinfo.c` (a complete `GetCPUInfo` LVO reading a CPUID-derived
@@ -488,7 +488,7 @@ Markers are unique per spike so a regression localises (the `[M*]`/`[H*]`/`[A*]`
 
 ## References
 
-AROS upstream (`../aros-core-pomaros`):
+AROS upstream (`../aros-core`):
 - Generic resource: `rom/processor/{getcpuinfo.c (GetCPUInfo LVO :23, stub model
   :160 / load :195 / speed :192, feature-range :146), init.c (cpucount :21),
   processor_intern.h (struct ProcessorBase + Private1 :20-26), defaults.h

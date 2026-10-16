@@ -2,10 +2,11 @@
 
 Hosted AROS on Apple Silicon (aarch64-darwin). **This repo is the host/graft
 layer only.** The AROS OS source (kernel, modules, libraries) is a *separate*
-checkout at `../aros-core-pomaros` (branch `pomaros-common`). Edit OS code
+checkout at `../aros-core` (public branch `main`). Edit OS code
 there, not here. Coordinate core edits with its owner. Use `CORE.lock` for the
-reviewed shared source revision. Push only to the new private product origin;
-upstream publication still needs John's explicit authorization.
+reviewed shared source revision. Product source is public; coordinate product pushes with the active review.
+The public core excludes native Apple hardware work. AROS upstream publication
+still needs John's explicit authorization. Preserve old signed artifact pins.
 
 ## Before you build or run — read first, every time
 
@@ -20,7 +21,7 @@ already solve them; read the doc instead of rediscovering the trap.
     `make` calls must select one goal at a time.
   - Build in a **stable** dir (`~/Source/aros-project/Build/pomaros-hosted`), never a session scratchpad or /tmp
     (both get GC'd half-deleted → the "I keep having to redo it" loop).
-  - Reuse the prebuilt toolchain (`~/Source/aros-project/aros-crosstools`); never rebuild LLVM.
+  - Routine builds reuse the preserved toolchain (`~/Source/aros-project/aros-crosstools`); never rebuild LLVM during a product rebuild. First-time contributors without a compiler use the explicit separate `graft/bootstrap-toolchain` recipe in GETTING-STARTED.md.
 - **A fix appears not to take when you run it** → read
   [docs/features/deployment/README.md](docs/features/deployment/README.md).
   There are several runnable copies of the same artifacts (`build/host-libs`, the boot

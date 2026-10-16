@@ -39,7 +39,7 @@ doc — are two:
 ## Does it already exist?
 
 **On the AROS side: almost entirely — the stack is there, only the macOS backend is
-missing.** Evidence (all `../aros-core-pomaros`):
+missing.** Evidence (all `../aros-core`):
 
 - **The generic spooler.** `workbench/devs/printer/` builds `printer.device`
   (`mmakefile.src` `files = printer driver prefs gfx text`,
@@ -500,7 +500,7 @@ dimensions) — the print analogue of audio's known sine.
 
 ## References
 
-AROS upstream (`../aros-core-pomaros`):
+AROS upstream (`../aros-core`):
 - Spooler: `workbench/devs/printer/printer.c` (system device, no-op commands
   :109–113), `driver.c` (`Printer_Unit` LoadSeg+magic :740–757, `pd_DriverTask`
   :526–667, `pd_PWrite`→`CMD_WRITE` :218–242, `pd_Init` opens `<PrtDevName>.device`

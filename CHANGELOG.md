@@ -2,6 +2,12 @@
 
 ## 2026-10-16 - PomAROS Hosted migration
 
+Public core source acquisition and an explicit first-time toolchain build plan
+let new contributors prepare the same source inputs without private repository
+access. Compiler checks reject incompatible preserved LLVM versions before
+compiling hosted objects; previously signed distributions keep their original
+source records.
+
 A separate core-only distribution can package the desktop and host bridges
 without unqualified optional applications. Its native Mac launcher supports full
 Developer ID signing and hardened runtime; release notices identify the exact

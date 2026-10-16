@@ -117,7 +117,7 @@ See [design.md → "What proves the internet works"](design.md) for the full mat
 - [hosted/bsdsocket/n5b/](../../../hosted/bsdsocket/n5b/) — the AROS test clients
   (`socktest.c`, `nettest.c`) and the host `echo_server.c`, kept for reproducibility.
 
-**AROS side (`aros-core-pomaros`, branch `aarch64-darwin-graft`):** the new module
+**AROS side (`aros-core`, branch `main`):** the new module
 `arch/all-unix/bsdsocket/` — a host-passthrough `bsdsocket.library`:
 
 - `bsdsocket.conf` — the genmodule LVO functionlist (AmiTCP offsets, copied verbatim).

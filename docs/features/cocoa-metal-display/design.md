@@ -32,7 +32,7 @@ window. See "The unattended-verification tension".
 
 ## Does it already exist?
 
-No. Verified by search over `../aros-core-pomaros`:
+No. Verified by search over `../aros-core`:
 
 - `grep -rliE "cocoa|cametallayer|nswindow|mtkview|metalkit"` returns **only**
   `arch/all-ios/hidd/uikit/uikit_hiddclass.c` and `.../eventtask.c` — the **iOS
@@ -44,8 +44,8 @@ No. Verified by search over `../aros-core-pomaros`:
   hidd) and two WirelessManager host drivers (`driver_osx.m`,
   `driver_iphone.m`) — none is a display HIDD for hosted macOS.
 - The hosted display HIDDs present are exactly two:
-  `../aros-core-pomaros/arch/all-hosted/hidd/sdl/` and
-  `../aros-core-pomaros/arch/all-hosted/hidd/x11/`. Confirmed by
+  `../aros-core/arch/all-hosted/hidd/sdl/` and
+  `../aros-core/arch/all-hosted/hidd/x11/`. Confirmed by
   `ls arch/all-hosted/hidd/` → `{sdl, x11}`.
 
 So a native Cocoa/AppKit + Metal display HIDD is genuinely new. (The iOS UIKit
@@ -92,11 +92,11 @@ exists in the tree — and the only Apple-family HIDD shape to mine is iOS UIKit
 A display driver is an OOP subclass tree registered with graphics.library. The
 authoritative interface definition — every method ID, attribute tag, interface-ID
 string and stub macro — is one file:
-**`../aros-core-pomaros/rom/hidds/gfx/gfx.conf`** (genmodule generates
+**`../aros-core/rom/hidds/gfx/gfx.conf`** (genmodule generates
 the `<interface/Hidd_*.h>` headers from it; the public umbrella is
-`../aros-core-pomaros/rom/hidds/gfx/include/gfx.h` = `<hidd/gfx.h>`).
+`../aros-core/rom/hidds/gfx/include/gfx.h` = `<hidd/gfx.h>`).
 Base-class implementations:
-`../aros-core-pomaros/rom/hidds/gfx/gfx_hiddclass.c` (graphics class)
+`../aros-core/rom/hidds/gfx/gfx_hiddclass.c` (graphics class)
 and `.../gfx_bitmapclass.c` (bitmap class).
 
 **Two classes to subclass:**
@@ -168,7 +168,7 @@ init-only tag lists and passes them to the superclass:
   (`gfx.conf:343–345`).
 
 The SDL driver is the cleanest worked example of building these:
-`../aros-core-pomaros/arch/all-hosted/hidd/sdl/sdlgfx_hiddclass.c`
+`../aros-core/arch/all-hosted/hidd/sdl/sdlgfx_hiddclass.c`
 (`SDLGfx__Root__New`, lines ~88–284) maps the host's reported format to a
 `vHidd_StdPixFmt_*` and emits the pixfmt + per-mode sync taglists.
 
@@ -409,7 +409,7 @@ read a file/buffer, emit one verdict block. Concretely:
 ## Risks & open questions
 
 - **Metal has zero precedent in the AROS tree** — every Metal API here is
-  **UNVERIFIED** against `aros-core-pomaros` and grounded only against the live macOS
+  **UNVERIFIED** against `aros-core` and grounded only against the live macOS
   SDK. Mitigation: D1 proves the exact call sequence first (the `pngprobe`/H7
   method), and the CGBitmap-into-`layer.contents` fallback is a fully grounded
   path (H7 + `native_api.m:119`) we can ship if Metal blocks. The exact pipeline
@@ -461,7 +461,7 @@ In-project:
 - `graft/WORKFLOW.md`, `graft/UPSTREAM-NOTES.md`, `graft/bootrun.sh` — the
   boot/run harness this driver plugs into.
 
-AROS upstream (`../aros-core-pomaros/`):
+AROS upstream (`../aros-core/`):
 - `rom/hidds/gfx/gfx.conf` — authoritative HIDD interface (methods, attrs, IIDs,
   stub macros).
 - `rom/hidds/gfx/include/gfx.h` — `<hidd/gfx.h>`: `CLID_*`/`IID_*` aliases,

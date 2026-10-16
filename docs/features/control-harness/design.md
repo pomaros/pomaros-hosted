@@ -45,7 +45,7 @@ No equivalent existed; this is original to the project.
   display HIDD. The X11/SDL hosted drivers consume real host events from a live
   server connection; none expose a "inject a synthetic key, read back the
   framebuffer" channel for an attended-free agent. Verified by search over
-  `../aros-core-pomaros` (no control-FIFO / synthetic-event path in the
+  `../aros-core` (no control-FIFO / synthetic-event path in the
   hosted HIDDs).
 - **GPL Amiga emulators** have scripting/automation (serial/debugger scripting,
   config-driven input, GUI hooks) — but they are GPL and, more to
@@ -243,7 +243,7 @@ session**. The migration is mostly mechanical:
   [hosted/cocoametal/cocoametal_window.m](../../../hosted/cocoametal/cocoametal_window.m)
   (`cm__pump_events_appkit`), [hosted/cocoametal/cocoametal.h](../../../hosted/cocoametal/cocoametal.h)
   (`CMEvent`/`CM_MOD_*`), [hosted/libaros/](../../../hosted/libaros/IDEAS.md).
-- AROS (`aros-core-pomaros`, `aarch64-darwin-graft`):
+- AROS (`aros-core`, `main`):
   `arch/all-darwin/hidd/cocoa/cocoa_input.c` (`cocoa_keymap[]` VK→RAWKEY, qualifiers,
   the per-VBlank pump).
 - Sibling features: [cocoa-metal-display](../cocoa-metal-display/design.md) (the

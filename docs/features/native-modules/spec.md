@@ -25,7 +25,7 @@ any implementation's expression.
 ## Scope
 
 **This feature is in progress, not greenfield.** A substantial native-LoadSeg W^X path
-**already exists in the work-tree** (`../aros-core-pomaros`, this project's
+**already exists in the work-tree** (`../aros-core`, this project's
 commit `71f75760` + the all-unix kernel additions): the ELF loader requests executable
 memory, `LoadSeg`'s `AllocFunc` routes it to `KrnAllocPages`, the kernel backs that with
 host `mmap`, relocations are applied, and `KrnSetProtection` flips the pages R/X. So the

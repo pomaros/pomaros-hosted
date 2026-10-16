@@ -92,7 +92,7 @@ artifact_line() {
 }
 
 ensure_desktop_payloads() {
-    upstream="${AROS_UPSTREAM:-$ROOT/../aros-core-pomaros}"
+    upstream="${AROS_SRC:-${AROS_UPSTREAM:-$ROOT/../aros-core}}"
     fontsrc="$upstream/workbench/fonts"
 
     if [ -d "$fontsrc" ]; then
@@ -131,7 +131,7 @@ write_startup_sequence() {
 
     # Stage the PIPE: mount description (the L:pipe-handler binary is a build
     # artifact; the startup Mount below is guarded by If EXISTS).
-    _up="${AROS_UPSTREAM:-$ROOT/../aros-core-pomaros}"
+    _up="${AROS_SRC:-${AROS_UPSTREAM:-$ROOT/../aros-core}}"
     if [ ! -f "$AROS/Devs/DOSDrivers/PIPE" ] && [ -f "$_up/workbench/devs/DOSDrivers/PIPE" ]; then
         mkdir -p "$AROS/Devs/DOSDrivers"
         cp -f "$_up/workbench/devs/DOSDrivers/PIPE" "$AROS/Devs/DOSDrivers/PIPE"

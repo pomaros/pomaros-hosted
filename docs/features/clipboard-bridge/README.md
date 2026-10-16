@@ -104,7 +104,7 @@ sketches how `ILBM`/PNG would layer on later.)
 - Deployed to `~/lib` by [graft/run-window.sh](../../../graft/run-window.sh) and
   [graft/aros-ctl](../../../graft/aros-ctl), beside `cocoametal.dylib`.
 
-**AROS side (`aros-core-pomaros`, branch `aarch64-darwin-graft`):**
+**AROS side (`aros-core`, branch `main`):**
 
 - `arch/all-darwin/hidd/cocoa/cocoa_clipboard.c` — the sync **process**
   (`CreateNewProcTags`, because it touches `clipboard.device`, which file-backs

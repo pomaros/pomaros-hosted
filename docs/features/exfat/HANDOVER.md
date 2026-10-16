@@ -1,3 +1,5 @@
+> Historical handoff/plan: retain the original source paths, branches, commits and observations below as recorded. For current public-core acquisition and builds, use [GETTING-STARTED.md](../../../GETTING-STARTED.md) and `CORE.lock`; these older workflow instructions do not override the current guide.
+
 # exFAT handover — 2026-08-04
 
 ## Current state

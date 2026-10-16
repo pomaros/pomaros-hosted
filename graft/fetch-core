@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 John Knipper
+"""Acquire the exact public AROS source without changing an existing checkout."""
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+root = Path(__file__).resolve().parent.parent
+lock = dict(line.split('=', 1) for line in (root / 'CORE.lock').read_text().splitlines()
+            if line and not line.startswith('#'))
+revision = lock['CORE_REVISION']
+if lock['CORE_URL'] != 'https://github.com/pomaros/aros-core.git' or not re.fullmatch('[0-9a-f]{40}', revision):
+    raise SystemExit('Expected a reviewed public core URL and complete commit SHA in CORE.lock')
+source = Path(os.environ.get('AROS_SRC', root.parent / 'aros-core')).expanduser()
+if source.is_symlink():
+    raise SystemExit('Refusing a symlink source destination: ' + str(source))
+source = source.resolve()
+env = os.environ.copy()
+env['GIT_TERMINAL_PROMPT'] = '0'
+def git(*args):
+    return subprocess.check_output(['git', *map(str, args)], env=env, text=True).strip()
+if source.exists():
+    if not (source / '.git').exists():
+        raise SystemExit('Source destination exists and is not a Git checkout: ' + str(source))
+    if git('-C', source, 'rev-parse', 'HEAD') != revision:
+        raise SystemExit('Existing source revision differs; refusing to move it. Select a new AROS_SRC or review its checkout manually.')
+    if git('-C', source, 'status', '--porcelain'):
+        raise SystemExit('Existing source has visible changes; refusing to modify it')
+else:
+    source.parent.mkdir(parents=True, exist_ok=True)
+    git('clone', '--filter=blob:none', '--no-checkout', '--single-branch', '--branch', lock['CORE_BRANCH'], lock['CORE_URL'], source)
+    git('-C', source, 'checkout', '--detach', revision)
+git('-C', source, 'submodule', 'update', '--init', '--recursive')
+if git('-C', source, 'rev-parse', 'HEAD') != revision:
+    raise SystemExit('Source moved during acquisition; review the pin and re-run verification')
+subprocess.run([str(root / 'graft/check-core'), '--source-only'], check=True,
+               env={**env, 'AROS_SRC': str(source)})
+print('Public shared source ready: ' + str(source))

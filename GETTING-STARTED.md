@@ -52,32 +52,38 @@ Hosted AROS is built from **two repositories that must sit side by side**:
 ```
 some-parent-dir/
 ├── pomaros-hosted/     ← THIS repo — the host / graft layer (scripts, host shims, docs)
-└── aros-core-pomaros/    ← the AROS OS source (kernel, libraries, Workbench)
+└── aros-core/    ← the AROS OS source (kernel, libraries, Workbench)
 ```
 
-`pomaros-hosted` is the Mac-side glue. `aros-core-pomaros` contains the shared
+`pomaros-hosted` is the Mac-side glue. `aros-core` contains the shared
 AROS sources and the Darwin hosted adaptation. Obtain the source at the exact
-revision recorded in `CORE.lock`; repository access is required while the
-shared source remains private.
+revision recorded in `CORE.lock` from the public `pomaros/aros-core` repository.
+The native Apple hardware implementation remains outside this public core.
 
 ```sh
 cd pomaros-hosted
-. ./CORE.lock
-git clone --branch "$CORE_BRANCH" "$CORE_URL" ../aros-core-pomaros
-git -C ../aros-core-pomaros checkout --detach "$CORE_REVISION"
-git -C ../aros-core-pomaros submodule update --init --recursive
+./graft/fetch-core
 ./graft/check-core
 ```
 
-The scripts default to `../aros-core-pomaros`, `../Build/pomaros-hosted`, and
+The scripts default to `../aros-core`, `../Build/pomaros-hosted`, and
 `../aros-crosstools`. They select Homebrew GNU make and a sibling `build-venv`
 when available. Install the build prerequisites once:
 
 ```sh
-brew install make llvm lld cmake zstd gawk automake autoconf bison flex netpbm libpng gnu-sed
+brew install make llvm lld cmake ninja zstd gawk automake autoconf bison flex netpbm libpng gnu-sed
 python3 -m venv ../build-venv
 ../build-venv/bin/python -m pip install mako pyyaml
 ```
+
+The helper refuses symlink destinations and existing checkouts with another
+revision or visible changes. Choose a new `AROS_SRC` or review an existing
+checkout manually when updating the pin.
+
+When migrating an existing build configured against another source checkout,
+keep that output and select a fresh stable directory before building, for example
+`export AROS_BUILD="$PWD/../Build/pomaros-public-hosted"` from this repository.
+The source guard refuses to reuse a configured tree with a different source path.
 
 The OS build must use the patched AROS compiler below.
 Existing user files and settings stay in `~/AROS/Shared` and
@@ -112,9 +118,10 @@ Two rules that will cost you a day each if you skip them:
   does not exist. It is a *warning, not an error*, so the build succeeds and all
   varargs silently break at runtime with no useful crash.
 
-Building the toolchain from source is a **one-time ~1–2 hour** step. After that
-the `crosstools` directory is relocatable — copy it aside and reuse it, and you
-never pay that cost again (see step 4).
+Building the toolchain from source is a **one-time ~1–2 hour** step. Reuse the
+compiler at a stable preserved prefix for subsequent product builds. Keep its
+original toolchain build tree too: copied symlinks and Mach-O dependencies must
+be audited before treating that prefix as independently relocatable.
 
 ## 4. Build hosted AROS
 
@@ -135,20 +142,20 @@ the core commit timestamp as `SOURCE_DATE_EPOCH`. It reuses
 If there is no preserved compiler, build it once in a separate stable tree:
 
 ```sh
-AROS_SRC=$(cd ../aros-core-pomaros && pwd)
-. ../build-venv/bin/activate
-BUILD=$(pwd)/../Build/pomaros-toolchain
-mkdir -p "$BUILD"
-cd "$BUILD"
-export PATH="/opt/homebrew/opt/make/libexec/gnubin:/opt/homebrew/bin:$PATH"
-"$AROS_SRC/configure" --target=darwin-aarch64 --with-toolchain=llvm --without-x
-make crosstools-toolchain
-cp -a bin/darwin-aarch64/tools/crosstools ../../aros-crosstools
+graft/bootstrap-toolchain --plan
+graft/bootstrap-toolchain --build
 ```
 
-Return to `pomaros-hosted`, activate the `build-venv` created above, and run the
-product build. The first toolchain build is deliberately separate from routine
-product rebuilds so a missing compiler cannot silently trigger hours of work.
+The helper uses a separate stable toolchain build and refuses to overwrite an
+existing compiler prefix. It obtains LLVM from the official public archives and
+applies the pinned core's tracked AROS patches. It records its commands and
+source identity. This first-time compiler source recipe has not been run in
+the public-core adoption checks; those checks reuse the preserved LLVM 20.1.0
+compiler. Retain the stable toolchain build tree after the helper copies the
+installed prefix, until symlinks and Mach-O dependencies have been checked for
+relocation. Activate the `build-venv` created above, then run the product build.
+The first toolchain build is deliberately separate from routine product
+rebuilds so a missing compiler cannot silently trigger hours of work.
 
 ---
 

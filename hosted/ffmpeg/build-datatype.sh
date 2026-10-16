@@ -2,7 +2,7 @@
 # build-datatype.sh -- build + deploy ffmpeg.datatype, the libavcodec-backed
 # picture datatype (decodes the first video frame of any container libavcodec
 # handles, so MultiView / the desktop can preview media). The class + its
-# FFmpeg descriptor live in the OS tree (aros-core-pomaros/workbench/classes/
+# FFmpeg descriptor live in the OS tree (aros-core/workbench/classes/
 # datatypes/ffmpeg + workbench/devs/datatypes/FFmpeg.dtd), but the class links
 # the out-of-tree ffmpeg sysroot this repo builds -- like FFView -- so the OS
 # mmakefile takes FFMPEG_SYSROOT and this host script points it at
@@ -15,10 +15,13 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$DIR/../.." && pwd)"
 SYS="$REPO/build/ffmpeg/sysroot-video"
 
-BUILD="${AROS_BUILD:-$HOME/Source/aros-project/Build/pomaros-hosted}"
-XT="${AROS_CROSSTOOLS:-$HOME/Source/aros-project/aros-crosstools}"
-[ -e "$XT/bin/objcopy" ] || ln -sf "$XT/bin/llvm-objcopy" "$XT/bin/objcopy"
-export PATH="$XT/bin:/opt/homebrew/bin:$PATH"
+BUILD="${AROS_BUILD:-$REPO/../Build/pomaros-hosted}"
+XT="${AROS_CROSSTOOLS:-$REPO/../aros-crosstools}"
+AROS_BUILD="$BUILD" "$REPO/graft/check-core"
+AROS_CROSSTOOLS="$XT" "$REPO/graft/check-toolchain"
+mkdir -p "$BUILD/host-tools"
+ln -sf "$XT/bin/llvm-objcopy" "$BUILD/host-tools/objcopy"
+export PATH="$BUILD/host-tools:$XT/bin:/opt/homebrew/bin:$PATH"
 
 [ -d "$SYS/lib" ] || { echo "build-datatype: $SYS missing -- run build-video.sh first" >&2; exit 1; }
 [ -f "$BUILD/Makefile" ] || { echo "build-datatype: $BUILD not configured (see docs/features/build)" >&2; exit 1; }

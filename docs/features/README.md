@@ -1,8 +1,10 @@
 # Feature plans — host capabilities for hosted AROS on Apple Silicon
 
+Source links use public [`pomaros/aros-core`](https://github.com/pomaros/aros-core) `main` for navigation. `CORE.lock` selects the reproducible build revision. Original design dates and historical line references remain evidence of their original audits.
+
 Grounded design/plan docs for things that would be **genuinely useful and don't exist
 yet** for the `aarch64-darwin` hosted port. Each was checked against the upstream tree
-(`../aros-core-pomaros`) *and* the web before writing — every AROS contract
+(`../aros-core`) *and* the web before writing — every AROS contract
 cited points at a real file, every external project at a real repo, and anything that
 couldn't be confirmed is marked **UNVERIFIED**.
 

@@ -6,13 +6,13 @@ for the darwin-aarch64 hosted target — and, more importantly, the traps that m
 people "redo the whole thing again." Read both: build produces the modules,
 deploy stages and runs them.
 
-> The shared OS source is a separate checkout at `../aros-core-pomaros`.
+> The shared OS source is a separate checkout at `../aros-core`.
 > `CORE.lock` records its reviewed source revision. This repository contains
 > the hosted product and host bridge, not a second copy of the kernel.
 > Initialize the source's translation/catalogue submodules before building:
 >
 > ```sh
-> git -C ../aros-core-pomaros submodule update --init --recursive
+> git -C ../aros-core submodule update --init --recursive
 > ```
 
 ---
@@ -78,10 +78,11 @@ guru. *This is the "I keep having to redo it" loop.*
 `Libs/` down to 3 libraries, `C:` empty, kickstart reduced to `exec.library` +
 `kernel.resource`). The same fate awaits `/tmp/aros-crosstools`.
 
-Use a home location: **`~/Source/aros-project/Build/pomaros-hosted`** for the build and **`~/Source/aros-project/aros-crosstools`**
-for the preserved toolchain (both are the defaults of
-`graft/build-darwin-aarch64.sh`, and `run-window.sh`/`aros-ctl` search
-`~/Source/aros-project/Build/pomaros-hosted` first; `/tmp/arosbuild` remains a legacy fallback).
+Use a stable sibling directory: **`../Build/pomaros-hosted`** for the build and
+**`../aros-crosstools`** for the preserved compiler, relative to this repository.
+These are the build and launcher defaults. Override `AROS_BUILD` and
+`AROS_CROSSTOOLS` explicitly when selecting another layout; launchers do not
+search historical temporary build trees.
 
 ## 2. The cross-toolchain — do NOT rebuild it (~1–2 h)
 
@@ -90,20 +91,23 @@ There are two toolchain stories; only one works:
 | Approach | Result |
 |---|---|
 | Thin wrapper around Homebrew clang (retarget system clang to aarch64 ELF) | **Dies at `-noposixc`** — Homebrew clang isn't the AROS-patched clang. A dead end; do not try it. |
-| AROS's own from-source patched **clang 20.1.0** (`--with-toolchain=llvm`) | Works — but building it from source is the ~1–2 h step you want to avoid. This is what `graft/build-darwin-aarch64.sh` and the recipe below do. |
+| AROS's own from-source patched **clang 20.1.0** (`--with-toolchain=llvm`) | The preserved compiler is verified. A first-time source recipe is provided by explicit `graft/bootstrap-toolchain --build`; routine `graft/build-darwin-aarch64.sh` reuses it. |
 
-On a machine with no prebuilt toolchain, `make crosstools-toolchain` does work
-from source since the 2026-08-30 fork fixes (before them, the aarch64 LLVM
-metatarget was unregistered — the make "succeeded" while building no compiler —
-and compiler-rt failed to configure against the shared LLVM package).
-
-The working toolchain is self-contained and **relocatable** (only depends on
-system libs + Homebrew `zstd`). Preserve and reuse it instead of rebuilding:
+On a machine without the preserved compiler, follow
+[GETTING-STARTED.md](../../../GETTING-STARTED.md):
 
 ```sh
-cp -a <build>/bin/darwin-aarch64/tools/crosstools ~/Source/aros-project/aros-crosstools
-~/Source/aros-project/aros-crosstools/bin/clang --version   # -> clang 20.1.0, Target: aarch64-unknown-aros
+graft/bootstrap-toolchain --plan
+graft/bootstrap-toolchain --build
 ```
+
+The helper records the public LLVM 20.1.0 sources, tracked AROS patches and
+commands, then builds in a separate stable tree. The complete first-time
+compiler build has not been executed in the public-core adoption checks; those
+checks use the preserved LLVM 20.1.0 compiler. Independent relocation of the
+copied compiler prefix is also unqualified. Retain the original toolchain build
+tree until escaping symlinks and Mach-O dependencies have been audited, and
+reuse a stable prefix for routine product builds.
 
 Then point `configure` at it with `--with-aros-toolchain=yes
 --with-aros-toolchain-install=$HOME/Source/aros-project/aros-crosstools`. Confirm configure prints
@@ -175,7 +179,7 @@ The boot set (47 modules, from the kickstart `AROSBootstrap.conf` + the list
 Resolve any target you're unsure of:
 
 ```sh
-grep -rhoE 'mmake=[a-z0-9-]+' ../aros-core-pomaros/rom/dos/mmakefile.src
+grep -rhoE 'mmake=[a-z0-9-]+' ../aros-core/rom/dos/mmakefile.src
 ```
 
 > `kernel` (the aggregate) is **narrow** on hosted — it builds only the
@@ -336,10 +340,12 @@ command so its real object is archived on the next build.
 
 The hosted audio stage selects CoreAudio explicitly. Shared SDK headers for PCI
 and Apple hardware do not imply that those physical drivers are available in a
-hosted process. Only the hosted audio graphs set `ac_cv_header_asm_io_h=no` and
-`ac_cv_header_aros_apple_audio_h=no`; native and VM builds retain their own driver
-selection. This configuration runs before the main graph because AHIRecord can
-pull AHI in as a dependency. The final install graph carries the same cache
+hosted process. Only the hosted audio graphs set `ac_cv_header_asm_io_h=no`;
+VM builds retain their own driver selection. Native Apple audio drivers and
+their configure probes are excluded from the public core. This configuration runs before the main graph because AHIRecord can
+pull AHI in as a dependency. Its configure linker probe needs `includes`,
+`linklibs` and `core-linklibs` first, including the generated library stubs on a
+fresh SDK. The final install graph carries the same cache
 settings in case its prerequisites trigger another configure. It uses the
 selected LLVM compiler, archiver, and
 ranlib, discards only stale AHI objects when that profile changes, and verifies
@@ -376,7 +382,7 @@ image and relinked. The helper rejects a VM/native output directory.
 | Builds clean but the boot faults with no diagnostic | clang‑22 `va_start` header compiled by the clang‑20 binary | restore clang‑20.1.0 freestanding headers (§2) |
 | `[MMAKE] Nothing known about project kernel-kernel` | mmake rebuilt itself mid-run; stale metatarget DB | one target per `make` call (§3) |
 | `make <target>` "succeeds" instantly but installs nothing | **typo'd metatarget: mmake exits 0 on an unknown target** (`[MMAKE][0] Nothing known about target X` is not an error). Cost a full debug cycle: `kernel-clipboard`/`workbench-libs-stdc`/`workbench-libs-cybergraphics` were silent no-ops (real names `workbench-devs-clipboard`, `compiler-stdc`, `workbench-libs-cgfx`) | grep the make output for `Nothing known about target` after adding any new target name; resolve names via `grep -rhoE 'mmake=[a-z0-9-]+' <srcdir>/mmakefile.src` |
-| `kernel-dos` fails: `use of undeclared identifier 'MSG_STRING_REQUESTTITLE'` (etc.) | **submodules not initialized** — `rom/dos/catalogs` is empty so `strings.h` is never generated and clang picks up the C `strings.h` instead | `git submodule update --init --recursive` in `../aros-core-pomaros` |
+| `kernel-dos` fails: `use of undeclared identifier 'MSG_STRING_REQUESTTITLE'` (etc.) | **submodules not initialized** — `rom/dos/catalogs` is empty so `strings.h` is never generated and clang picks up the C `strings.h` instead | `git submodule update --init --recursive` in `../aros-core` |
 | Wanderer requester `Could not open … "muimaster.library"` (deps all on disk) | one of Wanderer's hard deps is truly absent — commonly `cybergraphics.library` (target is `workbench-libs-cgfx`, NOT `-cybergraphics`) or `stdcio.library` (`compiler-stdcio`; without it every C: command is also silently mute) | `version <lib>.library` from the boot shell bisects it: "object not found" = missing lib |
 | `Display driver(s) failed… Entering emergency shell` | `icon.library` missing (no monitors load) **or** no `AROS.boot` signature | build the userland libs (§3b); stage `AROS.boot` (deploy doc) |
 | `Please insert volume "THEMES"` requester | AROSDefault theme not staged | `run-window.sh` stages it now; see deploy doc |
@@ -385,7 +391,7 @@ image and relinked. The helper rejects a VM/native output directory.
 
 ## 7. Shared core changes
 
-Make OS changes in `../aros-core-pomaros`, coordinate with its owner, and record
+Make OS changes in `../aros-core`, coordinate with its owner, and record
 the tested revision in `CORE.lock`. Keep the Darwin-specific x18 reservation
 out of the native ABI. Product-repository pushes do not authorize publishing
 private native source or posting upstream; follow the upstream approval gate in

@@ -85,7 +85,7 @@ CoreAudio. No third-party implementation is consulted; resemblance is coincident
 
 AHI exposes **three** distinct "volume" notions. Only one is the right master control
 point; the other two are wrong for a global desktop slider. All paths verified in
-`../aros-core-pomaros`.
+`../aros-core`.
 
 ### (a) Per-channel `AHI_SetVol` — NOT the control point
 
@@ -422,7 +422,7 @@ numeric oracles, both reused:
 
 ## References
 
-AROS upstream (`../aros-core-pomaros`):
+AROS upstream (`../aros-core`):
 - AHI public API: `workbench/devs/AHI/Include/SFD/ahi_lib.sfd`
   (`AHI_SetEffect` :31, `AHI_SetVol` :26, `AHI_AllocAudioA` :14, `AHI_Play` :56).
 - Master-volume effect struct + effect codes:

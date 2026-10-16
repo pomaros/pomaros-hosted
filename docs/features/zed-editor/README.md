@@ -583,7 +583,7 @@ acceptance test, phrased AROS-idiom-neutral. Core editing needs none of them.
 
 `fork`/`select`/`poll`/`mmap`/`dlopen` will not be implemented POSIX-style; use
 AROS idioms. Mapping: spawn via `SystemTagList SYS_Asynch` / `CreateNewProc` +
-the `PIPE:` handler that already exists in `aros-core-pomaros`
+the `PIPE:` handler that already exists in `aros-core`
 (`workbench/fs/pipe`) but is unmounted on the hosted boot; readiness via exec
 signals (`SetSocketSignals`/`WaitSelect` in the bsdsocket API) behind a vendored
 `polling`-crate AROS backend; wasm via wasmtime's Pulley interpreter (no

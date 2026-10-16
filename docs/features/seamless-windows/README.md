@@ -1,7 +1,7 @@
 # Seamless windows: AROS programs as first-class Mac citizens
 
 **Status: feasibility study (2026-07-14). No code yet.** Grounded against both trees
-(this repo + `../aros-core-pomaros`); every contract cited points at a real file.
+(this repo + `../aros-core`); every contract cited points at a real file.
 
 The goal, in one sentence: each AROS application window becomes its **own native
 macOS window** (movable, minimizable, in the Window menu, mixing freely with Mac
@@ -34,13 +34,13 @@ in place:
   `cm__sync_main` with signals blocked, `cocoametal.m:74`) **scales unchanged to
   N windows**: more NSWindows is just more objects on the same one thread.
 
-**AROS display side** (`../aros-core-pomaros/arch/all-darwin/hidd/cocoa/`): the gfx
+**AROS display side** (`../aros-core/arch/all-darwin/hidd/cocoa/`): the gfx
 HIDD keeps a single global context (`cocoa_intern.h`, "one Cocoa display in the
 system") and shows one BGRA8 framebuffer. Every hosted AROS driver in the tree
 (X11, SDL, GDI, Cocoa) is **one host window per AROS *screen***; nothing is
 per-Intuition-window. There is no rootless prior art in the tree.
 
-**How Intuition windows render** (`../aros-core-pomaros`): a window is **not a
+**How Intuition windows render** (`../aros-core`): a window is **not a
 surface**. It is a `struct Layer` (`compiler/include/graphics/clip.h:32`), a
 clipped region drawing straight into the **screen's shared bitmap**
 (`rom/intuition/openwindow.c:1565`: `w->RPort = w->WLayer->rp`). The only

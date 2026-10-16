@@ -101,7 +101,7 @@ with reality.
 ### 1. The marshal descriptor comes from `genmodule`, not from guesswork
 
 The source of truth is the module `.conf` files. One real line from
-[rom/exec/exec.conf:106](../../../../aros-core-pomaros/rom/exec/exec.conf):
+[rom/exec/exec.conf:106](https://github.com/pomaros/aros-core/blob/main/rom/exec/exec.conf):
 
 ```
 APTR AllocMem(IPTR byteSize, ULONG requirements) (D0, D1)
@@ -109,11 +109,11 @@ APTR AllocMem(IPTR byteSize, ULONG requirements) (D0, D1)
 
 That single line carries everything a marshaller needs: the **return type** (`APTR`),
 the **argument types** (`IPTR`, `ULONG`), and the **m68k source registers**
-(`D0`, `D1`) — and [tools/genmodule/](../../../../aros-core-pomaros/tools/genmodule/)
+(`D0`, `D1`) — and [tools/genmodule/](https://github.com/pomaros/aros-core/tree/main/tools/genmodule/)
 already parses it to build the library's function table, its FD file
-([writefd.c](../../../../aros-core-pomaros/tools/genmodule/writefd.c)), and its inline
+([writefd.c](https://github.com/pomaros/aros-core/blob/main/tools/genmodule/writefd.c)), and its inline
 headers. The per-function `AROS_LHA(type,name,reg)` declarations in the C source
-(e.g. [rom/exec/allocmem.c:42-43](../../../../aros-core-pomaros/rom/exec/allocmem.c),
+(e.g. [rom/exec/allocmem.c:42-43](https://github.com/pomaros/aros-core/blob/main/rom/exec/allocmem.c),
 `AROS_LHA(IPTR, byteSize, D0)` / `AROS_LHA(ULONG, requirements, D1)`) are the same
 facts, generated from the same `.conf`.
 
@@ -158,7 +158,7 @@ never appears because we never look at untyped bytes:
   byte-order-aware accessors — which is exactly what native AROS already does for
   on-disk and over-the-wire big-endian data (`AROS_BE2LONG` / `AROS_BE2WORD`,
   the same macros the hunk relocator uses,
-  [internalloadseg_aos.c:292](../../../../aros-core-pomaros/rom/dos/internalloadseg_aos.c)).
+  [internalloadseg_aos.c:292](https://github.com/pomaros/aros-core/blob/main/rom/dos/internalloadseg_aos.c)).
   The boundary swaps *typed scalars and pointers*; deep structure access is the
   callee's typed business, longword-by-longword, never a blind memory swap.
 
@@ -166,7 +166,7 @@ never appears because we never look at untyped bytes:
 
 There is no "convert the heap to little-endian" step anywhere — that step is the
 impossible one. The relocator already emits 32-bit **big-endian** pointers
-([internalloadseg_aos.c](../../../../aros-core-pomaros/rom/dos/internalloadseg_aos.c)),
+([internalloadseg_aos.c](https://github.com/pomaros/aros-core/blob/main/rom/dos/internalloadseg_aos.c)),
 the engine's sandbox is a 32-bit big-endian space
 ([INTERFACE §5](../68k-jit/INTERFACE.md)), and app-private structures are read and
 written by 68k code in big-endian throughout. Little-endian appears **only** in the
@@ -181,7 +181,7 @@ the app hands across that the signature types as an opaque pointer. This is the 
 engineering, and it is small, bounded, and case-by-case — not "impossible":
 
 - **Callback hooks** (`struct Hook`, `AROS_UFHA(struct Hook *, h, A0)` —
-  [asmcall.h:822](../../../../aros-core-pomaros/compiler/arossupport/include/asmcall.h)).
+  [asmcall.h:822](https://github.com/pomaros/aros-core/blob/main/compiler/arossupport/include/asmcall.h)).
   A native library that calls back into a 68k-supplied hook must re-enter the
   translator for the callback body, marshalling the *callback's* own register args
   back the other direction. The boundary is symmetric: the same descriptor machinery,
@@ -237,27 +237,27 @@ data and rules the engine already declared it needs:
 
 ## References
 
-Grounded in the upstream tree (`../aros-core-pomaros`) unless noted.
+Grounded in the upstream tree (`../aros-core`) unless noted.
 
-- [rom/exec/exec.conf:106](../../../../aros-core-pomaros/rom/exec/exec.conf) — the
+- [rom/exec/exec.conf:106](https://github.com/pomaros/aros-core/blob/main/rom/exec/exec.conf) — the
   source-of-truth line: `APTR AllocMem(IPTR byteSize, ULONG requirements) (D0, D1)`
   (return type + arg types + register map together).
-- [rom/exec/allocmem.c:42-43](../../../../aros-core-pomaros/rom/exec/allocmem.c) — the same
+- [rom/exec/allocmem.c:42-43](https://github.com/pomaros/aros-core/blob/main/rom/exec/allocmem.c) — the same
   facts as `AROS_LHA(IPTR, byteSize, D0)` / `AROS_LHA(ULONG, requirements, D1)`.
-- [tools/genmodule/](../../../../aros-core-pomaros/tools/genmodule/) — parses `.conf`,
-  emits the function table / FD ([writefd.c](../../../../aros-core-pomaros/tools/genmodule/writefd.c)) /
+- [tools/genmodule/](https://github.com/pomaros/aros-core/tree/main/tools/genmodule/) — parses `.conf`,
+  emits the function table / FD ([writefd.c](https://github.com/pomaros/aros-core/blob/main/tools/genmodule/writefd.c)) /
   inlines; the marshal-descriptor back-end is a peer of `writefd.c`.
-- [compiler/arossupport/include/libcall.h](../../../../aros-core-pomaros/compiler/arossupport/include/libcall.h)
+- [compiler/arossupport/include/libcall.h](https://github.com/pomaros/aros-core/blob/main/compiler/arossupport/include/libcall.h)
   — `AROS_LH*` / `__AROS_LHA(type,name,reg)` library register-arg declarations.
-- [compiler/arossupport/include/asmcall.h](../../../../aros-core-pomaros/compiler/arossupport/include/asmcall.h)
+- [compiler/arossupport/include/asmcall.h](https://github.com/pomaros/aros-core/blob/main/compiler/arossupport/include/asmcall.h)
   — `AROS_UFH*` / `AROS_UFHA(type,name,reg)` (e.g. `AROS_UFHA(struct Hook *, h, A0)`),
   the callback/hook ABI.
-- [arch/m68k-all/include/aros/cpu.h](../../../../aros-core-pomaros/arch/m68k-all/include/aros/cpu.h)
+- [arch/m68k-all/include/aros/cpu.h](https://github.com/pomaros/aros-core/blob/main/arch/m68k-all/include/aros/cpu.h)
   — the negative-offset `JumpVec` table the bridge recognises (`0x4EF9`, stride 6).
-- [rom/dos/internalloadseg_aos.c:292](../../../../aros-core-pomaros/rom/dos/internalloadseg_aos.c)
+- [rom/dos/internalloadseg_aos.c:292](https://github.com/pomaros/aros-core/blob/main/rom/dos/internalloadseg_aos.c)
   — `HUNK_RELOC32` big-endian relocation; `AROS_BE2LONG`, the precedent for
   byte-order-aware access to BE data by native code.
-- [workbench/libs/workbench/uae_integration.c](../../../../aros-core-pomaros/workbench/libs/workbench/uae_integration.c)
+- [workbench/libs/workbench/uae_integration.c](https://github.com/pomaros/aros-core/blob/main/workbench/libs/workbench/uae_integration.c)
   — the existing **model 1** delegation (hands 68k binaries to an external emulator),
   for contrast.
 

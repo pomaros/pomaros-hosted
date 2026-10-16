@@ -1,5 +1,7 @@
 # Stabilization record: crash containment + the resize deadlock
 
+> Historical integration record: branch names, local paths and commit references below describe their original investigation. Use the [current source/build guide](../GETTING-STARTED.md) and `CORE.lock` for maintained public-core instructions.
+
 The record of the 2026-07 robustness effort on hosted AROS (aarch64-darwin).
 Requirement: the hosted AROS instance must never crash out or wedge from a
 single guest fault. Two concrete deliverables, both delivered:

@@ -28,7 +28,7 @@ Yes — mostly. `emul-handler` splits cleanly into a **portable core** and a thi
 **per-host overlay**, and only the overlay is host-specific.
 
 **Portable core (host-independent, reused verbatim):**
-`../aros-core-pomaros/arch/all-hosted/filesys/emul_handler/`
+`../aros-core/arch/all-hosted/filesys/emul_handler/`
 - `emul_handler.c` — the DOS-packet dispatcher (`handlePacket`), the volume/lock
   machinery, `new_volume()`, `EmulHandlerMain` process. ~1240 lines, no syscalls.
 - `emul_init.c` — `startup()`: creates the `EMU` BootNode via `expansion.library`,
@@ -54,7 +54,7 @@ Yes — mostly. `emul-handler` splits cleanly into a **portable core** and a thi
   not need to be a full one: macOS is POSIX, so it builds against the *Unix* overlay.
 - The Unix overlay is **already Darwin-aware**, and this repo already extended it:
   - `unix_hints.h` has a `HOST_OS_darwin` branch (commit `a68e4c5c` in
-    aros-core-pomaros, *this project's* work) that drops the ~2010 `_DARWIN_NO_64_BIT_INODE`
+    aros-core, *this project's* work) that drops the ~2010 `_DARWIN_NO_64_BIT_INODE`
     assumption — modern macOS / Apple Silicon is 64-bit-inode-only
     (`__DARWIN_ONLY_64_BIT_INO_T` is a hard compile error otherwise). `INODE64_SUFFIX`
     is left empty so the plain `stat`/`readdir` symbols (already the 64-bit versions)
@@ -143,7 +143,7 @@ interface**, not the FSA_/IOFileSys model (confirmed: `handlePacket` switches on
 public headers).
 
 **The packet** —
-`../aros-core-pomaros/compiler/include/dos/dosextens.h`:
+`../aros-core/compiler/include/dos/dosextens.h`:
 ```c
 struct DosPacket {
     struct Message *dp_Link;   struct MsgPort *dp_Port;
@@ -424,21 +424,21 @@ link map (overlay object linked, dummy not).
 ## References
 
 - Portable handler core:
-  `../aros-core-pomaros/arch/all-hosted/filesys/emul_handler/{emul_handler.c,emul_init.c,filenames.c,emul_intern.h,emul.conf,mmakefile.src}`
+  `../aros-core/arch/all-hosted/filesys/emul_handler/{emul_handler.c,emul_init.c,filenames.c,emul_intern.h,emul.conf,mmakefile.src}`
 - POSIX host overlay (the template):
-  `../aros-core-pomaros/arch/all-unix/filesys/emul_handler/{emul_host.c,emul_host_unix.c,emul_unix.h,emul_host.h,unix_hints.h,emul_dir.c}`
+  `../aros-core/arch/all-unix/filesys/emul_handler/{emul_host.c,emul_host_unix.c,emul_unix.h,emul_host.h,unix_hints.h,emul_dir.c}`
 - Darwin precedent (host file/disk over `libSystem.dylib`):
-  `../aros-core-pomaros/arch/all-darwin/hostdisk/{geometry.c}`,
-  `../aros-core-pomaros/arch/all-unix/devs/hostdisk/{hostdisk_host.c,hostdisk_host.h}`
+  `../aros-core/arch/all-darwin/hostdisk/{geometry.c}`,
+  `../aros-core/arch/all-unix/devs/hostdisk/{hostdisk_host.c,hostdisk_host.h}`
 - DOS contract:
-  `../aros-core-pomaros/compiler/include/dos/{dosextens.h,dos.h,exall.h,filehandler.h}`
+  `../aros-core/compiler/include/dos/{dosextens.h,dos.h,exall.h,filehandler.h}`
   (`DosPacket`, `ACTION_*`, `FileLock`, `FileInfoBlock`, `ExAllData`, `DosList`,
   `DeviceNode`, `DosEnvec`, `DE_*`, `ST_*`)
-- DOSList ops: `../aros-core-pomaros/rom/dos/{makedosentry.c,adddosentry.c,runhandler.c}`
-- Mount template: `../aros-core-pomaros/workbench/devs/Mountlist` (`HOME:`, `USR:`)
-- Host-call mechanism: `../aros-core-pomaros/arch/all-hosted/hostlib/`
+- DOSList ops: `../aros-core/rom/dos/{makedosentry.c,adddosentry.c,runhandler.c}`
+- Mount template: `../aros-core/workbench/devs/Mountlist` (`HOME:`, `USR:`)
+- Host-call mechanism: `../aros-core/arch/all-hosted/hostlib/`
   (`HostLib_Open/GetInterface/Lock/Unlock`); bootstrap `dlopen/dlsym` in
-  `../aros-core-pomaros/arch/all-unix/bootstrap/`
+  `../aros-core/arch/all-unix/bootstrap/`
 - This project's grounding: `docs/history/DECISION-LOG.md` (H10 message ports, H11 device-on-a-file —
   the switched-task host-syscall pattern), `graft/WORKFLOW.md` (boot status, F1/F2),
   `hosted/device.c` (the IORequest→task→`pread/pwrite`→reply spike),

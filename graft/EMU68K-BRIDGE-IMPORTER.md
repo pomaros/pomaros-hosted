@@ -350,7 +350,7 @@ For this workspace the concrete commands after policy promotion are:
 ```sh
 make struct-layouts
 python3 graft/gen-emu68k-bridge --emit \
-  ../aros-core-pomaros/arch/all-darwin/libs/emu68k/
+  ../aros-core/arch/all-darwin/libs/emu68k/
 TARGETS="hostlibs-emu68k" ./graft/rebuild-aros.sh
 make hosted-emu68k-t3gen
 make hosted-emu68k-t3lha
