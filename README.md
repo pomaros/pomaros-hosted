@@ -39,14 +39,15 @@ scope and developer ABI requirements in [RELEASE-NOTES.md](RELEASE-NOTES.md).
 - Play audio through CoreAudio and use the Mac's network connection.
 - Mount `~/AROS/Shared` as writable `MacRW:` and read-only `MacRO:` volumes.
 - Decode common media formats and accelerate the display path with Metal.
-- Run native AArch64 AROS applications, including the bundled Zed editor and
-  Ferail file manager.
+- Run native AArch64 AROS applications. Zed and Ferail remain optional
+  development payloads pending distribution qualification.
 - Run a growing set of classic 68k applications through the included JIT.
 - Be driven and inspected without a person at the keyboard through `aros-ctl`.
 
-The normal release includes Zed and Ferail. Moonstone is deliberately excluded
-from the public release; developers can restore it for a private build with
-`POMAROS_INCLUDE_MOONSTONE=1` after providing its binary and assets.
+The default core distribution includes the desktop and host bridges. It excludes
+Zed, Ferail, FFmpeg media applications, Rust extras, and Moonstone assets.
+Optional application distributions require their own source and dependency
+qualification; see [RELEASE.md](RELEASE.md).
 
 ## Current limitations
 
@@ -60,13 +61,11 @@ from the public release; developers can restore it for a private build with
   LhA work, but compatibility varies and programs that depend on unimplemented
   operating-system calls or classic Amiga hardware may fail. Use **Help -> Show
   Reports** after a failure to collect the bounded local compatibility report.
-- The inherited release pipeline uses an interim signing arrangement. The delivery DMG and outer
-  `PomAROS.app` bundle are Developer ID signed, while the hosted AROS engine and
-  its bridge libraries retain ad-hoc signatures and run without Apple's
-  hardened runtime. This preserves the current hosted scheduler behavior; it
-  does not mean that the embedded host code has an independent Developer ID
-  signature. A portable scheduler correction is required before the complete
-  host layer can use hardened runtime and the complete image can be notarized.
+- Self-contained core candidates use Developer ID signing and hardened runtime
+  for the complete host layer. Retain their Apple notarization reports with
+  each artifact. Public redistribution still requires the corresponding source
+  and licence materials for every included copyleft component; the shared AROS
+  checkout remains private.
 
 ## Repository boundary
 
