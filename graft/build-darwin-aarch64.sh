@@ -32,16 +32,20 @@ BUILD="$(cd "$BUILD" && pwd)"
 
 # Toolchain construction is an explicit first-time operation; normal rebuilds
 # reuse the preserved compiler and never remove the configured build tree.
-if [ ! -x "$XT/bin/clang" ]; then
-    echo "Missing AROS cross-toolchain: $XT (see GETTING-STARTED.md)" >&2
-    exit 2
-fi
+for tool in clang llvm-ar llvm-ranlib; do
+    if [ ! -x "$XT/bin/$tool" ]; then
+        echo "Missing preserved AROS tool: $XT/bin/$tool (see GETTING-STARTED.md)" >&2
+        exit 2
+    fi
+done
 mkdir -p "$SHIM"
 ln -sf "$LLVM/llvm-objcopy" "$SHIM/objcopy"
+ln -sf "$XT/bin/llvm-ar" "$SHIM/ar"
+ln -sf "$XT/bin/llvm-ranlib" "$SHIM/ranlib"
 AROS_BUILD_VENV="${AROS_BUILD_VENV:-$ROOT/../build-venv}"
 export PATH="$SHIM:$XT/bin:$AROS_BUILD_VENV/bin:/opt/homebrew/opt/make/libexec/gnubin:/opt/homebrew/bin:$PATH"
 cd "$BUILD"
-CONFIGURE_ID="$(git -C "$AROS_SRC" rev-parse HEAD):$SOURCE_DATE_EPOCH:$XT"
+CONFIGURE_ID="$(git -C "$AROS_SRC" rev-parse HEAD):$SOURCE_DATE_EPOCH:$XT:$(readlink "$SHIM/ar"):$(readlink "$SHIM/ranlib")"
 if [ ! -f Makefile ] || [ "$(cat .pomaros-configure-core 2>/dev/null || true)" != "$CONFIGURE_ID" ]; then
     "$AROS_SRC/configure" --target=darwin-aarch64 --with-toolchain=llvm \
         --without-x --with-aros-toolchain=yes --with-aros-toolchain-install="$XT"
@@ -49,6 +53,7 @@ if [ ! -f Makefile ] || [ "$(cat .pomaros-configure-core 2>/dev/null || true)" !
     {
         printf 'CORE_REVISION=%s\n' "$(git -C "$AROS_SRC" rev-parse HEAD)"
         printf 'SOURCE_DATE_EPOCH=%s\n' "$SOURCE_DATE_EPOCH"
+        printf 'AR=%s\nRANLIB=%s\n' "$SHIM/ar" "$SHIM/ranlib"
         printf 'command='; printf '%q ' "$AROS_SRC/configure" --target=darwin-aarch64 \
             --with-toolchain=llvm --without-x --with-aros-toolchain=yes \
             --with-aros-toolchain-install="$XT"; printf '\n'
@@ -58,6 +63,16 @@ if ! grep -Eq -- '^[^#]*-ffixed-x18' config/make.cfg; then
     echo "Hosted build requires -ffixed-x18 in config/make.cfg; refusing mixed ABI" >&2
     exit 3
 fi
+
+# A failed BSD ar invocation may leave only the archive magic, which make then
+# considers current after selecting LLVM. The bootstrap always has elfloader.o.
+bootstrap_archive="$BUILD/bin/darwin-aarch64/gen/lib/libbootstrap.a"
+if [ -f "$bootstrap_archive" ] && [ "$(stat -f %z "$bootstrap_archive")" = 8 ]; then
+    echo "Removing empty archive left by a failed bootstrap build: $bootstrap_archive"
+    rm "$bootstrap_archive"
+fi
+
+[ "${POMAROS_CONFIGURE_ONLY:-0}" = 1 ] && exit 0
 
 # --- 3) Build the boot module set (rules 3 + 4) ------------------------------
 # Explicit metatargets share one MetaMake graph. This deduplicates prerequisites

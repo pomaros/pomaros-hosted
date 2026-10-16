@@ -336,6 +336,13 @@ EOF
 Also worth deleting outright: `$D/deps/libzed_aros_*.a` (2.4 GB each, one per
 build of the editor staticlib) and `$D/libzed_aros_app.a`, the superseded shim.
 
+The hosted configure wrapper exposes LLVM `ar` and `ranlib` beside `objcopy`.
+Both host and bootstrap archives need response-file support; Apple's BSD `ar`
+treats `@archive.ar.rsp` as an input filename. Re-run the configure wrapper to
+select the preserved LLVM tools; do not patch generated configuration files.
+The wrapper also discards an empty bootstrap archive left by a failed BSD `ar`
+command so its real object is archived on the next build.
+
 ## 6. Troubleshooting — symptom → cause
 
 | Symptom | Cause | Fix |

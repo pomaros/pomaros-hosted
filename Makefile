@@ -2451,7 +2451,7 @@ clean:
 # development app. The app references the stable external OS output tree.
 .PHONY: pomaros-hosted pomaros-hosted-check
 pomaros-hosted:
-	./graft/build-darwin-aarch64.sh
+	POMAROS_CONFIGURE_ONLY=1 ./graft/build-darwin-aarch64.sh
 	./graft/rebuild-aros.sh
 	$(MAKE) cocoametal-dylib pasteboard-dylib coreaudio-dylib bsdsock-dylib emu68k-dylib
 	AROS_HOST_CONF=/dev/null AROS_HOST_VOLUME="MacRW:$(CURDIR)/build/Shared;WRITE" ./graft/aros-ctl deploy

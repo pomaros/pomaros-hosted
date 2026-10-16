@@ -57,7 +57,7 @@ if [ "$AROS_SRC/configure" -nt "$AROS_BUILD/config.status" ]; then
 fi
 
 # The boot module set (kickstart) -- section 3 of docs/features/build/README.md.
-BOOT_TARGETS="kernel-dos kernel-kernel kernel-dosboot kernel-utility kernel-aros
+BOOT_TARGETS="kernel-exec kernel-dos kernel-kernel kernel-dosboot kernel-utility kernel-aros
 kernel-oop kernel-intuition kernel-graphics kernel-layers kernel-keymap
 kernel-debug kernel-bootloader kernel-console kernel-input kernel-keyboard
 kernel-gameport workbench-devs-clipboard kernel-hidd kernel-hidd-gfx kernel-hidd-input
@@ -72,13 +72,19 @@ compiler-stdc kernel-hidd-cocoa kernel-bootstrap-hosted"
 
 # The desktop userland -- section 3b. Without these the boot reaches only a CLI
 # or dies in the display-driver / dos.library check.
+BRIDGE_TARGETS="workbench-libs-uuid workbench-libs-bsdsocket hostlibs-emu68k
+workbench-devs-hostdisk kernel-fs-exfat"
+
 DESKTOP_TARGETS="workbench-c workbench-libs-icon workbench-libs-kms
 workbench-libs-lowlevel workbench-libs-diskfont workbench-libs-reaction
 workbench-libs-workbench workbench-libs-version workbench-libs-mathffp
 workbench-libs-mathieeesingbas workbench-libs-mathieeedoubbas
 workbench-libs-mathieeedoubtrans workbench-system-wanderer
 workbench-classes-zune workbench-datatypes-picture workbench-datatypes-png
-workbench-utilities-clock workbench-utilities-multiview workbench-utilities-more"
+workbench-utilities-clock workbench-utilities-multiview workbench-utilities-more
+workbench-prefs-zune workbench-prefs-wanderer workbench-prefs-screenmode
+workbench-prefs-moned workbench-prefs-settings workbench-system-aboutaros
+iconset-Gorilla-wbench-icons workbench-images"
 
 # The Workbench apps behind the staged icons (Tools/, System/, Prefs/). The
 # icon set is staged wholesale, so every app missing from this list shows up
@@ -132,7 +138,7 @@ ASSEMBLE_TARGETS="kernel-link-unix boot"
 
 FULL_SET=""
 [ -z "${TARGETS:-}" ] && FULL_SET=1
-TARGETS="${TARGETS:-$BOOT_TARGETS $DESKTOP_TARGETS $APP_TARGETS $AUDIO_TARGETS $ASSEMBLE_TARGETS}"
+TARGETS="${TARGETS:-$BOOT_TARGETS $BRIDGE_TARGETS $DESKTOP_TARGETS $APP_TARGETS $AUDIO_TARGETS $ASSEMBLE_TARGETS}"
 
 cd "$AROS_BUILD"
 ok=0; fail=0; failed=""
