@@ -6,6 +6,8 @@ A separate core-only distribution can package the desktop and host bridges
 without unqualified optional applications. Its native Mac launcher supports full
 Developer ID signing and hardened runtime; release notices identify the exact
 profile and retain the source obligations of included copyleft components.
+Hosted file access now recognizes macOS write protection when booting directly
+from a read-only distribution disk image.
 
 The hosted Mac product is now PomAROS Hosted, with renamed app, release tools,
 menus, diagnostics, and issue links. Host bridges and existing user configuration
