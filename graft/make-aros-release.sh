@@ -95,7 +95,7 @@ INFO_PLIST='<?xml version="1.0" encoding="UTF-8"?>
   <key>CFBundleVersion</key><string>@POMAROS_BUILD_NUMBER@</string>
   <key>NSHumanReadableCopyright</key><string>Copyright © 2026 John Knipper. AROS under the AROS Public License.</string>
   <key>NSHighResolutionCapable</key><true/>
-  <key>LSMinimumSystemVersion</key><string>12.0</string>
+  <key>LSMinimumSystemVersion</key><string>26.0</string>
 </dict></plist>'
 
 # The launcher (CFBundleExecutable). At runtime it expands the conf template into a

@@ -39,4 +39,8 @@ The standard C library includes generated Unicode character data. See
 Licenses/Unicode-NOTICE.md and Licenses/Unicode-LICENSE.txt; matching cached
 UnicodeData.txt and SpecialCasing.txt accompany the source materials.
 
+Compression, XML and PNG implementations retain their original zlib, bzip2,
+Expat and libpng licence notices. See Licenses/CORE-PORT-NOTICES.md and its
+referenced verbatim licence files.
+
 Apple system frameworks are loaded from macOS and are not redistributed.

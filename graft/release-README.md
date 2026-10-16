@@ -4,6 +4,10 @@ This Apple Silicon application contains the AROS Wanderer desktop, a live system
 monitor, host graphics/audio/network/clipboard/file bridges and the 68k runtime.
 It is self-contained and does not need the source or development build trees.
 
+This preview requires an Apple Silicon Mac running macOS 26.0 or newer.
+The bundled host libraries declare that deployment minimum; older macOS
+versions have not been qualified for this binary distribution.
+
 Drag PomAROS.app to Applications and open it. It starts in a normal window.
 Files in ~/AROS/Shared appear as MacRO: and MacRW:. Preferences and runtime
 configuration are stored under ~/Library/Application Support/AROS.

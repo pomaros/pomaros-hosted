@@ -11,7 +11,8 @@ The core profile does not remove their corresponding-source obligations.
 Public preview publication requires matching source/build/relinking materials
 for all included components and a completed payload-specific component audit.
 The 0.2.2 build 9 preview uses public core `89db046` and the release tag
-`v0.2.2-preview.1`. Private native Apple
+`v0.2.2-preview.1`. Its existing host libraries declare macOS 26.0 as their
+minimum; the public application metadata and compatibility checker must agree. Private native Apple
 hardware implementation and history remain outside the public core.
 
 Read the [build](docs/features/build/README.md) and

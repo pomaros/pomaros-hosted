@@ -5,6 +5,10 @@ from the public shared core `89db046157d415e98c05ca18316ca7ae63b07023`.
 The application identifies itself as version 0.2.2, build 9. Its source revision,
 components and build inputs are recorded in the bundled BUILD-MANIFEST.txt.
 
+This binary preview requires Apple Silicon and macOS 26.0 or newer, matching
+the deployment minimum declared by its host libraries. Older macOS versions
+are outside this binary preview's qualification.
+
 PomAROS Hosted runs AROS as an AArch64 process under macOS. It opens in a normal
 window and uses macOS for graphics, audio, networking, clipboard and shared host
 files. The system monitor shows live AROS time, uptime and memory; physical Apple
