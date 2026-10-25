@@ -359,6 +359,9 @@ This helper builds the full pinned LLVM 20.1.0 builtins from verified source
 archives with `-ffixed-x18`, disables optional SME multiversioning helpers, and
 checks every emitted instruction for x18 use. It needs CMake, Ninja, and internet
 access on its first run; subsequent runs reuse the recorded compiler/source hash.
+CMake object caches are keyed by the recipe, compiler, source, ABI flags and
+sysroot identity. Moving the toolchain or SDK selects a separate cache instead
+of letting CMake rediscover the host platform during cross compilation.
 
 The archive lives in the hosted output's `hosted-runtime` resource directory.
 `build-targets` selects it through the target link flags and `TARGET_C_LIBS`;

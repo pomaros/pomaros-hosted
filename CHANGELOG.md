@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-25 - Reliable hosted runtime rebuilds
+
+Compiler runtime builds isolate their CMake cache by compiler, SDK and ABI
+identity, so a moved checkout cannot reuse an incompatible host configuration.
+
 ## 2026-10-16 - PomAROS Hosted migration
 
 The 0.2.2 build 9 core preview packages the public shared AROS source, a
