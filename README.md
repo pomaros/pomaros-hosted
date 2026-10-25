@@ -181,3 +181,7 @@ The integration code is distributed under the AROS Public License 1.1; bundled
 projects and dependencies retain their own licences. See [LICENSE](LICENSE),
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md), and the generated material in
 `notices/`.
+
+The clean common-core export pin requires its own build and runtime
+qualification. The complete pre-export OS build passed; its results retain
+their original source identity.
