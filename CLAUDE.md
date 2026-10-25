@@ -2,7 +2,7 @@
 
 Hosted AROS on Apple Silicon (aarch64-darwin). **This repo is the host/graft
 layer only.** The AROS OS source (kernel, modules, libraries) is a *separate*
-checkout at `../aros-core` (public branch `main`). Edit OS code
+checkout at `../aros-core` (revision and branch in `CORE.lock`). Edit OS code
 there, not here. Coordinate core edits with its owner. Use `CORE.lock` for the
 reviewed shared source revision. Product source is public; coordinate product pushes with the active review.
 The public core excludes native Apple hardware work. AROS upstream publication
