@@ -207,6 +207,8 @@ a *different* dead end:
   failed to initialize. Entering emergency shell.` Others needed for a clean
   desktop: `kms`, `lowlevel`, `diskfont`, `reaction`, `workbench`, `version`,
   the `mathieee*` set.
+  Build `workbench-libs-png` for Wanderer's png.library and its z1.library
+  dependency; building the PNG datatype alone does not build that library.
 - **Wanderer + classes** — `make workbench-system-wanderer workbench-classes-zune
   workbench-libs-workbench`, plus `workbench-datatypes-picture`/`-png`, plus the
   Cocoa display HIDD/monitor `make kernel-hidd-cocoa`.
