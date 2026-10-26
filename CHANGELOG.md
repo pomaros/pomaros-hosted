@@ -4,7 +4,8 @@
 
 Build 11 uses the shared operating-system core selected for the VM and QEMU
 products, while preserving the Hosted reserved-x18 ABI. Fresh desktop builds
-install their standard fonts, so packaging needs no preliminary desktop launch.
+install their standard fonts and PIPE support. Packaging activates the Cocoa
+monitor directly, without requiring a preliminary desktop launch.
 
 Hosted desktop builds include png.library. Deployment checks reject missing
 desktop files and stale app copies while accepting verified signing-only

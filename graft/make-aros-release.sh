@@ -382,6 +382,8 @@ if [ "${1:-}" = "--check" ]; then
     A="$APP/Contents"
     [ -d "$A/Resources/AROS" ];                         ck $? "embedded AROS tree present"
     [ -f "$A/Resources/AROS/AROS.boot" ];               ck $? "AROS.boot embedded"
+    [ -f "$A/Resources/AROS/Devs/Monitors/Cocoa" ]; ck $? "Cocoa display driver activated"
+    [ -f "$A/Resources/AROS/Devs/DOSDrivers/PIPE" ] && [ -f "$A/Resources/AROS/L/pipe-handler" ]; ck $? "PIPE mount and handler embedded"
     [ -d "$A/Resources/AROS/Prefs/Presets/Themes/AROSDefault" ]; ck $? "AROSDefault theme embedded"
     [ -e "$A/Resources/AROS/System/Wanderer/Wanderer" ]; ck $? "Wanderer embedded"
     if [ "$RELEASE_PROFILE" = core ]; then
@@ -488,9 +490,10 @@ SRC="$(cd "$BOOTD/../.." && pwd)"   # .../darwin-aarch64/AROS
 [ -d "$NOTICES" ] || { echo "missing third-party notices directory: $NOTICES" >&2; exit 1; }
 [ -f "$REPORT_ENV" ] || { echo "missing report environment helper: $REPORT_ENV" >&2; exit 1; }
 
-# require the prepared desktop payloads — this script does NOT re-stage them
+# Require built desktop payloads; monitor activation belongs to the package.
 for p in AROS.boot Fonts Prefs/Presets/Themes/AROSDefault System/Wanderer/Wanderer \
-    Devs/Monitors/Cocoa Libs/emu68k.library L/exfat-handler \
+    Storage/Monitors/Cocoa Devs/DOSDrivers/PIPE L/pipe-handler \
+    Libs/emu68k.library L/exfat-handler \
     Devs/hostdisk.device C/MediaWatch; do
     [ -e "$SRC/$p" ] || { echo "make-aros-release.sh: $SRC missing $p — run graft/rebuild-aros.sh first" >&2; exit 1; }
 done
@@ -513,6 +516,8 @@ for item in $RUNTIME_ROOT_ITEMS; do
     [ -e "$SRC/$item" ] || continue
     /usr/bin/ditto "$SRC/$item" "$DST/$item"
 done
+mkdir -p "$DST/Devs/Monitors"
+cp -f "$SRC/Storage/Monitors/Cocoa" "$DST/Devs/Monitors/Cocoa"
 rm -f "$DST/Devs/Monitors/headless" 2>/dev/null || true
 for x in $EXCLUDE_C; do rm -f "$DST/C/$x" "$DST/C/$x.info"; done
 [ "$INCLUDE_MOONSTONE" = 1 ] || rm -f "$DST/C/Moonstone" "$DST/C/Moonstone.info"

@@ -77,7 +77,8 @@ compiler-stdc kernel-hidd-cocoa kernel-bootstrap-hosted"
 # The desktop userland -- section 3b. Without these the boot reaches only a CLI
 # or dies in the display-driver / dos.library check.
 BRIDGE_TARGETS="workbench-libs-uuid workbench-libs-bsdsocket hostlibs-emu68k
-workbench-devs-hostdisk kernel-fs-exfat workbench-devs-keymaps"
+workbench-devs-hostdisk kernel-fs-exfat workbench-devs-keymaps
+workbench-devs-dosdrivers workbench-fs-pipe"
 
 DESKTOP_TARGETS="workbench-c workbench-libs-icon workbench-libs-kms workbench-libs-png
 workbench-libs-lowlevel workbench-libs-diskfont workbench-libs-muiscreen workbench-libs-reaction
