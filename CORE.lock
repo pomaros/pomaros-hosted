@@ -1,7 +1,7 @@
 # Reviewed shared AROS source, common to all PomAROS products.
 CORE_URL=https://github.com/pomaros/aros-core.git
 CORE_BRANCH=main
-CORE_REVISION=7591f11f8df920bceeb580113b3d41503a5c60aa
+CORE_REVISION=ecdca1f0bcd72d28312cd81953a911658a7f8ce9
 CORE_TARGET=darwin-aarch64
 CORE_X18_POLICY=reserved
 # Source selection only; existing binary qualification keeps its recorded revision.
