@@ -3,7 +3,8 @@
 ## 2026-10-26 - Reliable desktop dependencies and debugging
 
 Build 11 uses the shared operating-system core selected for the VM and QEMU
-products, while preserving the Hosted reserved-x18 ABI.
+products, while preserving the Hosted reserved-x18 ABI. Fresh desktop builds
+install their standard fonts, so packaging needs no preliminary desktop launch.
 
 Hosted desktop builds include png.library. Deployment checks reject missing
 desktop files and stale app copies while accepting verified signing-only

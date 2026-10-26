@@ -32,7 +32,9 @@ It selects explicit metatargets in a single MetaMake graph, preserving their
 normal dependencies while avoiding repeated prerequisite walks and independent
 top-level goals. The exact target list is recorded in `pomaros-targets.json`
 and the combined log in `rebuild-logs/hosted-runtime.log` inside the build tree.
-Unknown targets and build failures fail the graph. It writes the `AROS.boot`
+Unknown targets and build failures fail the graph. The desktop graph installs the
+standard bitmap fonts through `workbench-fonts`, so packaging requires no prior
+interactive launch. It writes the `AROS.boot`
 signature and sets
 up the `objcopy` shim + PATH. It never runs a bare `make` and never rebuilds
 LLVM. If `~/Source/aros-project/Build/pomaros-hosted` isn't configured yet, it prints the one-time configure

@@ -492,7 +492,7 @@ SRC="$(cd "$BOOTD/../.." && pwd)"   # .../darwin-aarch64/AROS
 for p in AROS.boot Fonts Prefs/Presets/Themes/AROSDefault System/Wanderer/Wanderer \
     Devs/Monitors/Cocoa Libs/emu68k.library L/exfat-handler \
     Devs/hostdisk.device C/MediaWatch; do
-    [ -e "$SRC/$p" ] || { echo "make-aros-release.sh: $SRC missing $p — boot desktop once via run-window.sh first" >&2; exit 1; }
+    [ -e "$SRC/$p" ] || { echo "make-aros-release.sh: $SRC missing $p — run graft/rebuild-aros.sh first" >&2; exit 1; }
 done
 if [ "$INCLUDE_MOONSTONE" = 1 ]; then
     [ -e "$SRC/C/Moonstone" ] || { echo "make-aros-release.sh: optional C:Moonstone is missing" >&2; exit 1; }

@@ -88,7 +88,7 @@ workbench-classes-zune workbench-datatypes-picture workbench-datatypes-png
 workbench-utilities-clock workbench-utilities-multiview workbench-utilities-more
 workbench-prefs-zune workbench-prefs-wanderer workbench-prefs-screenmode
 workbench-prefs-moned workbench-prefs-settings workbench-system-aboutaros
-iconset-Gorilla-wbench-icons workbench-images"
+iconset-Gorilla-wbench-icons workbench-images workbench-fonts"
 
 # The Workbench apps behind the staged icons (Tools/, System/, Prefs/). The
 # icon set is staged wholesale, so every app missing from this list shows up
