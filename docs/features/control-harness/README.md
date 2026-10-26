@@ -37,6 +37,10 @@ graft/aros-ctl shot                # screenshot -> run/darwin-aarch64/ (no TCC)
 graft/aros-ctl stop                # ask AROS to shut down, then clean up
 ```
 
+For inspection before guest execution, launch with
+`AROS_CTL_WAIT_FOR_DEBUGGER=1` and follow the
+[host LLDB procedure](../debug-tools/README.md#3-host-lldb--the-gdb-equivalent-hosted-only).
+
 **Record a scripted demo** — `record SECS` returns immediately and the app auto-stops
 at the deadline, so you drive the demo during the window (no manual stop, no TCC):
 

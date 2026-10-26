@@ -659,6 +659,10 @@ deploy)
     echo "deployed boot dir: $BOOTD"
     ;;
 run)
+    case "${AROS_CTL_WAIT_FOR_DEBUGGER:-0}" in
+        0|1) ;;
+        *) echo "aros-ctl: AROS_CTL_WAIT_FOR_DEBUGGER must be 0 or 1" >&2; exit 2 ;;
+    esac
     BOOTD="$(find_bootd)"
     if [ -z "$BOOTD" ] || [ ! -x "$BOOTD/AROSBootstrap" ]; then
         echo "aros-ctl: no AROSBootstrap found." >&2
@@ -760,6 +764,9 @@ run)
     plutil -insert StandardErrorPath -string "$LOG" "$JOB_PLIST"
     plutil -insert ProcessType -string Interactive "$JOB_PLIST"
     plutil -insert RunAtLoad -bool YES "$JOB_PLIST"
+    if [ "${AROS_CTL_WAIT_FOR_DEBUGGER:-0}" = 1 ]; then
+        plutil -insert WaitForDebugger -bool YES "$JOB_PLIST"
+    fi
     if ! launchctl bootstrap "gui/$(id -u)" "$JOB_PLIST"; then
         echo "aros-ctl: could not bootstrap launchd job $JOB_LABEL" >&2
         rm -f "$PIDF" "$FIFO"

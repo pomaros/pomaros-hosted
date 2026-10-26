@@ -18,11 +18,13 @@ reserves Apple's `x18` register. Their platform binaries are distinct.
 
 ## Migration status
 
-The core pin selects the aligned shared consolidation candidate. The retained
-Hosted configuration/compiler-runtime gate predates this source pin; it passes
-the reserved-x18 ABI and an instruction scan of its rebuilt runtime. Complete
-OS compilation and runtime qualification of the selected pin are pending. The archived development-app
-observations below retain their original source identities.
+The selected common-core pin passes the configured boot/desktop build,
+reserved-x18 compiler-runtime checks, strict deployment identity checks, and
+windowed desktop startup/input qualification. LLDB attachment before the first
+instruction and live inspection are exercised separately; continued operation
+after debugger detach is not qualified. Application, media and release coverage
+are separate gates. The archived development-app observations below retain their
+original source identities.
 
 This repository has been renamed to PomAROS Hosted. No PomAROS release has been
 published yet; earlier version and signing notes describe the inherited product.
@@ -182,6 +184,4 @@ projects and dependencies retain their own licences. See [LICENSE](LICENSE),
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md), and the generated material in
 `notices/`.
 
-The clean common-core export pin requires its own build and runtime
-qualification. The complete pre-export OS build passed; its results retain
-their original source identity.
+For source-build qualification scope, see [Migration status](#migration-status).

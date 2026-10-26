@@ -13,6 +13,7 @@ ROOT="$(cd "$HERE/.." && pwd)"
 HOST_LIB_DIR="${AROS_HOST_LIB_DIR:-$ROOT/build/host-libs}"
 : "${AROS_HOST_CONF:=$HOME/Library/Application Support/AROS/aros-host.conf}"
 : "${AROS_APP:=$ROOT/build/PomAROS.app}"
+deployment_failures=0
 
 find_bootd() {
     if [ -n "${AROS_CTL_BOOTD:-}" ]; then printf '%s\n' "$AROS_CTL_BOOTD"; return; fi
@@ -43,8 +44,16 @@ line() {
 compare() {
     label="$1"; src="$2"; dst="$3"
     sh="$(hash12 "$src")"; dh="$(hash12 "$dst")"
-    if [ "$sh" = "$dh" ] && [ "$sh" != "missing" ]; then status="OK"; else status="WARN"; fi
+    status=FAIL
+    if [ -f "$src" ] && [ -f "$dst" ]; then
+        if cmp -s "$src" "$dst"; then
+            status=OK
+        elif python3 "$HERE/deployment_identity.py" "$src" "$dst"; then
+            status=OK
+        fi
+    fi
     printf '%-22s %-4s src=%s dst=%s\n' "$label" "$status" "$sh" "$dh"
+    [ "$status" = OK ] || deployment_failures=$((deployment_failures + 1))
     [ "$status" = OK ]
 }
 
@@ -126,7 +135,11 @@ line "nettest" "$AROS/C/nettest"
 line "SetKeyboard" "$AROS/C/SetKeyboard"
 # Rust-on-AROS no_std proof ([RS0]/[RS1]): built by hosted/rust/aros-build.sh,
 # run by graft/rust-smoke. compare = "is the deployed C: command the one I built?"
-compare "RustHello" "$ROOT/build/rust-aros/RustHello" "$AROS/C/RustHello" || true
+if [ -e "$ROOT/build/rust-aros/RustHello" ] || [ -e "$AROS/C/RustHello" ]; then
+    compare "RustHello" "$ROOT/build/rust-aros/RustHello" "$AROS/C/RustHello" || true
+else
+    echo "SKIP RustHello (optional proof is not built or deployed)"
+fi
 line "TestLib" "$AROS/C/TestLib"
 line "LoadMatrix" "$AROS/C/LoadMatrix"
 line "Wanderer" "$AROS/System/Wanderer/Wanderer"
@@ -134,6 +147,11 @@ line "Wanderer" "$AROS/System/Wanderer/Wanderer"
 echo
 echo "desktop presence:"
 for p in \
+    "$AROS/Libs/png.library" \
+    "$AROS/Libs/z1.library" \
+    "$AROS/Libs/coolimages.library" \
+    "$AROS/Libs/muimaster.library" \
+    "$AROS/Libs/icon.library" \
     "$AROS/Prefs/Zune" \
     "$AROS/Prefs/Wanderer" \
     "$AROS/Fonts" \
@@ -151,6 +169,7 @@ for p in \
         printf 'OK   %s\n' "$p"
     else
         printf 'MISS %s\n' "$p"
+        deployment_failures=$((deployment_failures + 1))
     fi
 done
 
@@ -195,7 +214,12 @@ if [ -x "$OBJDUMP" ]; then
         # internal call. Writing x18 to the stack and back never computes with
         # its (host-zeroed) value, so it cannot corrupt anything. Any other
         # reference (load FROM [x18], mov, arithmetic) still counts.
-        n="$("$OBJDUMP" -d "$m" 2>/dev/null | grep -wE 'x18|w18' \
+        if ! disassembly="$("$OBJDUMP" -d "$m" 2>/dev/null)"; then
+            printf 'FAIL cannot disassemble %s\n' "$m"
+            x18_fail=1
+            continue
+        fi
+        n="$(printf '%s\n' "$disassembly" | grep -wE 'x18|w18' \
              | grep -cvE '(stp|ldp)[[:space:]]+x18, x30, \[sp')"
         if [ "${n:-0}" -gt "$X18_LIMIT" ]; then
             printf 'FAIL %-40s %s x18 refs (stale objects -- rebuild it)\n' "${m#$AROS/}" "$n"
@@ -204,5 +228,8 @@ if [ -x "$OBJDUMP" ]; then
     done
     [ "$x18_fail" = 0 ] && echo "OK   all checked modules <= $X18_LIMIT x18 refs"
 else
-    echo "SKIP llvm-objdump not found (set OBJDUMP=)"
+    echo "FAIL llvm-objdump not found (set OBJDUMP=)"
+    x18_fail=1
 fi
+
+[ "$deployment_failures" = 0 ] && [ "${x18_fail:-0}" = 0 ]

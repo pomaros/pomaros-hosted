@@ -79,7 +79,7 @@ compiler-stdc kernel-hidd-cocoa kernel-bootstrap-hosted"
 BRIDGE_TARGETS="workbench-libs-uuid workbench-libs-bsdsocket hostlibs-emu68k
 workbench-devs-hostdisk kernel-fs-exfat workbench-devs-keymaps"
 
-DESKTOP_TARGETS="workbench-c workbench-libs-icon workbench-libs-kms
+DESKTOP_TARGETS="workbench-c workbench-libs-icon workbench-libs-kms workbench-libs-png
 workbench-libs-lowlevel workbench-libs-diskfont workbench-libs-muiscreen workbench-libs-reaction
 workbench-libs-workbench workbench-libs-version workbench-libs-mathffp
 workbench-libs-mathieeesingbas workbench-libs-mathieeedoubbas

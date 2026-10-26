@@ -10,7 +10,7 @@ box that's a black box; these turn it into a readable, step-by-step picture.
 | `graft/dep-scan <path>` | "What disk objects does this artifact name before launch?" | `graft/dep-scan` | host-side command |
 | `C:LoadMatrix` | "Does the known desktop load chain open?" | `workbench/c/LoadMatrix.c` | always on (a command) |
 | `graft/aros-ctl deploy` | "Make the runnable image match current build outputs" | `graft/aros-ctl` | host-side command |
-| `graft/deploy-check` | "Am I running the files I just built?" | `graft/deploy-check` | host-side command |
+| `graft/deploy-check` | "Am I running the files I just built?" | `graft/deploy-check`, `graft/deployment_identity.py` | host-side command |
 | `graft/desktop-smoke` | "Does the desktop boot and screenshot cleanly?" | `graft/desktop-smoke` | host-side command |
 | `graft/desktop-visual` | "Do known GUI desktop tools render visibly?" | `graft/desktop-visual` | host-side command |
 | `graft/startup-loop` | "Does repeated launch/stop stay clean?" | `graft/startup-loop` | host-side command |
@@ -671,8 +671,31 @@ Hosted AROS *is* a normal darwin process (`PomAROS`/`AROSBootstrap`), so it can
 be debugged with the **host** debugger:
 
 ```sh
-lldb -p "$(cat /tmp/aros-cm.pid)"     # then: continue
+AROS_CTL_WAIT_FOR_DEBUGGER=1 graft/aros-ctl run
+lldb -O 'settings set interpreter.save-transcript true' -p "$(cat /tmp/aros-cm.pid)"
 ```
+
+`AROS_CTL_WAIT_FOR_DEBUGGER=1` uses launchd's `WaitForDebugger` property:
+the process starts suspended at its first instruction. Inspect registers and
+the initial backtrace before continuing. The normal launch omits this property.
+Use matching `AROS_CTL_FIFO`, `AROS_CTL_LOG` and `AROS_CTL_PIDF` values to isolate
+a diagnostic instance. A suspended process is not a boot or desktop pass.
+
+Inside LLDB, retain the stopped registers and backtrace before continuing:
+
+```text
+register read pc sp
+thread backtrace
+process handle SIGALRM SIGUSR1 SIGUSR2 -n false -p true -s false
+continue
+```
+
+Use `process interrupt` to inspect a running test, then inspect registers and
+thread stacks. End an owned disposable debug run with `process kill`, save the
+transcript with `session save PATH`, and `quit`. Clean its launchd job with
+`graft/aros-ctl stop` using the same control environment. Normal desktop
+qualification is a separate launch, not a claim that detaching a debugger
+preserves a running instance.
 
 lldb catches the SIGSEGV on the AROS thread before AROS's own handler, giving the
 **fault address + registers** ("which pointer was wild"). Symbols: AROS code is

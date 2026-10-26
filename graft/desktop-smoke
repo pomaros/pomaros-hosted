@@ -19,7 +19,6 @@ ROOT="$(cd "$HERE/.." >/dev/null 2>&1 && pwd)"
 LOCK_DIR="${AROS_HARNESS_LOCK_DIR:-/tmp/aros-harness.lock}"
 RUN_DIR="${AROS_DESKTOP_SMOKE_RUN_DIR:-$ROOT/run/darwin-aarch64}"
 RUN_STAMP="${AROS_DESKTOP_SMOKE_RUN_STAMP:-$(date +%Y%m%d-%H%M%S)}"
-mkdir -p "$RUN_DIR"
 
 cleanup_lock() {
     status=$?
@@ -28,11 +27,6 @@ cleanup_lock() {
     exit "$status"
 }
 
-if ! mkdir "$LOCK_DIR" 2>/dev/null; then
-    echo "FAIL: another AROS harness smoke appears to be running ($LOCK_DIR)" >&2
-    exit 1
-fi
-trap cleanup_lock EXIT INT TERM
 
 SHOT="${1:-$RUN_DIR/desktop-$RUN_STAMP.png}"
 MENU_SHOT="${AROS_DESKTOP_SMOKE_MENU_SHOT:-${SHOT%.png}-menu.png}"
@@ -130,17 +124,19 @@ ppm_region_non_background_count() {
         my $dims = <$fh>;
         my $maxv = <$fh>;
         my ($w, $h) = split /\s+/, $dims;
-        my $count = 0;
+        die "invalid PPM" unless $magic eq "P6\n" && $maxv eq "255\n" && $w > 0 && $h > 0;
+        my ($count, $background) = (0, 0);
         for my $y (0 .. $h - 1) {
             read($fh, my $row, $w * 3) == $w * 3 or die "short read";
             next if $y < $y1 || $y > $y2;
             for (my $x = $x1; $x <= $x2 && $x < $w; $x++) {
                 my $i = $x * 3;
                 my ($r, $g, $b) = unpack("CCC", substr($row, $i, 3));
-                $count++ if !($r == 153 && $g == 153 && $b == 153);
+                if ($r == 153 && $g == 153 && $b == 153) { $background++; }
+                else { $count++; }
             }
         }
-        print "$count\n";
+        print(($background >= 800 ? $count : 0), "\n");
     ' "$ppm" "$x1" "$y1" "$x2" "$y2"
 }
 
@@ -150,6 +146,21 @@ desktop_looks_populated() {
     # regression had zero non-background pixels here.
     [ "$(ppm_region_non_background_count "$1" 0 16 120 270 || echo 0)" -gt 800 ]
 }
+
+if [ "${1:-}" = --check-frame ]; then
+    [ "$#" = 2 ] || { echo "usage: desktop-smoke --check-frame FRAME.png" >&2; exit 2; }
+    if desktop_looks_populated "$2"; then
+        echo "desktop-frame result=PASS"; exit 0
+    fi
+    echo "desktop-frame result=FAIL"; exit 1
+fi
+
+mkdir -p "$RUN_DIR"
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+    echo "FAIL: another AROS harness smoke appears to be running ($LOCK_DIR)" >&2
+    exit 1
+fi
+trap cleanup_lock EXIT INT TERM
 
 echo "== deploy-check =="
 AROS_CTL_STARTUP_MODE=desktop "$HERE/aros-ctl" deploy || fail "deploy failed"

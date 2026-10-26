@@ -95,7 +95,7 @@ Run:
 
 The important lines:
 
-- host dylibs/schema should be `OK`
+- host dylibs/schema should be `OK`; a mismatched or missing deployment fails the command
 - `Cocoa deployed` should be `OK`
 - `effective AROS_HOST_VOLUME` should show the config-derived mount spec, or say
   the launcher default will be used
@@ -104,17 +104,24 @@ The important lines:
 - key desktop files should be present: `Prefs/Zune`, `Prefs/Wanderer`,
   `System/About`, `Tools`, `Utilities`
 
-`WARN` on a host dylib/schema means `build/host-libs` is stale. Run
+`FAIL` on a host dylib/schema means `build/host-libs` is stale. Run
 `./graft/aros-ctl deploy`.
 
-`WARN` on `Cocoa deployed` means the boot image is still using an older monitor.
+`FAIL` on `Cocoa deployed` means the boot image is still using an older monitor.
 Run `./graft/aros-ctl deploy`.
 
 `MISS` on desktop presence means the boot tree is incomplete; loader/application
 debugging after that is usually noise.
 
-`WARN` in the app-bundle section means the double-clickable app is stale even if
+`FAIL` in the app-bundle section means the double-clickable app is stale even if
 `run-window.sh` is current. Rebuild it with `./graft/make-aros-app.sh`.
+
+Build the app after deployment has finalized the boot configuration. Comparisons
+use complete file bytes. For signed arm64 Mach-O copies, the verifier checks
+the deployed signature and compares bytes after removing signatures and their
+`__LINKEDIT` reservation difference; changed code or data fails. PNG, zlib and
+the desktop files are mandatory. An absent optional RustHello proof is skipped
+only when neither its build output nor its deployment exists.
 
 ## Evidence-Smoke Commands
 
@@ -129,6 +136,13 @@ make cocoametal-shell
 ```
 
 Screenshots and logs land in `run/darwin-aarch64/`.
+
+`graft/desktop-smoke --check-frame FRAME.png` checks the paired PPM capture
+without launching a guest or taking a harness lock. The default desktop oracle
+requires both its background and foreground icon pixels; a uniform black, red
+or background frame is rejected. `make desktop-oracle-check` tests those
+negative controls, and `make deployment-identity-check` exercises actual
+arm64 signatures, signed data mutation, truncation and missing files.
 
 ## Desktop boot requirements (beyond the module set)
 

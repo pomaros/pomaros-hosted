@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-26 - Reliable desktop dependencies and debugging
+
+Hosted desktop builds include png.library. Deployment checks reject missing
+desktop files and stale app copies while accepting verified signing-only
+differences. The desktop test rejects uniform blank captures. Diagnostic
+launches can wait for LLDB before the first instruction.
+
 ## 2026-10-25 - Reliable hosted runtime rebuilds
 
 Compiler runtime builds isolate their CMake cache by compiler, SDK and ABI
