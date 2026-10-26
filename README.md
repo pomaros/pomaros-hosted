@@ -18,10 +18,10 @@ reserves Apple's `x18` register. Their platform binaries are distinct.
 
 ## Migration status
 
-The core pin selects the shared consolidation candidate. Fresh hosted
-configuration and compiler-runtime construction pass with the reserved-x18
-ABI, including an instruction scan of the rebuilt runtime. Complete OS
-compilation and runtime qualification of this pin are pending. The archived development-app
+The core pin selects the aligned shared consolidation candidate. The retained
+Hosted configuration/compiler-runtime gate predates this source pin; it passes
+the reserved-x18 ABI and an instruction scan of its rebuilt runtime. Complete
+OS compilation and runtime qualification of the selected pin are pending. The archived development-app
 observations below retain their original source identities.
 
 This repository has been renamed to PomAROS Hosted. No PomAROS release has been
