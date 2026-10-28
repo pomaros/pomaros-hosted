@@ -37,6 +37,22 @@ with tempfile.TemporaryDirectory(prefix="pomaros-core-selection-") as tmp:
     stamp = build / ".pomaros-configure-core"
     stamp.write_text("0" * 40 + ":other-config\n")
     assert "Build revision mismatch" in check(False)
+    boot = build / "bin/darwin-aarch64/AROS/boot/darwin"
+    boot.mkdir(parents=True)
+    (boot / "AROSBootstrap").write_text("#!/bin/sh\nexit 0\n")
+    (boot / "AROSBootstrap").chmod(0o755)
+    (product / "VERSION").write_text("POMAROS_VERSION=0.0.0\nPOMAROS_BUILD_NUMBER=1\n")
+    app = root / "existing.app"
+    app.mkdir()
+    sentinel = app / "sentinel"
+    sentinel.write_text("preserve until admission succeeds\n")
+    for script in ("make-aros-app.sh", "make-aros-release.sh"):
+        shutil.copy2(ROOT / "graft" / script, product / "graft" / script)
+        result = subprocess.run([str(product / "graft" / script)],
+                                env=dict(env, AROS_CTL_BOOTD=str(boot), AROS_APP=str(app)),
+                                capture_output=True, text=True, timeout=10)
+        assert result.returncode != 0 and "Build revision mismatch" in result.stderr, result.stderr
+        assert sentinel.read_text() == "preserve until admission succeeds\n"
     check(True, "--source-only")
     stamp.write_text(revision + ":matching-config\n")
     check(True)
@@ -45,4 +61,4 @@ with tempfile.TemporaryDirectory(prefix="pomaros-core-selection-") as tmp:
     (build / "Makefile").write_text("SRCDIR := " + str(source) + "\n")
     (source / "source.c").write_text("/* modified */\n")
     assert "visible changes" in check(False)
-print("Hosted core selection: PASS (missing/stale stamp, source-only, matching SDK, foreign source, dirty source)")
+print("Hosted core selection: PASS (six source/SDK cases and both stale-package entry points)")

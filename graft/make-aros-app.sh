@@ -177,6 +177,7 @@ BOOTD="$(find_bootd)"
     echo "make-aros-app.sh: no AROSBootstrap found." >&2
     echo "  point AROS_CTL_BOOTD at <build>/bin/darwin-aarch64/AROS/boot/darwin, or build one." >&2
     exit 1; }
+AROS_SRC="${AROS_SRC:-$ROOT/../aros-core}" AROS_BUILD="$(cd "$BOOTD/../../../../.." && pwd)" "$HERE/check-core"
 [ -f "$DYLIB" ] || { echo "missing $DYLIB — run: make cocoametal-dylib" >&2; exit 1; }
 [ -f "$EMU68K" ] || { echo "missing $EMU68K — run: make emu68k-dylib" >&2; exit 1; }
 echo ">> boot dir: $BOOTD"

@@ -482,6 +482,7 @@ case "${1:-}" in ""|--dmg) ;; *) echo "usage: $0 [--check|--dmg|--dmg-only]" >&2
 BOOTD="$(find_bootd)"
 [ -n "$BOOTD" ] && [ -x "$BOOTD/AROSBootstrap" ] || { echo "make-aros-release.sh: no AROSBootstrap (set AROS_CTL_BOOTD)" >&2; exit 1; }
 SRC="$(cd "$BOOTD/../.." && pwd)"   # .../darwin-aarch64/AROS
+AROS_SRC="$AROS_SOURCE_TREE" AROS_BUILD="$(cd "$SRC/../../.." && pwd)" "$HERE/check-core"
 [ -f "$DYLIB" ] || { echo "missing $DYLIB (make cocoametal-dylib, or set AROS_CTL_DYLIB)" >&2; exit 1; }
 [ -f "$EMU68K" ] || { echo "missing $EMU68K (make emu68k-dylib, or set AROS_CTL_EMU68K_DYLIB)" >&2; exit 1; }
 [ -x "$COMPAT" ] || { echo "missing executable compatibility checker: $COMPAT" >&2; exit 1; }

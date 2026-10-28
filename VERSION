@@ -1,3 +1,3 @@
 # Single source of truth for PomAROS release identity.
 POMAROS_VERSION=0.2.2
-POMAROS_BUILD_NUMBER=11
+POMAROS_BUILD_NUMBER=12

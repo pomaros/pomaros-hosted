@@ -85,6 +85,8 @@ keep that output and select a fresh stable directory before building, for exampl
 `export AROS_BUILD="$PWD/../Build/pomaros-public-hosted"` from this repository.
 The source guard refuses to reuse a configured tree with a different source path,
 a different pinned revision, or a missing configuration identity.
+Both development and release packaging check the SDK selected by the actual
+bootstrap path before modifying the destination app.
 Run `make core-selection-check` to verify these refusals.
 
 The OS build must use the patched AROS compiler below.
