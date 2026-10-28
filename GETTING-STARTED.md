@@ -83,7 +83,9 @@ checkout manually when updating the pin.
 When migrating an existing build configured against another source checkout,
 keep that output and select a fresh stable directory before building, for example
 `export AROS_BUILD="$PWD/../Build/pomaros-public-hosted"` from this repository.
-The source guard refuses to reuse a configured tree with a different source path.
+The source guard refuses to reuse a configured tree with a different source path,
+a different pinned revision, or a missing configuration identity.
+Run `make core-selection-check` to verify these refusals.
 
 The OS build must use the patched AROS compiler below.
 Existing user files and settings stay in `~/AROS/Shared` and

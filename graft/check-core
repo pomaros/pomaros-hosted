@@ -23,5 +23,10 @@ if [ "${1:-}" != --source-only ] && [ -f "$BUILD_DIR/Makefile" ]; then
         echo "Build tree uses another source: $configured_source (expected $expected_source)" >&2
         exit 1
     fi
+    configured_revision="$(cut -d : -f 1 "$BUILD_DIR/.pomaros-configure-core" 2>/dev/null || true)"
+    if [ "$configured_revision" != "$CORE_REVISION" ]; then
+        echo "Build revision mismatch: configured ${configured_revision:-unknown}, expected $CORE_REVISION; select a fresh build directory" >&2
+        exit 1
+    fi
 fi
 printf 'Core %s (%s; x18=%s)\n' "$CORE_REVISION" "$CORE_TARGET" "$CORE_X18_POLICY"

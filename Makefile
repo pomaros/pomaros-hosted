@@ -2449,7 +2449,9 @@ clean:
 
 # Configure/rebuild the hosted OS, rebuild the host bridge, then assemble the
 # development app. The app references the stable external OS output tree.
-.PHONY: pomaros-source pomaros-hosted pomaros-hosted-check deployment-identity-check desktop-oracle-check
+.PHONY: pomaros-source pomaros-hosted pomaros-hosted-check deployment-identity-check desktop-oracle-check core-selection-check
+core-selection-check:
+	python3 harness/test-core-selection.py
 deployment-identity-check:
 	python3 harness/test-deployment-identity.py
 
@@ -2466,7 +2468,7 @@ pomaros-hosted:
 	AROS_HOST_CONF=/dev/null AROS_HOST_VOLUME="MacRW:$(CURDIR)/build/Shared;WRITE" ./graft/aros-ctl deploy
 	./graft/make-aros-app.sh
 
-pomaros-hosted-check: deployment-identity-check desktop-oracle-check
+pomaros-hosted-check: core-selection-check deployment-identity-check desktop-oracle-check
 	POMAROS_FORCE_WINDOWED=1 $(MAKE) hosted-abi cocoametal-abi pasteboard-abi coreaudio-abi bsdsock-abi cocoametal-shell cocoametal-prefs hosted-hostvolume hosted-jit68k-hardened hosted-jit68k-x18
 	./graft/make-aros-app.sh --check
 
