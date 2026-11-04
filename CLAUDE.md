@@ -4,7 +4,7 @@ Hosted AROS on Apple Silicon (aarch64-darwin). **This repo is the host/graft
 layer only.** The AROS OS source (kernel, modules, libraries) is a *separate*
 checkout at `../aros-core` (revision and branch in `CORE.lock`). Edit OS code
 there, not here. Coordinate core edits with its owner. Use `CORE.lock` for the
-reviewed shared source revision. Product source is public; coordinate product pushes with the active review.
+reviewed shared source revision. Product source is public.
 The public core excludes native Apple hardware work. AROS upstream publication
 still needs John's explicit authorization. Preserve old signed artifact pins.
 
@@ -41,7 +41,7 @@ already solve them; read the doc instead of rediscovering the trap.
 ## Contributing upstream (PRs to aros-development-team/AROS)
 
 **Ask before anything reaches upstream.** Pushing to John's own repos
-(`github.com/jonx/*`) needs no permission. Opening a PR, updating a branch that
+(`github.com/jonx/*` and `github.com/pomaros/*`) needs no permission. Opening a PR, updating a branch that
 is the head of an open upstream PR, or commenting on any upstream PR or issue
 needs John's explicit go-ahead *for that action*. Being told to build something
 is not permission to publish it. **When work is ready to ship, read

@@ -15,14 +15,13 @@ description: >-
 
 Two different rules, decided by WHERE the thing lands:
 
-**Repos John owns (`github.com/jonx/*`: AROS, AROS-AArch64, aros-raspi).**
+**Repos John owns (`github.com/jonx/*` and `github.com/pomaros/*`, public ones included).**
 Push freely. Branches, backups, force-push to his own working branches, new
 repos. No need to ask. This is his workspace and keeping it backed up is a
 good thing.
 
-The PomAROS product repositories live under `github.com/pomaros`. Keep them
-private; John authorized filling hosted, QEMU, and VM. The native product
-repository stays empty until he approves its publication.
+Free to push does not change what may be published: private code and Apple
+platform sources stay out of public repositories.
 
 **Anything on `aros-development-team/AROS`.** Nothing happens without John
 saying so for that specific action. That covers:
