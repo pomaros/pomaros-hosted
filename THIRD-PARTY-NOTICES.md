@@ -44,7 +44,7 @@ includes `FERAIL-LICENSE-MIT`, `FERAIL-LICENSE-APACHE`, Ferail's maintained
 `FERAIL-THIRD-PARTY-NOTICES.md`, and the generated target-specific report
 `FERAIL-RUST-DEPENDENCIES.md`.
 
-- Project and source: <https://github.com/jonx/Feraille>
+- Project and source: <https://github.com/jonx/Ferail>
 
 ## Emu68
 

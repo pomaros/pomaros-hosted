@@ -9,7 +9,7 @@ copies. Those notices are collected here.
 This file covers the components that are **compiled or embedded into the
 shipped binary**. The complete transitive Rust dependency graph (hundreds of
 crates, overwhelmingly MIT and/or Apache-2.0) is pinned in
-[`Cargo.lock`](https://github.com/jonx/Feraille/blob/main/Cargo.lock); to regenerate a full per-crate license listing,
+[`Cargo.lock`](https://github.com/jonx/Ferail/blob/main/Cargo.lock); to regenerate a full per-crate license listing,
 run [`cargo about`](https://github.com/EmbarkStudios/cargo-about) or
 [`cargo bundle-licenses`](https://github.com/sstadick/cargo-bundle-licenses)
 over the workspace.
@@ -46,7 +46,7 @@ those crates are pure no-ops, so nothing is lost by removing them.
 The dependency **is present in the `gpui` revision resolved here**, and since
 zed `00cba838a` (2026-08-05) it is a *direct* `gpui → ztracing` edge, no
 longer just `gpui → sum_tree → ztracing`. It is severed by
-[`vendor/ztracing`](https://github.com/jonx/Feraille/tree/main/vendor/ztracing) — a **clean-room MIT/Apache
+[`vendor/ztracing`](https://github.com/jonx/Ferail/tree/main/vendor/ztracing) — a **clean-room MIT/Apache
 no-op stub** with the same public surface, written from the API contract
 rather than derived from the GPL source — wired in through a `[patch]` in the
 workspace `Cargo.toml`. Patching `ztracing` at the root keeps `zlog` and
@@ -96,7 +96,7 @@ AROS — it fails to compile.
 
 | Crate | Upstream version | Licence | Delta |
 |---|---|---|---|
-| [`vendor/tar`](https://github.com/jonx/Feraille/tree/main/vendor/tar) | 0.4.46 | MIT OR Apache-2.0 | AROS arms for `path2bytes`/`bytes2path`/`ends_with_slash`/`fill_platform_from`; AROS added to the existing symlink/permission/xattr fallbacks |
+| [`vendor/tar`](https://github.com/jonx/Ferail/tree/main/vendor/tar) | 0.4.46 | MIT OR Apache-2.0 | AROS arms for `path2bytes`/`bytes2path`/`ends_with_slash`/`fill_platform_from`; AROS added to the existing symlink/permission/xattr fallbacks |
 | `vendor/stacker` | 0.1.23 | MIT OR Apache-2.0 | AROS arm making stack growth a no-op (its probe is libc `mmap`/`mprotect`) |
 | `vendor/filetime` | 0.2.26 | MIT OR Apache-2.0 | AROS arm reading times from std `Metadata`; set-times reported unsupported |
 
@@ -134,7 +134,7 @@ the copyright and permission notices to travel with redistributed copies.
   Apache-2.0; `tree-sitter-graphql` (Copyright © 2025 Joohwan Oh) ships a
   `LICENSE` file rather than a manifest `license` field, and is MIT. Each
   grammar carries its own copyright holder — the authoritative per-crate
-  list is pinned in [`Cargo.lock`](https://github.com/jonx/Feraille/blob/main/Cargo.lock) and can be regenerated with
+  list is pinned in [`Cargo.lock`](https://github.com/jonx/Ferail/blob/main/Cargo.lock) and can be regenerated with
   `cargo about` or `cargo bundle-licenses`.
 
 The grammars reach the build transitively through `gpui-component`; the set
@@ -147,7 +147,7 @@ changes when that pin moves, so re-check this section on a rev bump.
 Ferail embeds 53 SVG glyphs in `crates/ferail-gpui/resources/icons/` and
 references the `gpui-component-assets` icon bundle at runtime. Their provenance
 and per-glyph mapping are catalogued in
-[docs/features/ICONS.md](https://github.com/jonx/Feraille/blob/main/docs/features/ICONS.md).
+[docs/features/ICONS.md](https://github.com/jonx/Ferail/blob/main/docs/features/ICONS.md).
 
 ### Lucide (ISC License)
 

@@ -21,7 +21,7 @@ hazards, SQLite roundtrip). Probe + link recipe:
 
 ## Goal
 
-Run [Feraille](https://github.com/jonx/Feraille) (the GPUI file manager,
+Run [Feraille](https://github.com/jonx/Ferail) (the GPUI file manager,
 local checkout `~/Source/Feraille`, branch `aros-port`) natively on
 darwin-aarch64 AROS, with the native AROS look. **Nothing is pushed to any
 upstream** (zed, Feraille, rust) until the port is presentable; all work is
